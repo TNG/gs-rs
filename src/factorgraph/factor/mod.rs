@@ -1,4 +1,5 @@
 use uuid::Uuid;
+use std::fmt;
 
 pub enum FactorType {
     /// Necessary to fix graph for underdetermined systems
@@ -11,7 +12,7 @@ pub enum FactorType {
     Observation2D,
 }
 
-pub trait Factor<'a> {
+pub trait Factor<'a>: fmt::Debug {
     fn get_id(&self) -> Uuid;
     fn get_type(&self) -> FactorType;
 

@@ -1,4 +1,5 @@
 use uuid::Uuid;
+use std::fmt;
 
 pub enum VariableType {
     /// position and rotation of the vehicle
@@ -7,7 +8,7 @@ pub enum VariableType {
     Landmark2D,
 }
 
-pub trait Variable<'a> {
+pub trait Variable<'a>: fmt::Debug {
     fn get_id(&self) -> Uuid;
     fn get_type(&self) -> VariableType;
 

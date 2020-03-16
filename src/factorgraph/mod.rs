@@ -1,3 +1,5 @@
+use std::fmt;
+
 use crate::factorgraph::factor::Factor;
 use crate::factorgraph::variable::Variable;
 use crate::factorgraph::constraint::Constraint;
@@ -6,13 +8,12 @@ pub mod variable;
 pub mod factor;
 pub mod constraint;
 
+#[derive(Debug)]
 pub struct FactorGraph<'a> {
-    factors: Vec<&'a dyn Factor<'a>>,
     variables: Vec<&'a dyn Variable<'a>>,
+    factors: Vec<&'a dyn Factor<'a>>,
     constraints: Vec<&'a Constraint<'a>>,
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -25,6 +26,7 @@ mod tests {
             .filter_level(LevelFilter::Debug)
             .try_init();
     }
+
     #[test]
     fn empty() {
         init();
@@ -37,6 +39,5 @@ mod tests {
 
         info!("{:?}", empty);
     }
-
 
 }
