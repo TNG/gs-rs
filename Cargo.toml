@@ -12,7 +12,7 @@ edition = "2018"
 [dependencies]
 log = "0.4.8"
 nalgebra = "0.20.0"
+approx = "0.3.2"
 
 [dev-dependencies]
 env_logger = "0.7.1"
-approx = "0.3.2"

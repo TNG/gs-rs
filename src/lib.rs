@@ -6,8 +6,8 @@ extern crate nalgebra;
 
 pub mod solver;
 
-fn interface() {
-    info!("Hello, I'm gs-rs. I will find your path for you.")
+pub fn interface() {
+    info!("Hello, I'm gs-rs. I will find your path for you.");
 }
 
 #[cfg(test)]
@@ -28,5 +28,4 @@ mod tests {
         init();
         interface();
     }
-
 }
