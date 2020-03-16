@@ -1,7 +1,10 @@
 use uuid::Uuid;
 use std::fmt;
 
+pub mod position_prior_factor_2d;
 pub mod position_factor_2d;
+pub mod odometry_factor_2d;
+pub mod observation_factor_2d;
 
 #[derive(Debug, PartialEq)]
 pub enum FactorType {
