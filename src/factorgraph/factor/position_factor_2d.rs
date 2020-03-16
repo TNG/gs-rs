@@ -6,7 +6,7 @@ pub struct PositionFactor2D {
     id: Uuid,
     /// [x, y, phi], phi defaulting to 0
     content: [f64; 3],
-    /// defaults to identity matrix
+    /// defaulting to identity matrix
     information_matrix: [f64; 6]
 }
 
@@ -22,7 +22,11 @@ impl PositionFactor2D {
     }
 
     pub fn from_xy_and_information_matrix(x: f64, y: f64, information_matrix: [f64; 6]) -> Self {
-        unimplemented!() // TODO
+        PositionFactor2D {
+            id: Uuid::new_v4(),
+            content: [x, y, 0.0],
+            information_matrix,
+        }
     }
 }
 
@@ -57,7 +61,7 @@ mod tests {
     }
 
     #[test]
-    fn empty() {
+    fn test_from_xy() {
         init();
 
         let test_factor = PositionFactor2D::from_xy(3.0, 5.0);
@@ -65,6 +69,17 @@ mod tests {
         assert_eq!(test_factor.get_content(), &[3.0, 5.0, 0.0]);
         assert_eq!(test_factor.get_type(), FactorType::Position2D);
         assert_eq!(test_factor.get_information_matrix(), &[1.0, 0.0, 1.0, 0.0, 0.0, 1.0]);
+    }
+
+    #[test]
+    fn test_from_xy_and_information_matrix() {
+        init();
+
+        let test_factor = PositionFactor2D::from_xy_and_information_matrix(3.0, 5.0, [1.0, 0.0, 1.0, 0.0, 0.0, 0.1]);
+        info!("{:?}", &test_factor);
+        assert_eq!(test_factor.get_content(), &[3.0, 5.0, 0.0]);
+        assert_eq!(test_factor.get_type(), FactorType::Position2D);
+        assert_eq!(test_factor.get_information_matrix(), &[1.0, 0.0, 1.0, 0.0, 0.0, 0.1]);
     }
 
 }

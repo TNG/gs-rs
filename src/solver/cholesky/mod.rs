@@ -97,7 +97,7 @@ mod test {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-        info!("TEST FAILED! The solver returned {:?} for not positive definite H = {:?}", x, not_positive_definite_H);
+        info!("TEST FAILED! The solver returned {:?} for not positive-definite H = {:?}", x, not_positive_definite_H);
     }
 
     #[test]
