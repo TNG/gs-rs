@@ -3,7 +3,9 @@ extern crate log;
 #[macro_use]
 extern crate approx;
 extern crate nalgebra;
+extern crate uuid;
 
+pub mod factorgraph;
 pub mod solver;
 
 pub fn interface() {
