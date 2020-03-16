@@ -1,5 +1,4 @@
 use uuid::Uuid;
-use std::fmt;
 
 use crate::factorgraph::{factor::Factor, variable::Variable};
 

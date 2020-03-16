@@ -1,5 +1,3 @@
-use std::fmt;
-
 use crate::factorgraph::factor::Factor;
 use crate::factorgraph::variable::Variable;
 use crate::factorgraph::constraint::Constraint;
