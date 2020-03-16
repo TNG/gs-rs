@@ -81,5 +81,4 @@ mod tests {
         assert_eq!(test_factor.get_type(), FactorType::Odometry2D);
         assert_eq!(test_factor.get_information_matrix(), &[1.0, 0.0, 1.0, 0.0, 0.0, 0.1]);
     }
-
 }

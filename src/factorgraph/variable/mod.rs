@@ -1,6 +1,9 @@
 use uuid::Uuid;
 use std::fmt;
 
+pub mod pose_variable_2d;
+pub mod landmark_variable_2d;
+
 pub enum VariableType {
     /// position and rotation of the vehicle
     Pose2D,

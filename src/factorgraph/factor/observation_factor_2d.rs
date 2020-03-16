@@ -4,7 +4,7 @@ use crate::factorgraph::factor::{Factor, FactorType};
 #[derive(Debug)]
 pub struct ObservationFactor2D {
     id: Uuid,
-    /// [x, y], observed position in relation to current pose
+    /// [x, y], observed position in relation to current pose TODO: position or pose? -> if pose, add phi and from_{...} methods
     content: [f64; 2],
     /// defaulting to identity matrix
     information_matrix: [f64; 3],
@@ -80,5 +80,4 @@ mod tests {
         assert_eq!(test_factor.get_type(), FactorType::Observation2D);
         assert_eq!(test_factor.get_information_matrix(), &[2.0, 0.0, 2.0]);
     }
-
 }
