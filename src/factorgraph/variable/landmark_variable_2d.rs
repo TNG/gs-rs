@@ -63,6 +63,7 @@ mod tests {
         info!("{:?}", &test_variable);
         assert_eq!(test_variable.get_content(), &[1.0, 1.0]);
         test_variable.set_content(2.0, 3.0);
+        info!("{:?}", &test_variable);
         assert_eq!(test_variable.get_content(), &[2.0, 3.0]);
     }
 }
