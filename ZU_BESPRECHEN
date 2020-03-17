@@ -1,0 +1,7 @@
+Samuel:
+- Wofür braucht LandmarkVariable2D die Rotation? Im Workshop gab es die für Landmarks auch nicht. Mein Verständnis: Landmarks können sich nicht bewegen -> "Rotation" sinnlos
+- Passt das Interface für get_content() in den Variablen? Es wird ein neuer Vektor zurückgegeben.
+	- Slices gehen nicht ("returns a value referencing data owned by the current function")
+	- Arrays würden soweit ich weiß nur gehen, wenn man 
+- Wollen wir content und get_content() zu etwas klarerem umbenennen? Dann gäbe es auch nicht mehr unterschiedliche return types für den gleichen Methodennamen in Faktoren und Variablen
+- Für einheitlicheres Naming: PoseVariable2D zu VehicleVariable2D umbenennen?
