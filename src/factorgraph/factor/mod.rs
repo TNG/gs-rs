@@ -21,6 +21,6 @@ pub enum FactorType {
 pub trait Factor<'a>: fmt::Debug {
     fn get_id(&self) -> Uuid;
     fn get_type(&self) -> FactorType;
-    fn get_content(&self) -> &[f64];
+    fn get_restriction(&self) -> &[f64];
     fn get_information_matrix(&self) -> &[f64];
 }

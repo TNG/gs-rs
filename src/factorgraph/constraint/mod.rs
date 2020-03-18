@@ -1,7 +1,7 @@
 use uuid::Uuid;
 
 use crate::factorgraph::factor::{Factor, /*TODO uncomment: position_prior_factor_2d::PositionPriorFactor2D,*/ observation_factor_2d::ObservationFactor2D, odometry_factor_2d::OdometryFactor2D, position_factor_2d::PositionFactor2D};
-use crate::factorgraph::variable::{landmark_variable_2d::LandmarkVariable2D, pose_variable_2d::PoseVariable2D, Variable};
+use crate::factorgraph::variable::{landmark_variable_2d::LandmarkVariable2D, vehicle_variable_2d::VehicleVariable2D, Variable};
 
 #[derive(Debug)]
 pub struct Constraint<'a> {
@@ -24,7 +24,7 @@ impl<'a> Constraint<'a> {
         unimplemented!();
     }
 
-    fn new_position_constraint_2d(factor: &'a PositionFactor2D, vehicle: &'a PoseVariable2D) -> Self {
+    fn new_position_constraint_2d(factor: &'a PositionFactor2D, vehicle: &'a VehicleVariable2D) -> Self {
         Constraint {
             id: Uuid::new_v4(),
             factor,
@@ -32,7 +32,7 @@ impl<'a> Constraint<'a> {
         }
     }
 
-    fn new_odometry_constraint_2d(factor: &'a OdometryFactor2D, vehicle_start: &'a PoseVariable2D, vehicle_end: &'a PoseVariable2D) -> Self {
+    fn new_odometry_constraint_2d(factor: &'a OdometryFactor2D, vehicle_start: &'a VehicleVariable2D, vehicle_end: &'a VehicleVariable2D) -> Self {
         Constraint {
             id: Uuid::new_v4(),
             factor,
@@ -40,7 +40,7 @@ impl<'a> Constraint<'a> {
         }
     }
 
-    fn new_observation_constraint_2d(factor: &'a ObservationFactor2D, vehicle: &'a PoseVariable2D, landmark: &'a LandmarkVariable2D) -> Self {
+    fn new_observation_constraint_2d(factor: &'a ObservationFactor2D, vehicle: &'a VehicleVariable2D, landmark: &'a LandmarkVariable2D) -> Self {
         Constraint {
             id: Uuid::new_v4(),
             factor,
@@ -74,7 +74,7 @@ mod tests {
         init();
 
         let factor = PositionFactor2D::from_position(1.0, 2.0);
-        let vehicle = PoseVariable2D::from_position(1.0, 1.0);
+        let vehicle = VehicleVariable2D::from_position(1.0, 1.0);
         let test_constraint = Constraint::new_position_constraint_2d(&factor, &vehicle);
         info!("{:?}", &test_constraint);
     }

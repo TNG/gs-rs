@@ -5,7 +5,7 @@ use crate::factorgraph::factor::{Factor, FactorType};
 pub struct PositionFactor2D {
     id: Uuid,
     /// [x, y, phi], phi defaulting to 0
-    content: [f64; 3],
+    restriction: [f64; 3],
     /// defaulting to identity matrix
     information_matrix: [f64; 6],
 }
@@ -14,7 +14,7 @@ impl PositionFactor2D {
     pub fn from_position(x: f64, y: f64) -> Self {
         PositionFactor2D {
             id: Uuid::new_v4(),
-            content: [x, y, 0.0],
+            restriction: [x, y, 0.0],
             information_matrix: [1.0,
                                  0.0, 1.0,
                                  0.0, 0.0, 1.0],
@@ -24,7 +24,7 @@ impl PositionFactor2D {
     pub fn from_pose(x: f64, y: f64, phi: f64) -> Self {
         PositionFactor2D {
             id: Uuid::new_v4(),
-            content: [x, y, phi],
+            restriction: [x, y, phi],
             information_matrix: [1.0,
                                  0.0, 1.0,
                                  0.0, 0.0, 1.0],
@@ -34,7 +34,7 @@ impl PositionFactor2D {
     pub fn from_position_and_information_matrix(x: f64, y: f64, information_matrix: [f64; 6]) -> Self {
         PositionFactor2D {
             id: Uuid::new_v4(),
-            content: [x, y, 0.0],
+            restriction: [x, y, 0.0],
             information_matrix,
         }
     }
@@ -42,7 +42,7 @@ impl PositionFactor2D {
     pub fn from_pose_and_information_matrix(x: f64, y: f64, phi: f64, information_matrix: [f64; 6]) -> Self {
         PositionFactor2D {
             id: Uuid::new_v4(),
-            content: [x, y, phi],
+            restriction: [x, y, phi],
             information_matrix,
         }
     }
@@ -57,8 +57,8 @@ impl Factor<'_> for PositionFactor2D {
         FactorType::Position2D
     }
 
-    fn get_content(&self) -> &[f64] {
-        &self.content
+    fn get_restriction(&self) -> &[f64] {
+        &self.restriction
     }
 
     fn get_information_matrix(&self) -> &[f64] {
@@ -84,7 +84,7 @@ mod tests {
 
         let test_factor = PositionFactor2D::from_position(3.0, 5.0);
         info!("{:?}", &test_factor);
-        assert_eq!(test_factor.get_content(), &[3.0, 5.0, 0.0]);
+        assert_eq!(test_factor.get_restriction(), &[3.0, 5.0, 0.0]);
         assert_eq!(test_factor.get_type(), FactorType::Position2D);
         assert_eq!(test_factor.get_information_matrix(), &[1.0, 0.0, 1.0, 0.0, 0.0, 1.0]);
     }
@@ -95,7 +95,7 @@ mod tests {
 
         let test_factor = PositionFactor2D::from_pose(3.0, 5.0, 0.1);
         info!("{:?}", &test_factor);
-        assert_eq!(test_factor.get_content(), &[3.0, 5.0, 0.1]);
+        assert_eq!(test_factor.get_restriction(), &[3.0, 5.0, 0.1]);
         assert_eq!(test_factor.get_type(), FactorType::Position2D);
         assert_eq!(test_factor.get_information_matrix(), &[1.0, 0.0, 1.0, 0.0, 0.0, 1.0]);
     }
@@ -106,7 +106,7 @@ mod tests {
 
         let test_factor = PositionFactor2D::from_position_and_information_matrix(3.0, 5.0, [1.0, 0.0, 1.0, 0.0, 0.0, 0.1]);
         info!("{:?}", &test_factor);
-        assert_eq!(test_factor.get_content(), &[3.0, 5.0, 0.0]);
+        assert_eq!(test_factor.get_restriction(), &[3.0, 5.0, 0.0]);
         assert_eq!(test_factor.get_type(), FactorType::Position2D);
         assert_eq!(test_factor.get_information_matrix(), &[1.0, 0.0, 1.0, 0.0, 0.0, 0.1]);
     }
@@ -117,7 +117,7 @@ mod tests {
 
         let test_factor = PositionFactor2D::from_pose_and_information_matrix(3.0, 5.0, 0.1, [1.0, 0.0, 1.0, 0.0, 0.0, 0.1]);
         info!("{:?}", &test_factor);
-        assert_eq!(test_factor.get_content(), &[3.0, 5.0, 0.1]);
+        assert_eq!(test_factor.get_restriction(), &[3.0, 5.0, 0.1]);
         assert_eq!(test_factor.get_type(), FactorType::Position2D);
         assert_eq!(test_factor.get_information_matrix(), &[1.0, 0.0, 1.0, 0.0, 0.0, 0.1]);
     }
