@@ -1,5 +1,5 @@
 use uuid::Uuid;
-use crate::factorgraph::factor::{Factor, FactorType};
+use crate::factor_graph::factor::{Factor, FactorType};
 
 #[derive(Debug)]
 pub struct ObservationFactor2D {

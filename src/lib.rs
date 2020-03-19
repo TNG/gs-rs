@@ -5,8 +5,9 @@ extern crate approx;
 extern crate nalgebra;
 extern crate uuid;
 
-pub mod factorgraph;
+pub mod factor_graph;
 pub mod solver;
+pub mod parser;
 
 pub fn interface() {
     info!("Hello, I'm gs-rs. I will find your path for you.");

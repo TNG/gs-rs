@@ -1,7 +1,7 @@
 use uuid::Uuid;
 
-use crate::factorgraph::factor::{Factor, /*TODO uncomment: position_prior_factor_2d::PositionPriorFactor2D,*/ observation_factor_2d::ObservationFactor2D, odometry_factor_2d::OdometryFactor2D, position_factor_2d::PositionFactor2D};
-use crate::factorgraph::variable::{landmark_variable_2d::LandmarkVariable2D, vehicle_variable_2d::VehicleVariable2D, Variable};
+use crate::factor_graph::factor::{Factor, /*TODO uncomment: position_prior_factor_2d::PositionPriorFactor2D,*/ observation_factor_2d::ObservationFactor2D, odometry_factor_2d::OdometryFactor2D, position_factor_2d::PositionFactor2D};
+use crate::factor_graph::variable::{landmark_variable_2d::LandmarkVariable2D, vehicle_variable_2d::VehicleVariable2D, Variable};
 
 #[derive(Debug)]
 pub struct Constraint<'a> {

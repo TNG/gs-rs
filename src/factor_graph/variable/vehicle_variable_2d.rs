@@ -1,5 +1,5 @@
 use uuid::Uuid;
-use crate::factorgraph::variable::{Variable, VariableType};
+use crate::factor_graph::variable::{Variable, VariableType};
 use std::rc::Rc;
 use std::cell::RefCell;
 

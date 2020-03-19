@@ -1,6 +1,6 @@
-use crate::factorgraph::factor::Factor;
-use crate::factorgraph::variable::Variable;
-use crate::factorgraph::constraint::Constraint;
+use crate::factor_graph::factor::Factor;
+use crate::factor_graph::variable::Variable;
+use crate::factor_graph::constraint::Constraint;
 
 pub mod variable;
 pub mod factor;
@@ -15,7 +15,7 @@ pub struct FactorGraph<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::factorgraph::FactorGraph;
+    use crate::factor_graph::FactorGraph;
     use log::LevelFilter;
 
     fn init() {
