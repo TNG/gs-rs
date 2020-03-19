@@ -11,8 +11,11 @@ impl Parser for JsonParser {
         }
     }
 
-    fn compose_model_to_string(model: FactorGraphModel) -> String {
-        unimplemented!()
+    fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
+        match serde_json::to_string(&model) {
+            Ok(s) => Ok(s),
+            Err(e) => Err(format!("Composing FactorGraphModel as JSON string unsuccessful: {}", e)),
+        }
     }
 }
 
@@ -73,4 +76,6 @@ mod tests {
         };
         info!("TEST FAILED! The missing file was able to be parsed: {:?}", parsed_model);
     }
+
+    // TODO Should compose_model_to_string() be tested with unit tests?
 }

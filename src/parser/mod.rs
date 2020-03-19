@@ -28,9 +28,13 @@ pub trait Parser {
         unimplemented!()
     }
 
-    fn compose_model_to_file(model: FactorGraphModel, file_path: &str) {
-        unimplemented!()
+    fn compose_model_to_file(model: FactorGraphModel, file_path: &str) -> Result<(), String>{
+        let s = Self::compose_model_to_string(model)?;
+        match fs::write(file_path, s) {
+            Ok(x) => Ok(x),
+            Err(e) => Err(format!("File could not be written to: {}", file_path))
+        }
     }
 
-    fn compose_model_to_string(model: FactorGraphModel) -> String;
+    fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String>;
 }
