@@ -13,6 +13,12 @@ pub struct FactorGraph<'a> {
     constraints: Vec<&'a Constraint<'a>>,
 }
 
+impl<'a> FactorGraph<'a> {
+    pub fn new(variables: Vec<&'a dyn Variable<'a>>, factors: Vec<&'a dyn Factor<'a>>, constraints: Vec<&'a Constraint<'a>>,) -> Self {
+        FactorGraph { variables, factors, constraints }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::factor_graph::FactorGraph;

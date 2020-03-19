@@ -5,7 +5,6 @@ pub struct JsonParser;
 
 impl Parser for JsonParser {
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String> {
-        // Ok(serde_json::from_str(s).unwrap())
         match serde_json::from_str::<FactorGraphModel>(s) {
             Ok(model) => Ok(model),
             Err(e) => Err(format!("Parsing to FactorGraphModel unsuccessful: {}", e)),
