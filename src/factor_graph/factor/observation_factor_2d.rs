@@ -1,7 +1,7 @@
 use uuid::Uuid;
 use crate::factor_graph::factor::{Factor, FactorType};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ObservationFactor2D {
     id: Uuid,
     /// [x, y, phi], observed pose in relation to current pose, phi defaulting to 0

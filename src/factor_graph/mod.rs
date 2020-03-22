@@ -1,10 +1,13 @@
+pub mod variable;
+pub mod factor;
+
+/*
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;
 use crate::factor_graph::constraint::Constraint;
 
-pub mod variable;
-pub mod factor;
 pub mod constraint;
+
 
 #[derive(Debug)]
 pub struct FactorGraph<'a> {
@@ -44,4 +47,4 @@ mod tests {
         info!("{:?}", empty);
     }
 
-}
+}*/

@@ -18,7 +18,7 @@ pub enum FactorType {
     Observation2D,
 }
 
-pub trait Factor<'a>: fmt::Debug {
+pub trait Factor<'a>: fmt::Debug + Clone {
     fn get_id(&self) -> Uuid;
     fn get_type(&self) -> FactorType;
     fn get_restriction(&self) -> &[f64];

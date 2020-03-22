@@ -1,19 +1,14 @@
+pub mod model;
+
 use crate::parser::model::FactorGraphModel;
-use crate::factor_graph::FactorGraph;
 
 use std::fs;
 
-pub mod model;
 pub mod json;
 pub mod g2o;
+pub mod converter;
 
 pub trait Parser {
-
-    // TODO correct lifetime usage?
-    fn parse_file<'a>(/*file path*/) -> Result<FactorGraph<'a>, String> {
-        unimplemented!()
-    }
-
     fn parse_file_to_model(file_path: &str) -> Result<FactorGraphModel, String> {
         let file_string = match fs::read_to_string(file_path) {
             Ok(s) => s,
@@ -23,18 +18,4 @@ pub trait Parser {
     }
 
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String>;
-
-    fn compose_file(factor_graph: FactorGraph, file_path: &str){
-        unimplemented!()
-    }
-
-    fn compose_model_to_file(model: FactorGraphModel, file_path: &str) -> Result<(), String>{
-        let s = Self::compose_model_to_string(model)?;
-        match fs::write(file_path, s) {
-            Ok(x) => Ok(x),
-            Err(e) => Err(format!("File could not be written to: {}", file_path))
-        }
-    }
-
-    fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String>;
 }

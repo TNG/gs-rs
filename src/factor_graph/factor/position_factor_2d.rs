@@ -1,7 +1,7 @@
 use uuid::Uuid;
 use crate::factor_graph::factor::{Factor, FactorType};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PositionFactor2D {
     id: Uuid,
     /// [x, y, phi], phi defaulting to 0

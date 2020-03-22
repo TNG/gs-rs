@@ -16,6 +16,8 @@ approx = "0.3.2"
 uuid = {version="0.8.1", features = ["v4"]}
 serde = { version = "1.0.104", features = ["derive"] }
 serde_json = "1.0.48"
+petgraph = "0.5.0"
+kiss3d = "0.23.0"
 
 [dev-dependencies]
 env_logger = "0.7.1"

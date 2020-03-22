@@ -4,10 +4,14 @@ extern crate log;
 extern crate approx;
 extern crate nalgebra;
 extern crate uuid;
+extern crate petgraph;
+extern crate kiss3d;
 
 pub mod factor_graph;
 pub mod solver;
 pub mod parser;
+pub mod petgraph_test;
+pub mod visualization;
 
 pub fn interface() {
     info!("Hello, I'm gs-rs. I will find your path for you.");

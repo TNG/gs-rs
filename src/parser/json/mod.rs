@@ -10,13 +10,6 @@ impl Parser for JsonParser {
             Err(e) => Err(format!("Parsing to FactorGraphModel unsuccessful: {}", e)),
         }
     }
-
-    fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
-        match serde_json::to_string(&model) {
-            Ok(s) => Ok(s),
-            Err(e) => Err(format!("Composing FactorGraphModel as JSON string unsuccessful: {}", e)),
-        }
-    }
 }
 
 #[cfg(test)]
@@ -39,7 +32,7 @@ mod tests {
             Ok(x) => x,
             Err(str) => panic!(str),
         };
-        info!("{:?}", &parsed_model);
+        dbg!("{:?}", &parsed_model);
 
         let vertices = vec![Vertex::new( 0, String::from("POSE2D_ANGLE"), [1.0, 0.0], [1.57] ),
                             Vertex::new( 1, String::from("POSE2D_ANGLE"), [0.0, 1.0], [3.14] )];
