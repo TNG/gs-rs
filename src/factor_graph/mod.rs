@@ -97,8 +97,8 @@ mod tests {
 
     #[test]
     fn factor_graph_from_json() {
-        let parsed_model: FactorGraph = match JsonParser::parse_file_to_model("test_files/testTrajectory2DAngle.json") {
-            Ok(x) => x.into(),
+        let parsed_model: FactorGraph = match JsonParser::parse_file("test_files/testTrajectory2DAngle.json") {
+            Ok(x) => x,
             Err(str) => panic!(str),
         };
         dbg!(&parsed_model);
@@ -109,8 +109,8 @@ mod tests {
     fn factor_graph_from_broken_json() {
         init();
 
-        let parsed_model: FactorGraph = match JsonParser::parse_file_to_model("test_files/testBrokenTrajectory2DAngle.json") {
-            Ok(x) => x.into(),
+        let parsed_model: FactorGraph = match JsonParser::parse_file("test_files/testBrokenTrajectory2DAngle.json") {
+            Ok(x) => x,
             Err(str) => panic!(str),
         };
         error!("Test should panic!");

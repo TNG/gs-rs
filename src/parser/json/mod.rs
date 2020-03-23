@@ -36,7 +36,30 @@ mod tests {
     fn test_parse_valid_file() {
         init();
 
-        let parsed_model: FactorGraphModel = match JsonParser::parse_file_to_model("test_files/testTrajectory2DAngle.json") {
+        let parsed_factor_graph = match JsonParser::parse_file("test_files/testTrajectory2DAngle.json") {
+            Ok(x) => x,
+            Err(str) => panic!(str),
+        };
+        dbg!("{:?}", &parsed_factor_graph);
+
+        // TODO remove or implement comparison technique for FactorGraph
+        // let vertices = vec![Vertex::new( 0, String::from("POSE2D_ANGLE"), [1.0, 0.0], [1.57] ),
+        //                     Vertex::new( 1, String::from("POSE2D_ANGLE"), [0.0, 1.0], [3.14] )];
+        // let edges = vec![Edge::new( String::from("PRIOR2D_ANGLE"), vec![0], [1.0, 0.0, 1.58],
+        //                             [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.5] ),
+        //                  Edge::new( String::from("PRIOR2D_ANGLE"), vec![1], [0.0, 1.0, 3.13],
+        //                             [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.5] ),
+        //                  Edge::new( String::from("ODOMETRY2D_ANGLE"), vec![0, 1], [1.0, 1.0, 1.57],
+        //                             [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.1] )];
+        // let expected_factor_graph = FactorGraphModel::new(vertices, edges).into();
+        // assert_eq!(parsed_factor_graph, expected_factor_graph);
+    }
+
+    #[test]
+    fn test_parse_valid_file_to_model() {
+        init();
+
+        let parsed_model = match JsonParser::parse_file_to_model("test_files/testTrajectory2DAngle.json") {
             Ok(x) => x,
             Err(str) => panic!(str),
         };

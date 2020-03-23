@@ -10,10 +10,12 @@ pub mod g2o;
 
 pub trait Parser {
 
-    // TODO try to implement for new FactorGraph type (otherwise let interface user take care of it)
-    // fn parse_file<'a>(/*file path*/) -> Result<FactorGraph<'a>, String> {
-    //     unimplemented!()
-    // }
+    fn parse_file<'a>(file_path: &str) -> Result<FactorGraph<'a>, String> {
+        match Self::parse_file_to_model(file_path) {
+            Ok(model) => Ok(model.into()),
+            Err(s) => Err(s),
+        }
+    }
 
     fn parse_file_to_model(file_path: &str) -> Result<FactorGraphModel, String> {
         let file_string = match fs::read_to_string(file_path) {
@@ -25,7 +27,7 @@ pub trait Parser {
 
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String>;
 
-    // TODO try to implement for new FactorGraph type (otherwise let interface user take care of it)
+    // TODO implement after implementing conversion from FactorGraph to FactorGraphModel
     fn compose_file(factor_graph: FactorGraph, file_path: &str){
         unimplemented!()
     }
