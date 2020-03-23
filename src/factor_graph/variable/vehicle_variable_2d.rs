@@ -32,7 +32,6 @@ impl VehicleVariable2D {
         }
     }
 
-
     /// method for testing how to edit the content
     /// TODO create more appropriate editing interface
     pub fn update_pose(&self, x: f64, y: f64, phi: f64) {
@@ -86,11 +85,9 @@ mod tests {
 
         let test_variable = VehicleVariable2D::from_pose_and_id(1, 3.0, 5.0, 0.1);
         info!("{:?}", &test_variable);
-//        assert_eq!(test_variable.id, )
         assert_eq!(test_variable.get_pose(), &[3.0, 5.0, 0.1]);
         assert_eq!(test_variable.get_type(), VariableType::Vehicle2D);
     }
-
 
     #[test]
     fn test_update_pose() {

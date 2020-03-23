@@ -25,6 +25,13 @@ impl LandmarkVariable2D {
         }
     }
 
+    pub fn from_pose_and_id(id: usize, x: f64, y: f64, phi: f64) -> Self {
+        LandmarkVariable2D {
+            id: Uuid::from_u128(id as u128),
+            pose: Rc::new(RefCell::new([x, y, phi])),
+        }
+    }
+
     /// method for testing how to edit the content
     /// TODO create more appropriate editing interface
     pub fn update_pose(&self, x: f64, y: f64, phi: f64) {
@@ -67,6 +74,16 @@ mod tests {
         init();
 
         let test_variable = LandmarkVariable2D::from_pose(3.0, 5.0, 0.1);
+        info!("{:?}", &test_variable);
+        assert_eq!(test_variable.get_pose(), &[3.0, 5.0, 0.1]);
+        assert_eq!(test_variable.get_type(), VariableType::Landmark2D);
+    }
+
+    #[test]
+    fn test_from_pose_and_id() {
+        init();
+
+        let test_variable = LandmarkVariable2D::from_pose_and_id(1, 3.0, 5.0, 0.1);
         info!("{:?}", &test_variable);
         assert_eq!(test_variable.get_pose(), &[3.0, 5.0, 0.1]);
         assert_eq!(test_variable.get_type(), VariableType::Landmark2D);

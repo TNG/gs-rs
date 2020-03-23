@@ -10,6 +10,14 @@ impl Parser for JsonParser {
             Err(e) => Err(format!("Parsing to FactorGraphModel unsuccessful: {}", e)),
         }
     }
+
+    fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
+        match serde_json::to_string(&model) {
+            Ok(s) => Ok(s),
+            Err(e) => Err(format!("Composing FactorGraphModel as JSON string unsuccessful: {}", e)),
+        }
+    }
+
 }
 
 #[cfg(test)]
