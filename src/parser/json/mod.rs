@@ -1,5 +1,5 @@
 use crate::parser::Parser;
-use crate::parser::model::{FactorGraphModel, Vertex, Edge};
+use crate::parser::model::{FactorGraphModel, Edge, Vertex};
 
 pub struct JsonParser;
 
@@ -42,7 +42,7 @@ mod tests {
         };
         dbg!("{:?}", &parsed_factor_graph);
 
-        // TODO remove or implement comparison technique for FactorGraph
+        // TODO remove code below or implement comparison technique for FactorGraph
         // let vertices = vec![Vertex::new( 0, String::from("POSE2D_ANGLE"), [1.0, 0.0], [1.57] ),
         //                     Vertex::new( 1, String::from("POSE2D_ANGLE"), [0.0, 1.0], [3.14] )];
         // let edges = vec![Edge::new( String::from("PRIOR2D_ANGLE"), vec![0], [1.0, 0.0, 1.58],

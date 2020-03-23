@@ -1,10 +1,7 @@
 use std::fmt::Debug;
 use serde::{Serialize, Deserialize};
-/*
-use crate::factor_graph::FactorGraph;
-use crate::factor_graph::variable::Variable;
-use crate::factor_graph::variable::vehicle_variable_2d::VehicleVariable2D;
-*/
+
+pub mod converter;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct FactorGraphModel {
@@ -33,7 +30,7 @@ pub struct Edge {
 
 
 
-// TODO code code below once tests run without it
+// TODO remove code below once tests run without it
 
 impl FactorGraphModel {
     #[deprecated(note="use direct initialization instead")]
