@@ -10,7 +10,6 @@ extern crate kiss3d;
 pub mod factor_graph;
 pub mod solver;
 pub mod parser;
-// pub mod petgraph_test; TODO remove completely
 pub mod visualization;
 
 pub fn interface() {
