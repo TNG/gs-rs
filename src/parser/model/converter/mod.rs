@@ -54,9 +54,9 @@ fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) -> Result<bool, String>
 fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex) -> Result<(), String> {
     match vertex.vertex_type.as_str() {
         "POSE2D_ANGLE" => Ok(factor_graph.node_indices.push(
-                             factor_graph.csr.add_node(Box::new(VehicleVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0]))) as u32)),
+                             factor_graph.csr.add_node(Box::new(VehicleVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0]))))),
         "LANDMARK2D_ANGLE" => Ok(factor_graph.node_indices.push(
-                              factor_graph.csr.add_node(Box::new(LandmarkVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0]))) as u32)),
+                              factor_graph.csr.add_node(Box::new(LandmarkVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0]))))),
         _ => {
             error!("Could not add vertex {:?}", vertex);
             Err(format!("Could not add vertex {:?}", vertex))
