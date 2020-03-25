@@ -1,17 +1,18 @@
 use nalgebra::{DMatrix, VecStorage, Dynamic};
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum FactorType {
+    Position2D,
+    // TODO add PositionPrior2D?
+    Odometry2D,
+    Observation2D,
+}
+
 #[derive(Debug, Clone)]
-pub enum Factor {
-    /// x, y, phi, information_matrix; measured absolute pose
-    PositionFactor2D(f64, f64, f64, InformationMatrix),
-
-    // TODO add PositionPriorFactor2D?
-
-    /// x, y, phi, information_matrix; measured pose with relation to previous pose
-    OdometryFactor2D(f64, f64, f64, InformationMatrix),
-
-    /// x, y, phi, information_matrix; observed pose in relation to current pose
-    ObservationFactor2D(f64, f64, f64, InformationMatrix),
+pub struct Factor {
+    pub factor_type: FactorType,
+    pub constraint: Vec<f64>,
+    pub information_matrix: InformationMatrix,
 }
 
 #[derive(Debug, Clone)]
