@@ -58,28 +58,24 @@ fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor
                 Observation2D => (0.5, 1.0, 0.5),
             };
 
-            if (factor.factor_type == Position2D) | (factor.factor_type == Observation2D) {
-                let mut measurement_object = visual_factor_graph.scene_node.add_cube(0.16, 0.16, 0.16);
-                measurement_object.set_local_translation(meas_point.coords.into());
+            let mut measurement_object = visual_factor_graph.scene_node.add_cube(0.16, 0.16, 0.16);
+            measurement_object.set_local_translation(meas_point.coords.into());
 
-                let mut measured_rotation_object = measurement_object.add_capsule(0.04, 1.5);
-                measured_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(&Vector3::z_axis(), meas_rotation));
-                measured_rotation_object.prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
+            let mut measured_rotation_object = measurement_object.add_capsule(0.04, 1.5);
+            measured_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(&Vector3::z_axis(), meas_rotation));
+            measured_rotation_object.prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
 
-                measurement_object.set_color(r, g, b);
-            } else if factor.factor_type == Odometry2D {
-                let mut measured_rotation_object = variable_object.add_capsule(0.04, 1.5);
-                measured_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(&Vector3::z_axis(), meas_rotation));
-                measured_rotation_object.prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
-
-                measured_rotation_object.set_color(r, g, b);
-            }
+            measurement_object.set_color(r, g, b);
 
             visual_factor_graph.lines.push([meas_point, var_point, Point3::new(r, g, b)]);
             if factor.factor_type == Observation2D {
                 let observed_variable = factor_graph.csr.index(edge.target());
                 let observed_point = Point3::new(observed_variable.get_pose()[0] as f32, observed_variable.get_pose()[1] as f32, 0.0 as f32);
                 visual_factor_graph.lines.push([meas_point, observed_point, Point3::new(r, g, b)]);
+            } else if factor.factor_type == Odometry2D {
+                let observed_variable = factor_graph.csr.index(edge.target());
+                let observed_point = Point3::new(observed_variable.get_pose()[0] as f32, observed_variable.get_pose()[1] as f32, 0.0 as f32);
+                visual_factor_graph.lines.push([var_point, observed_point, Point3::new(1.0, 1.0, 1.0)]);
             }
         }
     }
