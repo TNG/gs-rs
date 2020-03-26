@@ -1,9 +1,8 @@
 use petgraph::csr::Csr;
 use crate::parser::model::{FactorGraphModel, Edge, Vertex};
 use crate::factor_graph::FactorGraph;
-use crate::factor_graph::factor::Factor::{PositionFactor2D, OdometryFactor2D, ObservationFactor2D};
+use crate::factor_graph::factor::{Factor, FactorType::*};
 use crate::factor_graph::variable::{vehicle_variable_2d::VehicleVariable2D, landmark_variable_2d::LandmarkVariable2D};
-use crate::factor_graph::variable::VariableType::Landmark2D;
 
 impl From<FactorGraphModel> for FactorGraph<'_> {
     fn from(model: FactorGraphModel) -> Self {
@@ -40,23 +39,25 @@ impl From<FactorGraph<'_>> for FactorGraphModel {
 // auxiliary functions
 
 fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) -> Result<bool, String> {
-    match edge.edge_type.as_str() {
-        "PRIOR2D_ANGLE" => Ok(factor_graph.csr.add_edge(edge.vertices[0], edge.vertices[0], PositionFactor2D(edge.restriction[0], edge.restriction[1], edge.restriction[2], edge.information_matrix.to_vec().into()))),
-        "ODOMETRY2D_ANGLE" => Ok(factor_graph.csr.add_edge(edge.vertices[0], edge.vertices[1], OdometryFactor2D(edge.restriction[0], edge.restriction[1], edge.restriction[2], edge.information_matrix.to_vec().into()))),
-        "OBSERVATION2D_ANGLE" => Ok(factor_graph.csr.add_edge(edge.vertices[0], edge.vertices[1], ObservationFactor2D(edge.restriction[0], edge.restriction[1], edge.restriction[2], edge.information_matrix.to_vec().into()))),
+    let (target_index, factor_type) = match edge.edge_type.as_str() {
+        "PRIOR2D_ANGLE" => (0, Position2D),
+        "ODOMETRY2D_ANGLE" => (1, Odometry2D),
+        "OBSERVATION2D_ANGLE" => (1, Observation2D),
         _ => {
             error!("Could not add edge {:?}", edge);
-            Err(format!("Could not add edge {:?}", edge))
+            return Err(format!("Could not add edge {:?}", edge));
         }
-    }
+    };
+    Ok(factor_graph.csr.add_edge(edge.vertices[0], edge.vertices[target_index],
+                                 Factor { factor_type: factor_type, constraint: edge.restriction.to_vec(), information_matrix: edge.information_matrix.to_vec().into() }))
 }
 
 fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex) -> Result<(), String> {
     match vertex.vertex_type.as_str() {
         "POSE2D_ANGLE" => Ok(factor_graph.node_indices.push(
-                             factor_graph.csr.add_node(Box::new(VehicleVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0]))) as u32)),
+                             factor_graph.csr.add_node(Box::new(VehicleVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0]))))),
         "LANDMARK2D_ANGLE" => Ok(factor_graph.node_indices.push(
-                              factor_graph.csr.add_node(Box::new(LandmarkVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0]))) as u32)),
+                              factor_graph.csr.add_node(Box::new(LandmarkVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0]))))),
         _ => {
             error!("Could not add vertex {:?}", vertex);
             Err(format!("Could not add vertex {:?}", vertex))
