@@ -13,3 +13,5 @@ pub struct FactorGraph<'a> {
     pub csr: FactorGraphCsr<'a>,
     pub node_indices: Vec<NodeIndex<usize>>,
 }
+
+// TODO implement fn get_node_at(index: NodeIndex<usize>) -> Box<dyn Variable<'a>>?

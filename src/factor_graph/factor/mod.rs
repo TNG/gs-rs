@@ -1,4 +1,4 @@
-use nalgebra::{DMatrix, VecStorage, Dynamic};
+use nalgebra::DMatrix;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum FactorType {
@@ -17,14 +17,14 @@ pub struct Factor {
 
 #[derive(Debug, Clone)]
 pub struct InformationMatrix {
-    content: DMatrix<f64>,
+    pub content: DMatrix<f64>,
 }
 
 impl From<Vec<f64>> for InformationMatrix {
     fn from(content: Vec<f64>) -> Self {
         let dim = (content.len() as f64).sqrt() as usize;
         InformationMatrix {
-            content: DMatrix::from_data(VecStorage::new(Dynamic::new(dim), Dynamic::new(dim), content.into()))
+            content: DMatrix::from_vec(dim, dim, content),
         }
     }
 }

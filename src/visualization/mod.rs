@@ -24,7 +24,7 @@ fn add_factor_graph_to_window(window: &mut Window, factor_graph: &FactorGraph) -
 
 fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor_graph: &FactorGraph) {
     for variable_index in &factor_graph.node_indices {
-        let variable: &Box<dyn Variable> = factor_graph.csr.index(variable_index.to_owned());
+        let variable: &Box<dyn Variable> = factor_graph.csr.index(*variable_index);
         let var_point = Point3::new(variable.get_pose()[0] as f32, variable.get_pose()[1] as f32, 0.0 as f32);
 
         let mut variable_object = visual_factor_graph.scene_node.add_sphere(0.1);
@@ -40,7 +40,7 @@ fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor
             Landmark2D => variable_object.set_color(0.0, 1.0, 0.0),
         };
 
-        for edge in factor_graph.csr.edges(variable_index.to_owned()) {
+        for edge in factor_graph.csr.edges(*variable_index) {
             let factor: &Factor = edge.weight();
             let factor_point = Point3::new(factor.constraint[0] as f32, factor.constraint[1] as f32, 0.0 as f32);
             let factor_rotation = factor.constraint[2] as f32;

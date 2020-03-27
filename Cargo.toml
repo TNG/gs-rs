@@ -11,7 +11,7 @@ edition = "2018"
 
 [dependencies]
 log = "0.4.8"
-nalgebra = "0.20.0"
+nalgebra = {version = "0.20.0", features = ["sparse"]}
 approx = "0.3.2"
 uuid = {version="0.8.1", features = ["v4"]}
 serde = { version = "1.0.104", features = ["derive"] }

@@ -11,6 +11,7 @@ pub mod factor_graph;
 pub mod solver;
 pub mod parser;
 pub mod visualization;
+pub mod calculator;
 
 pub fn interface() {
     info!("Hello, I'm gs-rs. I will find your path for you.");
