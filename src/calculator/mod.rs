@@ -15,22 +15,16 @@ fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>) {
     // let mut H = CsMatrix::new_uninitialized_generic(Dynamic::new(dim), Dynamic::new(dim), max_non_zeros);
     let mut H = DMatrix::from_vec(dim, dim, vec![0.0; dim * dim]);
     let mut b = DVector::from_vec(vec![0.0; dim]);
+    dbg!(&b);
     let index_map: HashMap<&usize, usize> = factor_graph.node_indices.iter().enumerate().map(|(a,b)| (b,a)).collect();
 
     for variable_index in &factor_graph.node_indices {
         let var_vector = &Vector3::from_vec(factor_graph.csr.index(*variable_index).get_pose());
 
-        let jacobi = Matrix3x6::from_vec(vec![-1.0,  0.0,  0.0,   // transposed jacobi is displayed
-                                              0.0, -1.0,  0.0,
-                                              0.0,  0.0, -1.0,
-                                              1.0,  0.0,  0.0,
-                                              0.0,  1.0,  0.0,
-                                              0.0,  0.0,  1.0]);
-        let jacobi_t = Matrix6x3::from_vec(vec![-1.0,  0.0,  0.0,  1.0,  0.0,  0.0,   // transposed jacobi_t is displayed
-                                                 0.0, -1.0,  0.0,  0.0,  1.0,  0.0,
-                                                 0.0,  0.0, -1.0,  0.0,  0.0,  1.0]);
+        let (jacobi, jacobi_t) = calculate_2d_jacobians();
 
         for edge in factor_graph.csr.edges(*variable_index) {
+            dbg!("Adding edge {:?}", edge);
             let factor: &Factor = edge.weight();
             let omega_k = &factor.information_matrix.content;
             let var_matr_index = index_map[variable_index];
@@ -42,13 +36,15 @@ fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>) {
                     H.index_mut((var_range.clone(), var_range.clone())).copy_from(updated_H_k);
                     let e_k_t = (&Vector3::from_vec(factor.constraint.clone()) - var_vector).transpose();
                     let b_k = e_k_t * omega_k;
-                    let updated_b_k = &(b.index((.., var_range.clone())) + b_k);
-                    b.index_mut((.., var_range)).copy_from(updated_b_k);
+                    dbg!(&b_k);
+                    dbg!(&var_range);
+                    let updated_b_k = &(b.index((var_range.clone(), ..)) + b_k.transpose());
+                    b.index_mut((var_range, ..)).copy_from(updated_b_k);
                 },
                 Odometry2D | Observation2D => {
-                    let right_mult = omega_k * jacobi;
+                    let right_mult = omega_k * &jacobi;
                     let target_vector = &Vector3::from_vec(factor_graph.csr.index(edge.target()).get_pose());
-                    let H_k = jacobi_t * &right_mult;
+                    let H_k = &jacobi_t * &right_mult;
                     let target_matr_index = index_map[&edge.target()];
                     let target_range = 3*target_matr_index..3*(target_matr_index +1);
                     let H_i_i = H_k.index((..3, ..3));
@@ -66,16 +62,47 @@ fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>) {
                     let e_k_t = (&Vector3::from_vec(factor.constraint.clone()) - (target_vector - var_vector)).transpose();
                     let b_k = e_k_t * &right_mult;
                     let b_i = b_k.index((.., ..3));
-                    let updated_b_i = &(b.index((.., var_range.clone())) + b_i);
-                    b.index_mut((.., var_range)).copy_from(updated_b_i);
+                    let updated_b_i = &(b.index((var_range.clone(), ..)) + b_i.transpose());
+                    b.index_mut((var_range, ..)).copy_from(updated_b_i);
+                    dbg!(b_k);
                     let b_j = b_k.index((.., 3..));
-                    let updated_b_j = &(b.index((.., target_range.clone())) + b_j);
-                    b.index_mut((.., target_range)).copy_from(updated_b_j);
+                    let updated_b_j = &(b.index((target_range.clone(), ..)) + b_j.transpose());
+                    b.index_mut((target_range, ..)).copy_from(updated_b_j);
                 },
             };
         }
     }
     (H, b)
+}
+
+fn calculate_2d_jacobians() -> (Matrix3x6<f64>, Matrix6x3<f64>) {
+    let jacobi = Matrix3x6::from_vec(vec![-1.0, 0.0, 0.0,
+                                          0.0, -1.0, 0.0,
+                                          0.0, 0.0, -1.0,
+                                          1.0, 0.0, 0.0,
+                                          0.0, 1.0, 0.0,
+                                          0.0, 0.0, 1.0]);
+
+    (jacobi, jacobi.transpose())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::factor_graph::FactorGraph;
+    use crate::parser::model::FactorGraphModel;
+    use crate::parser::json::JsonParser;
+    use crate::parser::Parser;
+    use crate::calculator::calculate_H_b;
+
+    #[test]
+    fn simple_H_b() {
+        let graph = JsonParser::parse_file_to_model("test_files/testTrajectory2DAngle.json").unwrap().into();
+
+        let (H, b) = calculate_H_b(&graph);
+
+        dbg!(H);
+        dbg!(b);
+    }
 }
 
 // TODO test calculate_H_b()
