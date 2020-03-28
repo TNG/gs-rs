@@ -2,6 +2,8 @@
 extern crate log;
 #[macro_use]
 extern crate approx;
+#[macro_use]
+extern crate itertools;
 extern crate nalgebra;
 extern crate uuid;
 extern crate petgraph;

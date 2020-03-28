@@ -12,6 +12,19 @@ struct VisualFactorGraph {
     lines: Vec<[Point3<f32>; 3]>,
 }
 
+// TODO does not work multiple times in a single scope
+pub fn visualize(factor_graph: &FactorGraph) {
+    let mut window = Window::new("gs-rs");
+    let visual_factor_graph = add_factor_graph_to_window(&mut window, &factor_graph);
+
+    while window.render() {
+        visual_factor_graph.lines.iter()
+            .map(|line| window.draw_line(&line[0], &line[1], &line[2]))
+            .for_each(drop);
+    }
+}
+
+
 /// currently only supports 2D graphs
 fn add_factor_graph_to_window(window: &mut Window, factor_graph: &FactorGraph) -> VisualFactorGraph {
     let mut visual_factor_graph = VisualFactorGraph {

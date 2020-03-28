@@ -32,11 +32,6 @@ impl LandmarkVariable2D {
         }
     }
 
-    /// method for testing how to edit the content
-    /// TODO create more appropriate editing interface
-    pub fn update_pose(&self, x: f64, y: f64, phi: f64) {
-        *self.pose.borrow_mut() = [x, y, phi];
-    }
 }
 
 impl Variable<'_> for LandmarkVariable2D {
@@ -45,6 +40,12 @@ impl Variable<'_> for LandmarkVariable2D {
     fn get_type(&self) -> VariableType { VariableType::Landmark2D }
 
     fn get_pose(&self) -> Vec<f64> { (*self.pose.borrow_mut()).to_vec() }
+
+    /// method for testing how to edit the content
+    /// TODO create more appropriate editing interface
+    fn update_pose(&self, update: Vec<f64>) {
+        *self.pose.borrow_mut() = [update[0], update[1], update[2]];
+    }
 }
 
 #[cfg(test)]
@@ -96,7 +97,7 @@ mod tests {
         let test_variable = LandmarkVariable2D::from_pose(1.0, 1.0, 0.1);
         info!("{:?}", &test_variable);
         assert_eq!(test_variable.get_pose(), &[1.0, 1.0, 0.1]);
-        test_variable.update_pose(2.0, 3.0, 0.5);
+        test_variable.update_pose(vec!(2.0, 3.0, 0.5));
         info!("{:?}", &test_variable);
         assert_eq!(test_variable.get_pose(), &[2.0, 3.0, 0.5]);
     }

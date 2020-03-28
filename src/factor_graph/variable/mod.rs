@@ -16,4 +16,5 @@ pub trait Variable<'a>: fmt::Debug {
     fn get_id(&self) -> Uuid;
     fn get_type(&self) -> VariableType;
     fn get_pose(&self) -> Vec<f64>;
+    fn update_pose(&self, update: Vec<f64>);
 }
