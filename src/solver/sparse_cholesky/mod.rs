@@ -1,15 +1,20 @@
 #![allow(non_snake_case)]
 
-use nalgebra::{Cholesky, DMatrix, DVector, Matrix3};
+use nalgebra::{Cholesky, DMatrix, DVector, Matrix3, CsMatrix, CsCholesky};
 use crate::solver::Solver;
 
-pub struct CholeskySolver;
+pub struct SparseCholeskySolver;
 
-impl Solver for CholeskySolver {
+impl Solver for SparseCholeskySolver {
     fn solve(b: &DVector<f64>, H: DMatrix<f64>) -> Result<Vec<f64>, String> {
-        match Cholesky::new(H) {
+        if H.transpose() != H {
+            return Err(String::from("H is not symmetric"));
+        }
+
+        let sparse = CsCholesky::new(&CsMatrix::from(H));
+        match sparse.l() {
             None => Err(String::from("H is not positive-definite")),
-            Some(cholesky) => Ok(cholesky.solve(&b).data.into()),
+            Some(l) => Ok(l.tr_solve_lower_triangular(&l.solve_lower_triangular(&b).unwrap()).unwrap().data.into()),
         }
     }
 }
@@ -18,7 +23,7 @@ impl Solver for CholeskySolver {
 mod test {
     use log::LevelFilter;
 
-    use crate::solver::cholesky::{CholeskySolver};
+    use crate::solver::sparse_cholesky::{SparseCholeskySolver};
     use crate::solver::Solver;
     use nalgebra::{DVector, DMatrix, Matrix3};
 
@@ -37,7 +42,7 @@ mod test {
                                        -1.0,  2.0, -1.0,
                                         0.0, -1.0,  2.0];
         let b = vec![6.0, 6.0, 6.0];
-        let solve_output = CholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3, positive_definite_H));
+        let solve_output = SparseCholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3, positive_definite_H));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)
@@ -56,7 +61,7 @@ mod test {
                                    -1.0,  2.0, -1.0,
                                     0.0, -1.0,  2.0];
         let b = vec![6.0, 6.0, 6.0];
-        let solve_output = CholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,positive_definite_H));
+        let solve_output = SparseCholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,positive_definite_H));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)
@@ -76,12 +81,12 @@ mod test {
                                            2.0, 3.0, 5.0,
                                            4.0, 5.0, 6.0];
         let b = vec![6.0, 6.0, 6.0];
-        let solve_output = CholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,not_positive_definite_H));
+        let solve_output = SparseCholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,not_positive_definite_H.clone()));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-     //   info!("TEST FAILED! The solver returned {:?} for not positive-definite H = {:?}", x, not_positive_definite_H);
+        info!("TEST FAILED! The solver returned {:?} for not positive-definite H = {:?}", x, not_positive_definite_H);
     }
 
     #[test]
@@ -93,12 +98,12 @@ mod test {
                                    -1.0,  2.0, -1.0,
                                     0.0, -1.0,  2.0];
         let b = vec![6.0, 6.0, 6.0];
-        let solve_output = CholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,not_symmetric_H));
+        let solve_output = SparseCholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,not_symmetric_H.clone()));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-        //info!("TEST FAILED! The solver returned {:?} for not symmetric H = {:?}", x, not_symmetric_H);
+        info!("TEST FAILED! The solver returned {:?} for not symmetric H = {:?}", x, not_symmetric_H);
     }
 
     #[test]
@@ -110,7 +115,7 @@ mod test {
                                        -1.0,  2.0, -1.0,
                                         0.0, -1.0,  2.0];
         let b = vec![6.0, 6.0, 6.0, 6.0];
-        let solve_output = CholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,positive_definite_H));
+        let solve_output = SparseCholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,positive_definite_H));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)

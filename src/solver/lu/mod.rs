@@ -1,25 +1,17 @@
 #![allow(non_snake_case)]
 
-use nalgebra::{LU, DMatrix};
+use nalgebra::{LU, DMatrix, DVector, Matrix3};
 use crate::solver::Solver;
 
 pub struct LUSolver;
 
 impl Solver for LUSolver {
-    fn solve(b: &[f64], H: &[f64]) -> Result<Vec<f64>, String> {
-        let dim = b.len();
+    fn solve(b: &DVector<f64>, H: DMatrix<f64>) -> Result<Vec<f64>, String> {
 
-        if H.len() != dim * dim {
-            return Err(format!("Incompatible dimensions! The length of H is not the length of b squared: H.len() = {:?}; b.len() = {:?}", H.len(), dim));
-        }
+        let lu_decomposition = LU::new(H);
 
-        let matrix_H = DMatrix::from_vec(dim, dim, H.to_vec());
-        let vector_b = DMatrix::from_vec(dim, 1, b.to_vec());
-
-        let lu_decomposition = LU::new(matrix_H);
-
-        match lu_decomposition.solve(&vector_b) {
-            None => Err(format!("H is not invertible: H = {:?}", H)),
+        match lu_decomposition.solve(&b) {
+            None => Err(String::from("H is not invertible.")),
             Some(lu) => Ok(lu.data.into()),
         }
     }
@@ -31,6 +23,7 @@ mod test {
 
     use crate::solver::lu::{LUSolver};
     use crate::solver::Solver;
+    use nalgebra::{DMatrix, DVector, Matrix3};
 
     fn init() {
         let _ = env_logger::builder()
@@ -47,12 +40,12 @@ mod test {
                                 -1.0, 2.0, -1.0,
                                  0.0, -1.0, 2.0];
         let b = vec![6.0, 6.0, 6.0];
-        let solve_output = LUSolver::solve(&b, &invertible_H);
+        let solve_output = LUSolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,invertible_H));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-        info!("H = {:?}; b = {:?}  |  x = {:?}", invertible_H, b, x);
+     //   info!("H = {:?}; b = {:?}  |  x = {:?}", invertible_H, b, x);
         assert!(relative_eq!(x[0], 6.0, epsilon = 1e-10));
         assert!(relative_eq!(x[1], 6.0, epsilon = 1e-10));
         assert!(relative_eq!(x[2], 0.0, epsilon = 1e-10));
@@ -67,12 +60,12 @@ mod test {
                                         3.0, -2.0,  1.0,
                                         3.0,  2.0, -1.0];
         let b = vec![6.0, 6.0, 6.0];
-        let solve_output = LUSolver::solve(&b, &not_invertible_H);
+        let solve_output = LUSolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,not_invertible_H));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-        info!("TEST FAILED! The solver returned {:?} for not invertible H = {:?}", x, not_invertible_H);
+      //  info!("TEST FAILED! The solver returned {:?} for not invertible H = {:?}", x, not_invertible_H);
     }
 
     #[test]
@@ -84,11 +77,12 @@ mod test {
                                        -1.0,  2.0, -1.0,
                                         0.0, -1.0,  2.0];
         let b = vec![6.0, 6.0, 6.0, 6.0];
-        let solve_output = LUSolver::solve(&b, &positive_definite_H);
+
+        let solve_output = LUSolver::solve(&DVector::from_vec(b),  DMatrix::<f64>::from_vec(3,3,positive_definite_H));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-        info!("TEST FAILED! The solver returned {:?} for incompatible dimensions: H = {:?}; b = {:?}", x, positive_definite_H, b);
+      //  info!("TEST FAILED! The solver returned {:?} for incompatible dimensions: H = {:?}; b = {:?}", x, positive_definite_H, b);
     }
 }

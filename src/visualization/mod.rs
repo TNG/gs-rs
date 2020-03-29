@@ -111,6 +111,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_render_valid_file() {
         init();
 
