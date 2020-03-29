@@ -7,7 +7,6 @@ use itertools::Itertools;
 
 use crate::calculator::linear_system::calculate_H_b;
 use crate::factor_graph::FactorGraph;
-use crate::factor_graph::variable::Variable;
 use crate::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::solver::Solver;
 
@@ -15,7 +14,7 @@ pub mod linear_system;
 
 
 pub fn optimize(graph: &FactorGraph, iterations: usize) {
-    for i in 0..iterations {
+    for _i in 0..iterations {
         update_once(graph);
     }
 }
@@ -37,12 +36,9 @@ fn update_single_variable(graph: &FactorGraph, node_index: usize, value: &[f64])
 
 #[cfg(test)]
 mod tests {
-    use crate::calculator::{update_once, optimize};
-    use crate::factor_graph::FactorGraph;
+    use crate::calculator::optimize;
     use crate::parser::json::JsonParser;
-    use crate::parser::model::FactorGraphModel;
     use crate::parser::Parser;
-    use crate::visualization::visualize;
 
     use log::LevelFilter;
     use std::time::SystemTime;

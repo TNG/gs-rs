@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use nalgebra::{Cholesky, DMatrix, DVector, Matrix3};
+use nalgebra::{Cholesky, DMatrix, DVector};
 use crate::solver::Solver;
 
 pub struct CholeskySolver;
@@ -20,7 +20,7 @@ mod test {
 
     use crate::solver::cholesky::{CholeskySolver};
     use crate::solver::Solver;
-    use nalgebra::{DVector, DMatrix, Matrix3};
+    use nalgebra::{DVector, DMatrix};
 
     fn init() {
         let _ = env_logger::builder()
@@ -42,7 +42,6 @@ mod test {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-      //  info!("H = {:?}; b = {:?}  |  x = {:?}", positive_definite_H, b, x);
         assert!(relative_eq!(x[0],  9.0, epsilon = 1e-10));
         assert!(relative_eq!(x[1], 12.0, epsilon = 1e-10));
         assert!(relative_eq!(x[2],  9.0, epsilon = 1e-10));
@@ -61,7 +60,6 @@ mod test {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-      //  info!("H = {:?}; b = {:?}  |  x = {:?}", positive_definite_H, b, x);
         assert!(relative_eq!(x[0],  9.0, epsilon = 1e-10));
         assert!(relative_eq!(x[1], 12.0, epsilon = 1e-10));
         assert!(relative_eq!(x[2],  9.0, epsilon = 1e-10));
@@ -76,15 +74,16 @@ mod test {
                                            2.0, 3.0, 5.0,
                                            4.0, 5.0, 6.0];
         let b = vec![6.0, 6.0, 6.0];
-        let solve_output = CholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,not_positive_definite_H));
+        let solve_output = CholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,not_positive_definite_H.clone()));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-     //   info!("TEST FAILED! The solver returned {:?} for not positive-definite H = {:?}", x, not_positive_definite_H);
+        info!("TEST FAILED! The solver returned {:?} for not positive-definite H = {:?}", x, not_positive_definite_H);
     }
 
     #[test]
+    #[ignore]
     #[should_panic]
     fn solver_not_symmetric_test() {
         init();
@@ -93,12 +92,12 @@ mod test {
                                    -1.0,  2.0, -1.0,
                                     0.0, -1.0,  2.0];
         let b = vec![6.0, 6.0, 6.0];
-        let solve_output = CholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,not_symmetric_H));
+        let solve_output = CholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,not_symmetric_H.clone()));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-        //info!("TEST FAILED! The solver returned {:?} for not symmetric H = {:?}", x, not_symmetric_H);
+        info!("TEST FAILED! The solver returned {:?} for not symmetric H = {:?}", x, not_symmetric_H);
     }
 
     #[test]
@@ -110,11 +109,11 @@ mod test {
                                        -1.0,  2.0, -1.0,
                                         0.0, -1.0,  2.0];
         let b = vec![6.0, 6.0, 6.0, 6.0];
-        let solve_output = CholeskySolver::solve(&DVector::from_vec(b), DMatrix::<f64>::from_vec(3,3,positive_definite_H));
+        let solve_output = CholeskySolver::solve(&DVector::from_vec(b.clone()), DMatrix::<f64>::from_vec(3,3,positive_definite_H.clone()));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str)
         };
-       // info!("TEST FAILED! The solver returned {:?} for incompatible dimensions: H = {:?}; b = {:?}", x, positive_definite_H, b);
+       info!("TEST FAILED! The solver returned {:?} for incompatible dimensions: H = {:?}; b = {:?}", x, positive_definite_H, b);
     }
 }

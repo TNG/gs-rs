@@ -1,8 +1,9 @@
 use petgraph::csr::Csr;
-use crate::parser::model::{FactorGraphModel, Edge, Vertex};
-use crate::factor_graph::FactorGraph;
+
 use crate::factor_graph::factor::{Factor, FactorType::*};
-use crate::factor_graph::variable::{vehicle_variable_2d::VehicleVariable2D, landmark_variable_2d::LandmarkVariable2D};
+use crate::factor_graph::FactorGraph;
+use crate::factor_graph::variable::{landmark_variable_2d::LandmarkVariable2D, vehicle_variable_2d::VehicleVariable2D};
+use crate::parser::model::{Edge, FactorGraphModel, Vertex};
 
 impl From<FactorGraphModel> for FactorGraph<'_> {
     fn from(model: FactorGraphModel) -> Self {
@@ -13,16 +14,11 @@ impl From<FactorGraphModel> for FactorGraph<'_> {
 
         // TODO replace by some kind of for_each
         model.vertices.iter()
-            .map(|x| add_vertex(&mut factor_graph, x))
-            .filter_map(Result::ok)
-            .for_each(drop);
+            .for_each(|x| add_vertex(&mut factor_graph, x));
 
         // TODO replace by some kind of for_each
         model.edges.iter()
-            .map(|x| add_edge(&mut factor_graph, x))
-            .filter_map(Result::ok)
-            .filter(|x| *x == true)
-            .for_each(drop);
+            .for_each(|x| add_edge(&mut factor_graph, x));
 
         factor_graph
     }
@@ -31,36 +27,32 @@ impl From<FactorGraphModel> for FactorGraph<'_> {
 // TODO implement to be able to compose JSON files
 impl From<FactorGraph<'_>> for FactorGraphModel {
     fn from(_: FactorGraph) -> Self {
-        unimplemented!()
+        unimplemented!();
     }
 }
 
-
-// auxiliary functions
-
-fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) -> Result<bool, String> {
+fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
     let (target_index, factor_type) = match edge.edge_type.as_str() {
         "PRIOR2D_ANGLE" => (0, Position2D),
         "ODOMETRY2D_ANGLE" => (1, Odometry2D),
         "OBSERVATION2D_ANGLE" => (1, Observation2D),
         _ => {
             error!("Could not add edge {:?}", edge);
-            return Err(format!("Could not add edge {:?}", edge));
+            return;
         }
     };
-    Ok(factor_graph.csr.add_edge(edge.vertices[0], edge.vertices[target_index],
-                                 Factor { factor_type: factor_type, constraint: edge.restriction.to_vec(), information_matrix: edge.information_matrix.to_vec().into() }))
+    factor_graph.csr.add_edge(edge.vertices[0], edge.vertices[target_index],
+                              Factor { factor_type, constraint: edge.restriction.to_vec(), information_matrix: edge.information_matrix.to_vec().into() });
 }
 
-fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex) -> Result<(), String> {
+fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex) {
     match vertex.vertex_type.as_str() {
-        "POSE2D_ANGLE" => Ok(factor_graph.node_indices.push(
-                             factor_graph.csr.add_node(Box::new(VehicleVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0]))))),
-        "LANDMARK2D_ANGLE" => Ok(factor_graph.node_indices.push(
-                              factor_graph.csr.add_node(Box::new(LandmarkVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0]))))),
+        "POSE2D_ANGLE" => factor_graph.node_indices.push(
+            factor_graph.csr.add_node(Box::new(VehicleVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0])))),
+        "LANDMARK2D_ANGLE" => factor_graph.node_indices.push(
+            factor_graph.csr.add_node(Box::new(LandmarkVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0])))),
         _ => {
             error!("Could not add vertex {:?}", vertex);
-            Err(format!("Could not add vertex {:?}", vertex))
         }
     }
 }

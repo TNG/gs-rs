@@ -1,11 +1,13 @@
-use crate::factor_graph::FactorGraph;
-use crate::factor_graph::variable::{Variable, VariableType::*};
-use crate::factor_graph::factor::{Factor, FactorType::*};
 use std::ops::Index;
-use kiss3d::window::Window;
+
 use kiss3d::scene::SceneNode;
-use nalgebra::{Translation3, UnitQuaternion, Vector3, Point3, Rotation3};
+use kiss3d::window::Window;
+use nalgebra::{Point3, Rotation3, Translation3, UnitQuaternion, Vector3};
 use petgraph::visit::EdgeRef;
+
+use crate::factor_graph::factor::{Factor, FactorType::*};
+use crate::factor_graph::FactorGraph;
+use crate::factor_graph::variable::{VariableType::*};
 
 struct VisualFactorGraph {
     scene_node: SceneNode,
@@ -37,7 +39,7 @@ fn add_factor_graph_to_window(window: &mut Window, factor_graph: &FactorGraph) -
 
 fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor_graph: &FactorGraph) {
     for variable_index in &factor_graph.node_indices {
-        let variable: &Box<dyn Variable> = factor_graph.csr.index(*variable_index);
+        let variable = factor_graph.csr.index(*variable_index);
         let var_point = Point3::new(variable.get_pose()[0] as f32, variable.get_pose()[1] as f32, 0.0 as f32);
 
         let mut variable_object = visual_factor_graph.scene_node.add_sphere(0.1);
@@ -95,13 +97,14 @@ fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor
 }
 
 
-
 #[cfg(test)]
 mod test {
     use log::LevelFilter;
-    use super::*;
+
     use crate::parser::json::JsonParser;
     use crate::parser::Parser;
+
+    use super::*;
 
     fn init() {
         let _ = env_logger::builder()

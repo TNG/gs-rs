@@ -1,5 +1,5 @@
 use crate::parser::Parser;
-use crate::parser::model::{FactorGraphModel, Edge, Vertex};
+use crate::parser::model::{FactorGraphModel};
 
 pub struct JsonParser;
 
@@ -22,8 +22,9 @@ impl Parser for JsonParser {
 
 #[cfg(test)]
 mod tests {
-    use log::LevelFilter;
     use super::*;
+    use log::LevelFilter;
+    use crate::parser::model::{Vertex, Edge};
 
     fn init() {
         let _ = env_logger::builder()
@@ -68,11 +69,11 @@ mod tests {
         let vertices = vec![Vertex::new( 0, String::from("POSE2D_ANGLE"), [0.0, 1.0], [0.0] ),
                             Vertex::new( 1, String::from("POSE2D_ANGLE"), [1.0, 0.0], [0.0] )];
         let edges = vec![Edge::new( String::from("PRIOR2D_ANGLE"), vec![0], [0.0, 1.0, 0.0],
-                                    [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000001] ),
+                                    [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001] ),
                          Edge::new( String::from("PRIOR2D_ANGLE"), vec![1], [1.0, 0.0, 0.0],
-                                    [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000001] ),
+                                    [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001] ),
                          Edge::new( String::from("ODOMETRY2D_ANGLE"), vec![0, 1], [0.5, -0.5, 0.0],
-                                    [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000001] )];
+                                    [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001] )];
         let expected_model = FactorGraphModel::new(vertices, edges);
         assert_eq!(parsed_model, expected_model);
     }
