@@ -1,8 +1,10 @@
 use petgraph::csr::Csr;
 
 use crate::factor_graph::factor::{Factor, FactorType::*};
+use crate::factor_graph::variable::{
+    landmark_variable_2d::LandmarkVariable2D, vehicle_variable_2d::VehicleVariable2D,
+};
 use crate::factor_graph::FactorGraph;
-use crate::factor_graph::variable::{landmark_variable_2d::LandmarkVariable2D, vehicle_variable_2d::VehicleVariable2D};
 use crate::parser::model::{Edge, FactorGraphModel, Vertex};
 
 impl From<FactorGraphModel> for FactorGraph<'_> {
@@ -13,11 +15,15 @@ impl From<FactorGraphModel> for FactorGraph<'_> {
         };
 
         // TODO replace by some kind of for_each
-        model.vertices.iter()
+        model
+            .vertices
+            .iter()
             .for_each(|x| add_vertex(&mut factor_graph, x));
 
         // TODO replace by some kind of for_each
-        model.edges.iter()
+        model
+            .edges
+            .iter()
             .for_each(|x| add_edge(&mut factor_graph, x));
 
         factor_graph
@@ -41,16 +47,43 @@ fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
             return;
         }
     };
-    factor_graph.csr.add_edge(edge.vertices[0], edge.vertices[target_index],
-                              Factor { factor_type, constraint: edge.restriction.to_vec(), information_matrix: edge.information_matrix.to_vec().into() });
+    factor_graph.csr.add_edge(
+        edge.vertices[0],
+        edge.vertices[target_index],
+        Factor {
+            factor_type,
+            constraint: edge.restriction.to_vec(),
+            information_matrix: edge.information_matrix.to_vec().into(),
+        },
+    );
 }
 
 fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex) {
     match vertex.vertex_type.as_str() {
-        "POSE2D_ANGLE" => factor_graph.node_indices.push(
-            factor_graph.csr.add_node(Box::new(VehicleVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0])))),
-        "LANDMARK2D_ANGLE" => factor_graph.node_indices.push(
-            factor_graph.csr.add_node(Box::new(LandmarkVariable2D::from_pose_and_id(vertex.id, vertex.position[0], vertex.position[1], vertex.rotation[0])))),
+        "POSE2D_ANGLE" => factor_graph
+            .node_indices
+            .push(
+                factor_graph
+                    .csr
+                    .add_node(Box::new(VehicleVariable2D::from_pose_and_id(
+                        vertex.id,
+                        vertex.position[0],
+                        vertex.position[1],
+                        vertex.rotation[0],
+                    ))),
+            ),
+        "LANDMARK2D_ANGLE" => factor_graph
+            .node_indices
+            .push(
+                factor_graph
+                    .csr
+                    .add_node(Box::new(LandmarkVariable2D::from_pose_and_id(
+                        vertex.id,
+                        vertex.position[0],
+                        vertex.position[1],
+                        vertex.rotation[0],
+                    ))),
+            ),
         _ => {
             error!("Could not add vertex {:?}", vertex);
         }

@@ -1,10 +1,10 @@
 #![allow(non_snake_case)]
 
-use nalgebra::{DVector, DMatrix};
+use nalgebra::{DMatrix, DVector};
 
-pub mod sparse_cholesky;
 pub mod cholesky;
 pub mod lu;
+pub mod sparse_cholesky;
 
 pub trait Solver {
     /// Solves the linear equation system defined by

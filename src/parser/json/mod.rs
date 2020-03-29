@@ -1,5 +1,5 @@
+use crate::parser::model::FactorGraphModel;
 use crate::parser::Parser;
-use crate::parser::model::{FactorGraphModel};
 
 pub struct JsonParser;
 
@@ -14,17 +14,19 @@ impl Parser for JsonParser {
     fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
         match serde_json::to_string(&model) {
             Ok(s) => Ok(s),
-            Err(e) => Err(format!("Composing FactorGraphModel as JSON string unsuccessful: {}", e)),
+            Err(e) => Err(format!(
+                "Composing FactorGraphModel as JSON string unsuccessful: {}",
+                e
+            )),
         }
     }
-
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::parser::model::{Edge, Vertex};
     use log::LevelFilter;
-    use crate::parser::model::{Vertex, Edge};
 
     fn init() {
         let _ = env_logger::builder()
@@ -37,10 +39,11 @@ mod tests {
     fn test_parse_valid_file() {
         init();
 
-        let parsed_factor_graph = match JsonParser::parse_file("test_files/testTrajectory2DAngle.json") {
-            Ok(x) => x,
-            Err(str) => panic!(str),
-        };
+        let parsed_factor_graph =
+            match JsonParser::parse_file("test_files/testTrajectory2DAngle.json") {
+                Ok(x) => x,
+                Err(str) => panic!(str),
+            };
         dbg!("{:?}", &parsed_factor_graph);
 
         // TODO remove code below or implement comparison technique for FactorGraph
@@ -60,20 +63,37 @@ mod tests {
     fn test_parse_valid_file_to_model() {
         init();
 
-        let parsed_model = match JsonParser::parse_file_to_model("test_files/testTrajectory2DAngle.json") {
-            Ok(x) => x,
-            Err(str) => panic!(str),
-        };
+        let parsed_model =
+            match JsonParser::parse_file_to_model("test_files/testTrajectory2DAngle.json") {
+                Ok(x) => x,
+                Err(str) => panic!(str),
+            };
         dbg!("{:?}", &parsed_model);
 
-        let vertices = vec![Vertex::new( 0, String::from("POSE2D_ANGLE"), [0.0, 1.0], [0.0] ),
-                            Vertex::new( 1, String::from("POSE2D_ANGLE"), [1.0, 0.0], [0.0] )];
-        let edges = vec![Edge::new( String::from("PRIOR2D_ANGLE"), vec![0], [0.0, 1.0, 0.0],
-                                    [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001] ),
-                         Edge::new( String::from("PRIOR2D_ANGLE"), vec![1], [1.0, 0.0, 0.0],
-                                    [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001] ),
-                         Edge::new( String::from("ODOMETRY2D_ANGLE"), vec![0, 1], [0.5, -0.5, 0.0],
-                                    [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001] )];
+        let vertices = vec![
+            Vertex::new(0, String::from("POSE2D_ANGLE"), [0.0, 1.0], [0.0]),
+            Vertex::new(1, String::from("POSE2D_ANGLE"), [1.0, 0.0], [0.0]),
+        ];
+        let edges = vec![
+            Edge::new(
+                String::from("PRIOR2D_ANGLE"),
+                vec![0],
+                [0.0, 1.0, 0.0],
+                [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
+            ),
+            Edge::new(
+                String::from("PRIOR2D_ANGLE"),
+                vec![1],
+                [1.0, 0.0, 0.0],
+                [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
+            ),
+            Edge::new(
+                String::from("ODOMETRY2D_ANGLE"),
+                vec![0, 1],
+                [0.5, -0.5, 0.0],
+                [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001],
+            ),
+        ];
         let expected_model = FactorGraphModel::new(vertices, edges);
         assert_eq!(parsed_model, expected_model);
     }
@@ -83,11 +103,15 @@ mod tests {
     fn test_parse_invalid_file() {
         init();
 
-        let parsed_model: FactorGraphModel = match JsonParser::parse_file_to_model("test_files/testBrokenTrajectory2DAngle.json") {
-            Ok(x) => x,
-            Err(str) => panic!(str),
-        };
-        info!("TEST FAILED! The invalid file was able to be parsed: {:?}", parsed_model);
+        let parsed_model: FactorGraphModel =
+            match JsonParser::parse_file_to_model("test_files/testBrokenTrajectory2DAngle.json") {
+                Ok(x) => x,
+                Err(str) => panic!(str),
+            };
+        info!(
+            "TEST FAILED! The invalid file was able to be parsed: {:?}",
+            parsed_model
+        );
     }
 
     #[test]
@@ -95,11 +119,15 @@ mod tests {
     fn test_parse_missing_file() {
         init();
 
-        let parsed_model: FactorGraphModel = match JsonParser::parse_file_to_model("test_files/missing_file.json") {
-            Ok(x) => x,
-            Err(str) => panic!(str),
-        };
-        info!("TEST FAILED! The missing file was able to be parsed: {:?}", parsed_model);
+        let parsed_model: FactorGraphModel =
+            match JsonParser::parse_file_to_model("test_files/missing_file.json") {
+                Ok(x) => x,
+                Err(str) => panic!(str),
+            };
+        info!(
+            "TEST FAILED! The missing file was able to be parsed: {:?}",
+            parsed_model
+        );
     }
 
     // TODO Should compose_model_to_string() be tested with unit tests?

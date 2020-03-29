@@ -12,7 +12,6 @@ use crate::solver::Solver;
 
 pub mod linear_system;
 
-
 pub fn optimize(graph: &FactorGraph, iterations: usize) {
     for _i in 0..iterations {
         update_once(graph);
@@ -33,7 +32,6 @@ fn update_single_variable(graph: &FactorGraph, node_index: usize, value: &[f64])
     var.update_pose(izip!(&bla, value).map(|(x, y)| x + y).collect_vec());
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::calculator::optimize;
@@ -53,7 +51,9 @@ mod tests {
     #[test]
     fn iter_once() {
         init();
-        let graph = JsonParser::parse_file_to_model("test_files/graphSLAM2dExample.json").unwrap().into();
+        let graph = JsonParser::parse_file_to_model("test_files/graphSLAM2dExample.json")
+            .unwrap()
+            .into();
         info!("{:?}", SystemTime::now());
         optimize(&graph, 1);
         info!("{:?}", SystemTime::now());
@@ -62,10 +62,11 @@ mod tests {
     #[test]
     fn iter_ten_times() {
         init();
-        let graph = JsonParser::parse_file_to_model("test_files/graphSLAM2dExample.json").unwrap().into();
+        let graph = JsonParser::parse_file_to_model("test_files/graphSLAM2dExample.json")
+            .unwrap()
+            .into();
         info!("{:?}", SystemTime::now());
         optimize(&graph, 10);
         info!("{:?}", SystemTime::now());
     }
-
 }

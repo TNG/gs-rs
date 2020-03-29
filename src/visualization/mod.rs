@@ -6,8 +6,8 @@ use nalgebra::{Point3, Rotation3, Translation3, UnitQuaternion, Vector3};
 use petgraph::visit::EdgeRef;
 
 use crate::factor_graph::factor::{Factor, FactorType::*};
+use crate::factor_graph::variable::VariableType::*;
 use crate::factor_graph::FactorGraph;
-use crate::factor_graph::variable::{VariableType::*};
 
 struct VisualFactorGraph {
     scene_node: SceneNode,
@@ -20,15 +20,19 @@ pub fn visualize(factor_graph: &FactorGraph) {
     let visual_factor_graph = add_factor_graph_to_window(&mut window, &factor_graph);
 
     while window.render() {
-        visual_factor_graph.lines.iter()
+        visual_factor_graph
+            .lines
+            .iter()
             .map(|line| window.draw_line(&line[0], &line[1], &line[2]))
             .for_each(drop);
     }
 }
 
-
 /// currently only supports 2D graphs
-fn add_factor_graph_to_window(window: &mut Window, factor_graph: &FactorGraph) -> VisualFactorGraph {
+fn add_factor_graph_to_window(
+    window: &mut Window,
+    factor_graph: &FactorGraph,
+) -> VisualFactorGraph {
     let mut visual_factor_graph = VisualFactorGraph {
         scene_node: window.add_group(),
         lines: vec![],
@@ -37,17 +41,27 @@ fn add_factor_graph_to_window(window: &mut Window, factor_graph: &FactorGraph) -
     visual_factor_graph
 }
 
-fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor_graph: &FactorGraph) {
+fn add_variables_and_factors(
+    visual_factor_graph: &mut VisualFactorGraph,
+    factor_graph: &FactorGraph,
+) {
     for variable_index in &factor_graph.node_indices {
         let variable = factor_graph.csr.index(*variable_index);
-        let var_point = Point3::new(variable.get_pose()[0] as f32, variable.get_pose()[1] as f32, 0.0 as f32);
+        let var_point = Point3::new(
+            variable.get_pose()[0] as f32,
+            variable.get_pose()[1] as f32,
+            0.0 as f32,
+        );
 
         let mut variable_object = visual_factor_graph.scene_node.add_sphere(0.1);
         variable_object.set_local_translation(var_point.coords.into());
 
         let mut var_rotation_object = variable_object.add_capsule(0.02, 2.0);
         let var_rotation = variable.get_pose()[2] as f32;
-        var_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(&Vector3::z_axis(), var_rotation));
+        var_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(
+            &Vector3::z_axis(),
+            var_rotation,
+        ));
         var_rotation_object.prepend_to_local_translation(&Translation3::new(0.0, 0.20, 0.0));
 
         match variable.get_type() {
@@ -57,13 +71,20 @@ fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor
 
         for edge in factor_graph.csr.edges(*variable_index) {
             let factor: &Factor = edge.weight();
-            let factor_point = Point3::new(factor.constraint[0] as f32, factor.constraint[1] as f32, 0.0 as f32);
+            let factor_point = Point3::new(
+                factor.constraint[0] as f32,
+                factor.constraint[1] as f32,
+                0.0 as f32,
+            );
             let factor_rotation = factor.constraint[2] as f32;
             let (meas_point, meas_rotation) = match factor.factor_type {
                 Position2D => (factor_point, factor_rotation),
                 Odometry2D | Observation2D => {
                     let local_point = Rotation3::new(Vector3::z() * var_rotation) * factor_point;
-                    ((var_point.coords + local_point.coords).into(), var_rotation + factor_rotation)
+                    (
+                        (var_point.coords + local_point.coords).into(),
+                        var_rotation + factor_rotation,
+                    )
                 }
             };
 
@@ -77,25 +98,44 @@ fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor
             measurement_object.set_local_translation(meas_point.coords.into());
 
             let mut measured_rotation_object = measurement_object.add_capsule(0.04, 1.5);
-            measured_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(&Vector3::z_axis(), meas_rotation));
-            measured_rotation_object.prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
+            measured_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(
+                &Vector3::z_axis(),
+                meas_rotation,
+            ));
+            measured_rotation_object
+                .prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
 
             measurement_object.set_color(r, g, b);
 
-            visual_factor_graph.lines.push([meas_point, var_point, Point3::new(r, g, b)]);
+            visual_factor_graph
+                .lines
+                .push([meas_point, var_point, Point3::new(r, g, b)]);
             if factor.factor_type == Observation2D {
                 let observed_variable = factor_graph.csr.index(edge.target());
-                let observed_point = Point3::new(observed_variable.get_pose()[0] as f32, observed_variable.get_pose()[1] as f32, 0.0 as f32);
-                visual_factor_graph.lines.push([meas_point, observed_point, Point3::new(r, g, b)]);
+                let observed_point = Point3::new(
+                    observed_variable.get_pose()[0] as f32,
+                    observed_variable.get_pose()[1] as f32,
+                    0.0 as f32,
+                );
+                visual_factor_graph
+                    .lines
+                    .push([meas_point, observed_point, Point3::new(r, g, b)]);
             } else if factor.factor_type == Odometry2D {
                 let observed_variable = factor_graph.csr.index(edge.target());
-                let observed_point = Point3::new(observed_variable.get_pose()[0] as f32, observed_variable.get_pose()[1] as f32, 0.0 as f32);
-                visual_factor_graph.lines.push([var_point, observed_point, Point3::new(1.0, 1.0, 1.0)]);
+                let observed_point = Point3::new(
+                    observed_variable.get_pose()[0] as f32,
+                    observed_variable.get_pose()[1] as f32,
+                    0.0 as f32,
+                );
+                visual_factor_graph.lines.push([
+                    var_point,
+                    observed_point,
+                    Point3::new(1.0, 1.0, 1.0),
+                ]);
             }
         }
     }
 }
-
 
 #[cfg(test)]
 mod test {
@@ -119,13 +159,16 @@ mod test {
         init();
 
         let mut window = Window::new("gs-rs");
-        let visual_factor_graph: VisualFactorGraph = match JsonParser::parse_file("test_files/fullTestGraph.json") {
-            Ok(factor_graph) => add_factor_graph_to_window(&mut window, &factor_graph),
-            Err(str) => panic!(str),
-        };
+        let visual_factor_graph: VisualFactorGraph =
+            match JsonParser::parse_file("test_files/fullTestGraph.json") {
+                Ok(factor_graph) => add_factor_graph_to_window(&mut window, &factor_graph),
+                Err(str) => panic!(str),
+            };
 
         while window.render() {
-            visual_factor_graph.lines.iter()
+            visual_factor_graph
+                .lines
+                .iter()
                 .map(|line| window.draw_line(&line[0], &line[1], &line[2]))
                 .for_each(drop);
         }

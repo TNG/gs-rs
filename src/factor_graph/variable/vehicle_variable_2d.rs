@@ -1,7 +1,7 @@
-use uuid::Uuid;
 use crate::factor_graph::variable::{Variable, VariableType};
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
+use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct VehicleVariable2D {
@@ -34,24 +34,29 @@ impl VehicleVariable2D {
 }
 
 impl Variable<'_> for VehicleVariable2D {
-    fn get_id(&self) -> Uuid { self.id }
+    fn get_id(&self) -> Uuid {
+        self.id
+    }
 
-    fn get_type(&self) -> VariableType { VariableType::Vehicle2D }
+    fn get_type(&self) -> VariableType {
+        VariableType::Vehicle2D
+    }
 
-    fn get_pose(&self) -> Vec<f64> { (*self.pose.borrow_mut()).to_vec() }
+    fn get_pose(&self) -> Vec<f64> {
+        (*self.pose.borrow_mut()).to_vec()
+    }
 
     /// method for testing how to edit the content
-/// TODO create more appropriate editing interface
+    /// TODO create more appropriate editing interface
     fn update_pose(&self, update: Vec<f64>) {
         *self.pose.borrow_mut() = [update[0], update[1], update[2]];
     }
-
 }
 
 #[cfg(test)]
 mod tests {
-    use log::LevelFilter;
     use super::*;
+    use log::LevelFilter;
 
     fn init() {
         let _ = env_logger::builder()
@@ -97,7 +102,7 @@ mod tests {
         let test_variable = VehicleVariable2D::from_pose(1.0, 1.0, 0.1);
         info!("{:?}", &test_variable);
         assert_eq!(test_variable.get_pose(), &[1.0, 1.0, 0.1]);
-        test_variable.update_pose(vec!(2.0, 3.0, 0.5));
+        test_variable.update_pose(vec![2.0, 3.0, 0.5]);
         info!("{:?}", &test_variable);
         assert_eq!(test_variable.get_pose(), &[2.0, 3.0, 0.5]);
     }

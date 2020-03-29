@@ -4,15 +4,15 @@ extern crate log;
 extern crate itertools;
 #[macro_use]
 extern crate approx;
-extern crate uuid;
 extern crate kiss3d;
 extern crate nalgebra;
 extern crate petgraph;
+extern crate uuid;
 
-pub mod solver;
-pub mod parser;
 pub mod calculator;
 pub mod factor_graph;
+pub mod parser;
+pub mod solver;
 pub mod visualization;
 
 pub fn interface() {

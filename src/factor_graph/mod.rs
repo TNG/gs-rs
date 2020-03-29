@@ -1,7 +1,7 @@
-use petgraph::csr::{Csr, NodeIndex};
-use petgraph::Directed;
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;
+use petgraph::csr::{Csr, NodeIndex};
+use petgraph::Directed;
 
 pub mod factor;
 pub mod variable;

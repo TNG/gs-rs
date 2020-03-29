@@ -2,14 +2,13 @@ pub mod model;
 
 use crate::parser::model::FactorGraphModel;
 
-use std::fs;
 use crate::factor_graph::FactorGraph;
+use std::fs;
 
-pub mod json;
 pub mod g2o;
+pub mod json;
 
 pub trait Parser {
-
     fn parse_file<'a>(file_path: &str) -> Result<FactorGraph<'a>, String> {
         match Self::parse_file_to_model(file_path) {
             Ok(model) => Ok(model.into()),
@@ -28,11 +27,11 @@ pub trait Parser {
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String>;
 
     // TODO implement after implementing conversion from FactorGraph to FactorGraphModel
-    fn compose_file(_factor_graph: FactorGraph, _file_path: &str){
+    fn compose_file(_factor_graph: FactorGraph, _file_path: &str) {
         unimplemented!()
     }
 
-    fn compose_model_to_file(model: FactorGraphModel, file_path: &str) -> Result<(), String>{
+    fn compose_model_to_file(model: FactorGraphModel, file_path: &str) -> Result<(), String> {
         let s = Self::compose_model_to_string(model)?;
         fs::write(file_path, s)
             .or_else(|_| Err(format!("File could not be written to: {}", file_path)))

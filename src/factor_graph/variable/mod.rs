@@ -1,8 +1,8 @@
-use uuid::Uuid;
 use std::fmt;
+use uuid::Uuid;
 
-pub mod vehicle_variable_2d;
 pub mod landmark_variable_2d;
+pub mod vehicle_variable_2d;
 
 #[derive(Debug, PartialEq)]
 pub enum VariableType {

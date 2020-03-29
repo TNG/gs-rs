@@ -1,5 +1,5 @@
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
-use serde::{Serialize, Deserialize};
 
 pub mod converter;
 
@@ -36,12 +36,27 @@ impl FactorGraphModel {
 
 impl Vertex {
     pub fn new(id: usize, vertex_type: String, position: [f64; 2], rotation: [f64; 1]) -> Self {
-        Vertex { id, vertex_type, position, rotation }
+        Vertex {
+            id,
+            vertex_type,
+            position,
+            rotation,
+        }
     }
 }
 
 impl Edge {
-    pub fn new(edge_type: String, vertices: Vec<usize>, restriction: [f64; 3], information_matrix: [f64; 9]) -> Self {
-        Edge { edge_type, vertices, restriction, information_matrix }
+    pub fn new(
+        edge_type: String,
+        vertices: Vec<usize>,
+        restriction: [f64; 3],
+        information_matrix: [f64; 9],
+    ) -> Self {
+        Edge {
+            edge_type,
+            vertices,
+            restriction,
+            information_matrix,
+        }
     }
 }
