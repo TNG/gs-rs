@@ -14,6 +14,7 @@ pub mod factor_graph;
 pub mod parser;
 pub mod solver;
 pub mod visualizer;
+pub mod demo; // TODO remove once file (i.e., the mod) is deleted
 
 pub fn interface() {
     info!("Hello, I'm gs-rs. I will find your path for you.");
