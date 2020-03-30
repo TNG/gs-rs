@@ -1,3 +1,5 @@
+//! Handles the graphical user interface.
+
 use std::ops::Index;
 
 use kiss3d::scene::SceneNode;
@@ -15,6 +17,8 @@ struct VisualFactorGraph {
 }
 
 // TODO does not work multiple times in a single scope
+/// Displays the visualization of the given factor graph in a new window.
+/// Does not work multiple times in a single scope.
 pub fn visualize(factor_graph: &FactorGraph) {
     let mut window = Window::new("gs-rs");
     let visual_factor_graph = add_factor_graph_to_window(&mut window, &factor_graph);
@@ -28,7 +32,6 @@ pub fn visualize(factor_graph: &FactorGraph) {
     }
 }
 
-/// currently only supports 2D graphs
 fn add_factor_graph_to_window(
     window: &mut Window,
     factor_graph: &FactorGraph,

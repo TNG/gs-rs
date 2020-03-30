@@ -1,3 +1,5 @@
+//! Improves variable estimates to better fit measurements.
+
 #![allow(non_snake_case)]
 
 use std::borrow::BorrowMut;
@@ -5,13 +7,14 @@ use std::ops::{Deref, Index};
 
 use itertools::Itertools;
 
-use crate::calculator::linear_system::calculate_H_b;
+use crate::optimizer::linear_system::calculate_H_b;
 use crate::factor_graph::FactorGraph;
 use crate::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::solver::Solver;
 
-pub mod linear_system;
+mod linear_system;
 
+/// Optimizes a factor graph with the given number of iterations.
 pub fn optimize(graph: &FactorGraph, iterations: usize) {
     for _i in 0..iterations {
         update_once(graph);
@@ -21,7 +24,7 @@ pub fn optimize(graph: &FactorGraph, iterations: usize) {
 fn update_once(graph: &FactorGraph) {
     let (H, b) = calculate_H_b(&graph);
     // TODO clumsy, since the solver transforms the arguments back to nalgebra matrices
-    let bla = SparseCholeskySolver::solve(&b, H);
+    let bla = SparseCholeskySolver::solve(H, &b);
     izip!(&graph.node_indices, bla.unwrap().chunks(3).collect_vec())
         .for_each(|(node_index, value)| update_single_variable(&graph, *node_index, value));
 }
@@ -34,7 +37,7 @@ fn update_single_variable(graph: &FactorGraph, node_index: usize, value: &[f64])
 
 #[cfg(test)]
 mod tests {
-    use crate::calculator::optimize;
+    use crate::optimizer::optimize;
     use crate::parser::json::JsonParser;
     use crate::parser::Parser;
 

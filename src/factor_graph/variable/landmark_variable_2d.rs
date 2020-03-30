@@ -3,14 +3,15 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use uuid::Uuid;
 
+/// Representation of an optimizable landmark variable.
 #[derive(Debug)]
 pub struct LandmarkVariable2D {
     id: Uuid,
-    /// [x, y, phi], phi defaulting to 0
     pose: Rc<RefCell<[f64; 3]>>,
 }
 
 impl LandmarkVariable2D {
+    /// Returns a new variable from a 2D position.
     pub fn from_position(x: f64, y: f64) -> Self {
         LandmarkVariable2D {
             id: Uuid::new_v4(),
@@ -18,6 +19,7 @@ impl LandmarkVariable2D {
         }
     }
 
+    /// Returns a new variable from a 2D pose.
     pub fn from_pose(x: f64, y: f64, phi: f64) -> Self {
         LandmarkVariable2D {
             id: Uuid::new_v4(),
@@ -25,6 +27,7 @@ impl LandmarkVariable2D {
         }
     }
 
+    /// Returns a new variable from a 2D pose and a given ID.
     pub fn from_pose_and_id(id: usize, x: f64, y: f64, phi: f64) -> Self {
         LandmarkVariable2D {
             id: Uuid::from_u128(id as u128),
@@ -46,8 +49,6 @@ impl Variable<'_> for LandmarkVariable2D {
         (*self.pose.borrow_mut()).to_vec()
     }
 
-    /// method for testing how to edit the content
-    /// TODO create more appropriate editing interface
     fn update_pose(&self, update: Vec<f64>) {
         *self.pose.borrow_mut() = [update[0], update[1], update[2]];
     }

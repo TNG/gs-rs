@@ -9,11 +9,11 @@ extern crate nalgebra;
 extern crate petgraph;
 extern crate uuid;
 
-pub mod calculator;
+pub mod optimizer;
 pub mod factor_graph;
 pub mod parser;
 pub mod solver;
-pub mod visualization;
+pub mod visualizer;
 
 pub fn interface() {
     info!("Hello, I'm gs-rs. I will find your path for you.");

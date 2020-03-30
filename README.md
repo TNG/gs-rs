@@ -2,5 +2,13 @@
 
 > "it leadeth me in the paths of righteousness for its name's sake"
 
-## Introduction
 gs-rs is an implementation of a monocular graph based SLAM backend in pure rust.
+
+
+## Example Usage
+
+TODO
+
+```
+
+```

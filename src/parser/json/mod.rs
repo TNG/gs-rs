@@ -1,6 +1,9 @@
+//! Conversion between factor graph structures and JSON files.
+
 use crate::parser::model::FactorGraphModel;
 use crate::parser::Parser;
 
+/// Implements JSON specific functions for parsing and composing files.
 pub struct JsonParser;
 
 impl Parser for JsonParser {

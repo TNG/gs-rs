@@ -1,12 +1,15 @@
+//! Solver for linear systems using the Cholesky decomposition.
+
 #![allow(non_snake_case)]
 
 use crate::solver::Solver;
 use nalgebra::{Cholesky, DMatrix, DVector};
 
+/// Implements the solver using the Cholesky decomposition.
 pub struct CholeskySolver;
 
 impl Solver for CholeskySolver {
-    fn solve(b: &DVector<f64>, H: DMatrix<f64>) -> Result<Vec<f64>, String> {
+    fn solve(H: DMatrix<f64>, b: &DVector<f64>) -> Result<Vec<f64>, String> {
         match Cholesky::new(H) {
             None => Err(String::from("H is not positive-definite")),
             Some(cholesky) => Ok(cholesky.solve(&b).data.into()),
@@ -39,8 +42,8 @@ mod test {
         ];
         let b = vec![6.0, 6.0, 6.0];
         let solve_output = CholeskySolver::solve(
-            &DVector::from_vec(b),
             DMatrix::<f64>::from_vec(3, 3, positive_definite_H),
+            &DVector::from_vec(b),
         );
         let x = match solve_output {
             Ok(sol) => sol,
@@ -61,8 +64,8 @@ mod test {
         ];
         let b = vec![6.0, 6.0, 6.0];
         let solve_output = CholeskySolver::solve(
-            &DVector::from_vec(b),
             DMatrix::<f64>::from_vec(3, 3, positive_definite_H),
+            &DVector::from_vec(b),
         );
         let x = match solve_output {
             Ok(sol) => sol,
@@ -84,8 +87,8 @@ mod test {
         ];
         let b = vec![6.0, 6.0, 6.0];
         let solve_output = CholeskySolver::solve(
-            &DVector::from_vec(b),
             DMatrix::<f64>::from_vec(3, 3, not_positive_definite_H.clone()),
+            &DVector::from_vec(b),
         );
         let x = match solve_output {
             Ok(sol) => sol,
@@ -109,8 +112,8 @@ mod test {
         ];
         let b = vec![6.0, 6.0, 6.0];
         let solve_output = CholeskySolver::solve(
-            &DVector::from_vec(b),
             DMatrix::<f64>::from_vec(3, 3, not_symmetric_H.clone()),
+            &DVector::from_vec(b),
         );
         let x = match solve_output {
             Ok(sol) => sol,
@@ -133,8 +136,8 @@ mod test {
         ];
         let b = vec![6.0, 6.0, 6.0, 6.0];
         let solve_output = CholeskySolver::solve(
-            &DVector::from_vec(b.clone()),
             DMatrix::<f64>::from_vec(3, 3, positive_definite_H.clone()),
+            &DVector::from_vec(b.clone()),
         );
         let x = match solve_output {
             Ok(sol) => sol,

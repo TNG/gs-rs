@@ -126,7 +126,7 @@ fn calculate_2d_jacobians() -> (Matrix3x6<f64>, Matrix6x3<f64>) {
 
 #[cfg(test)]
 mod tests {
-    use crate::calculator::linear_system::calculate_H_b;
+    use crate::optimizer::linear_system::calculate_H_b;
     use crate::parser::json::JsonParser;
     use crate::parser::Parser;
 

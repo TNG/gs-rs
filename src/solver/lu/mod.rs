@@ -1,13 +1,15 @@
+//! Solver for linear systems using the LU (lower-upper) decomposition.
+
 #![allow(non_snake_case)]
 
+use crate::solver::Solver;
 use nalgebra::{DMatrix, DVector, LU};
 
-use crate::solver::Solver;
-
+/// Implements the solver using the LU (lower-upper) decomposition.
 pub struct LUSolver;
 
 impl Solver for LUSolver {
-    fn solve(b: &DVector<f64>, H: DMatrix<f64>) -> Result<Vec<f64>, String> {
+    fn solve(H: DMatrix<f64>, b: &DVector<f64>) -> Result<Vec<f64>, String> {
         let lu_decomposition = LU::new(H);
 
         match lu_decomposition.solve(&b) {
@@ -39,8 +41,8 @@ mod test {
         let invertible_H = vec![2.0, -1.0, 2.0, -1.0, 2.0, -1.0, 0.0, -1.0, 2.0];
         let b = vec![6.0, 6.0, 6.0];
         let solve_output = LUSolver::solve(
-            &DVector::from_vec(b),
             DMatrix::<f64>::from_vec(3, 3, invertible_H),
+            &DVector::from_vec(b),
         );
         let x = match solve_output {
             Ok(sol) => sol,
@@ -59,8 +61,8 @@ mod test {
         let not_invertible_H = vec![0.0, 2.0, -1.0, 3.0, -2.0, 1.0, 3.0, 2.0, -1.0];
         let b = vec![6.0, 6.0, 6.0];
         let solve_output = LUSolver::solve(
-            &DVector::from_vec(b),
             DMatrix::<f64>::from_vec(3, 3, not_invertible_H.clone()),
+            &DVector::from_vec(b),
         );
         let x = match solve_output {
             Ok(sol) => sol,
@@ -81,8 +83,8 @@ mod test {
         let b = vec![6.0, 6.0, 6.0, 6.0];
 
         let solve_output = LUSolver::solve(
-            &DVector::from_vec(b.clone()),
             DMatrix::<f64>::from_vec(3, 3, positive_definite_H.clone()),
+            &DVector::from_vec(b.clone()),
         );
         let x = match solve_output {
             Ok(sol) => sol,
