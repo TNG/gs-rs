@@ -1,6 +1,6 @@
 use crate::factor_graph::factor::{Factor, FactorType::*};
 use crate::factor_graph::FactorGraph;
-use nalgebra::{DMatrix, DVector, Matrix3x6, Matrix6x3, Vector3, Rotation3, Point3};
+use nalgebra::{DMatrix, DVector, Matrix3x6, Matrix6x3, Vector3, Rotation2, Point2, RowVector2, Vector2, RowVector3};
 use petgraph::visit::EdgeRef;
 use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
@@ -32,10 +32,9 @@ fn update_H_b_for_variable(
     variable_index: usize,
 ) {
     let variable = factor_graph.csr.index(variable_index);
-    let var_point = &Point3::new(
+    let var_point = &Point2::new(
         variable.get_pose()[0],
         variable.get_pose()[1],
-        0.0,
     );
     let var_rotation = variable.get_pose()[2];
     for edge in factor_graph.csr.edges(variable_index) {
@@ -68,7 +67,7 @@ fn handle_odometry_or_observation_2d(
     H: &mut DMatrix<f64>,
     b: &mut DVector<f64>,
     index_map: &HashMap<&usize, usize, RandomState>,
-    var_point: &Point3<f64>,
+    var_point: &Point2<f64>,
     var_rotation: f64,
     target_id: usize,
     factor: &Factor,
@@ -98,17 +97,16 @@ fn handle_odometry_or_observation_2d(
         .copy_from(updated_H_j_j);
 
     let target = factor_graph.csr.index(target_id);
-    let target_point = Point3::new(
+    let target_point = Point2::new(
         target.get_pose()[0],
         target.get_pose()[1],
-        0.0,
     );
     let target_rotation = target.get_pose()[2];
-    let relative_position = (Rotation3::new(Vector3::z() * -var_rotation) * (target_point - var_point)).data;
-    // let relative_position = (target_point - var_point).data;
-    let relative_rotation = target_rotation - var_rotation;
-    let relative_pose = Vector3::new(relative_position.as_slice()[0], relative_position.as_slice()[1], relative_rotation);
-    let e_k_t = (Vector3::from_vec(factor.constraint.clone()) - relative_pose).transpose();
+    // e_ij_x = (R_ij_T (R_i_T (x_j - x_i) - x_ij))
+    let e_ij_x = Rotation2::new(-factor.constraint[2]) * (Rotation2::new(-var_rotation) * (target_point - var_point) - Vector2::new(factor.constraint[0], factor.constraint[1]));
+    // e_ij_r = (phi_j - phi_i - phi_ij)
+    let e_ij_r = target_rotation - var_rotation - factor.constraint[2];
+    let e_k_t = RowVector3::from_vec(vec![e_ij_x.data.to_vec()[0], e_ij_x.data.to_vec()[1], e_ij_r]);
     let b_k = e_k_t * &right_mult;
     let b_i = b_k.index((.., ..3));
     let updated_b_i = &(b.index((var_range.clone(), ..)) + b_i.transpose());
@@ -121,7 +119,7 @@ fn handle_odometry_or_observation_2d(
 fn handle_position_2d(
     H: &mut DMatrix<f64>,
     b: &mut DVector<f64>,
-    var_point: &Point3<f64>,
+    var_point: &Point2<f64>,
     var_rotation: f64,
     factor: &Factor,
     omega_k: &DMatrix<f64>,
