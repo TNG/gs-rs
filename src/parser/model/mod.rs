@@ -33,8 +33,6 @@ pub struct Edge {
     pub information_matrix: [f64; 9],
 }
 
-
-
 // TODO make constructors below deprecated and remove once tests run without it?
 
 impl FactorGraphModel {

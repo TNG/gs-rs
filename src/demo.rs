@@ -1,8 +1,8 @@
 // TODO delete this file once done testing with this
 
+use crate::optimizer::optimize;
 use crate::parser::json::JsonParser;
 use crate::parser::Parser;
-use crate::optimizer::optimize;
 use crate::visualizer::visualize;
 
 #[test]

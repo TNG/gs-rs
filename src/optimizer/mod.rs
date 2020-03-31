@@ -7,8 +7,8 @@ use std::ops::{Deref, Index};
 
 use itertools::Itertools;
 
-use crate::optimizer::linear_system::calculate_H_b;
 use crate::factor_graph::FactorGraph;
+use crate::optimizer::linear_system::calculate_H_b;
 use crate::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::solver::Solver;
 use std::f64::consts::PI;
@@ -33,7 +33,11 @@ fn update_once(graph: &FactorGraph) {
 fn update_single_variable(graph: &FactorGraph, node_index: usize, value: &[f64]) {
     let mut var = graph.csr.index(node_index);
     let bla = var.borrow_mut().deref().get_pose();
-    let updated_pose = vec![bla[0]+ value[0], bla[1] + value[1], (bla[2]+ value[2])%(2.0*PI) - PI];
+    let updated_pose = vec![
+        bla[0] + value[0],
+        bla[1] + value[1],
+        (bla[2] + value[2]) % (2.0 * PI) - PI,
+    ];
     var.update_pose(updated_pose);
 }
 

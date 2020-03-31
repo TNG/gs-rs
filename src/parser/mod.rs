@@ -1,12 +1,12 @@
 //! Conversion between factor graph structures and files.
 
-use crate::parser::model::FactorGraphModel;
 use crate::factor_graph::FactorGraph;
+use crate::parser::model::FactorGraphModel;
 use std::fs;
 
-pub mod model;
 pub mod g2o;
 pub mod json;
+pub mod model;
 
 // Trait to be used by all parsers with the basic file parsing and composition functionality.
 pub trait Parser {
