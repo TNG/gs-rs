@@ -1,0 +1,216 @@
+\section{Hypergraph-Embeddable Optimization Problems}\label{sec:hypergraph-embeddableOptimizationProblems}
+
+\subsection{Least Squares Optimization Problems}\label{subsec:leastSquaresOptimizationProblems}
+
+\subsubsection{Definition}
+A least squares optimization problem with a set of constraints $\mathcal{C}$ can be generally formulated as:
+\begin{align}
+    \label{formulation}
+    F(\chi) &= \sum_{k\in\mathcal{C}}e_k(\chi_k, z_k)^{T}\Omega_k e_k(\chi_k, z_k)\\
+    {\chi}^* &= \text{argmin}_{\chi} F(\chi),
+\end{align}
+where
+\begin{align}
+    \chi = (\chi_1^T,\dots,\chi_n^T)^T
+\end{align}
+is the structured vector of parameters subject to optimization and
+\begin{align}
+    \chi_k = (\chi_{k_1}^T,\dots,\chi_{k_q}^T)^T
+\end{align}
+is the structured vector of parameter blocks subject to the constraint $k\in\mathcal{C}$.
+
+$z_k$ and $\Omega_k$ denote the mean and information matrix of constraint $k$, respectively.
+
+Finally, $e_k(\chi_k, z_k)$ is a vector error function measuring how well the parameter blocks
+$\chi_k$ satisfy the constraint $k$.
+
+\subsubsection{Linearization of the Error Function}
+Given an initial guess $\hat{\chi}$ of the parameter set $\chi$, we can expand the error function
+by means of a first order \textsc{Taylor} expansion:
+\begin{align}
+    e_k(\chi_k) &= e_k(\hat{\chi_k}+\Delta\chi_k)\\
+    &\approx e_k(\hat{\chi_k})+J_{k}\Delta\chi_k,
+\end{align}
+where $J_{k}=\nabla e_k(\hat{\chi_k})$ is the \textsc{Jacobian} computed at $\hat{\chi}_k$.
+
+Insertion into\ \ref{formulation} yields:
+\begin{align}
+    F_k(\hat{\chi_k}+\Delta\chi_k) &= e_k(\hat{\chi_k}+\Delta\chi_k)^{T}\Omega_k e_k(\hat{\chi_k}+\Delta\chi_k)\\
+    &\approx \left(e_k(\hat{\chi_k})+J_{k}\Delta\chi_{k}\right)^T\Omega_k\left(e_k(\hat{\chi_k})+J_{k}\Delta\chi_{k}\right)\\
+    &= \underbrace{e_k(\hat{\chi_k})^T\Omega_k e_k(\hat{\chi_k})}_{c_k}
+    + 2\underbrace{e_k(\hat{\chi_k})^{T}\Omega_{k}J_k}_{b_k}\Delta \chi_k
+    + \Delta\chi_k^T \underbrace{J_k^T\Omega_k J_k}_{H_k}\Delta \chi_k\\
+    &= c_k + 2b_{k}\Delta \chi_k + \Delta \chi_k^T H_k \Delta \chi_k.
+\end{align}
+Generalizing this result to the set of all constraints yields:
+\begin{align}
+    F(\hat{\chi}+\Delta \chi) &= \sum_{k\in\mathcal{C}} F_k(\hat{\chi_k}+ \Delta\chi_k)\\
+    &= \sum_{k\in\mathcal{C}} c_k + 2b_{k}\Delta \chi_k + \Delta \chi_k^T H_k \Delta \chi_k\\
+    &= c + 2b^T\Delta\chi + \Delta \chi^T H \Delta \chi.
+    \label{target}
+\end{align}
+where
+\begin{align}
+    c &= \sum_{k\in\mathcal{C}}c_{k}\\
+    b &= \bigoplus_{k\in\mathcal{C}}b_{k}\\
+    \Delta \chi &= \bigoplus_{k\in\mathcal{C}}\Delta \chi_{k}\\
+    H &= \bigoplus_{k\in\mathcal{C}} H_{k}.
+\end{align}
+Here, $\bigoplus$ denotes an addition of blocks for vectors and matrices, where the position is derived from the constraint index.
+
+We need to minimize $F(\hat\chi+\Delta\chi)$ in $\Delta\chi$. It can be done by solving the linear system
+\begin{align}
+    H\Delta\chi^\star = -b
+\end{align}
+
+\subsubsection{Example}
+Let us consider a system of two parameter blocks $\chi_0$, $\chi_1$ (e.g.\ poses in two dimensions)
+and three constraints $z_0$, $z_1$ (e.g.\ position measurements), $z_{01}$ (e.g.\ an odometry measurement), where the first two constraints
+control only one parameter block each and the
+last constraint connects the two parameter blocks.
+
+We will set $z_{0}=(0,1)^T, z_1 = (1,0)^T, z_{01} = (0.5, -0.5)^T$.
+Thus, we have a system, where the position measurements are further apart
+than the odometry requires.
+
+The information matrices are defined as follows:
+\begin{align}
+    \Omega_{0} &= \begin{pmatrix}
+                      10 & 0 \\ 0 & 10
+    \end{pmatrix}\\
+    \Omega_{1} &= \begin{pmatrix}
+                      10 & 0 \\ 0 & 10
+    \end{pmatrix}\\
+    \Omega_{01} &=\begin{pmatrix}
+                      1 & 0 \\ 0 & 1
+    \end{pmatrix}
+\end{align}
+That is, the odometry measurement is considered ten times less precise than the position measurement.
+
+We will define the error functions
+\begin{align}
+    e_0(\chi_0,z_0) &= z_0 - \chi_0 \\
+    e_1(\chi_1,z_1) &= z_1 - \chi_1 \\
+    e_{01}(\chi_{01},z_{01}) &= z_{01} - (\chi_1 - \chi_0).
+\end{align}
+Thus, for the \textsc{Jacobian}s we find
+\begin{align}
+    J_0 &= \begin{pmatrix}
+               \frac{\partial (z_0 - \chi_0)_x}{\partial (\chi_0)_x} & \frac{\partial (z_0 - \chi_0)_x}{\partial (\chi_0)_y} \\
+               \frac{\partial (z_0 - \chi_0)_y}{\partial (\chi_0)_x} & \frac{\partial (z_0 - \chi_0)_y}{\partial (\chi_0)_y}
+    \end{pmatrix}\\
+    &= \begin{pmatrix}
+           1 & 0 \\ 0 & 1
+    \end{pmatrix}\\
+    J_1 &= \begin{pmatrix}
+               1 & 0 \\ 0 & 1
+    \end{pmatrix}\\
+    J_{01} &= \begin{pmatrix}
+                  \frac{\partial (z_0 - (\chi_1 - \chi_0))_x}{\partial (\chi_0)_x} &
+                  \frac{\partial (z_0 - (\chi_1 - \chi_0))_x}{\partial (\chi_0)_y} &
+                  \frac{\partial (z_0 - (\chi_1 - \chi_0))_x}{\partial (\chi_1)_x} &
+                  \frac{\partial (z_0 - (\chi_1 - \chi_0))_x}{\partial (\chi_1)_y} \\
+                  \frac{\partial (z_0 - (\chi_1 - \chi_0))_y}{\partial (\chi_0)_x} &
+                  \frac{\partial (z_0 - (\chi_1 - \chi_0))_y}{\partial (\chi_0)_y} &
+                  \frac{\partial (z_0 - (\chi_1 - \chi_0))_y}{\partial (\chi_1)_x} &
+                  \frac{\partial (z_0 - (\chi_1 - \chi_0))_y}{\partial (\chi_1)_y}
+    \end{pmatrix}\\
+    &= \begin{pmatrix}
+           -1 & 0 & 1 & 0 \\ 0 & -1 & 0 & 1
+    \end{pmatrix}
+\end{align}
+Let us apply the position constraints as initial guesses of the pose variables:
+\begin{align}
+    \hat{\chi_0} &= z_0 = (0,1)^{T}\\
+    \hat{\chi_1} &= z_1 = (1,0)^{T}.
+\end{align}
+Now we can calculate the components of our target equation\ \ref{target}:
+\begin{align}
+    b_0 &= e_0^T \cdotp \Omega_0 J_{0}\\
+    &= (0,0) \cdotp \begin{pmatrix}
+                        10 & 0 \\ 0 & 10
+    \end{pmatrix} \cdotp \begin{pmatrix}
+                             1 & 0 \\ 0 & 1
+    \end{pmatrix}\\
+    &= (0,0).\\
+    b_1 &= e_1^T \cdotp \Omega_{1} J_{1}\\
+    &= (0,0) \cdotp \begin{pmatrix}
+                        10 & 0 \\ 0 & 10
+    \end{pmatrix} \cdotp \begin{pmatrix}
+                             1 & 0 \\ 0 & 1
+    \end{pmatrix}\\
+    &= (0,0).\\
+    b_{01} &= e_{01}^T \cdotp \Omega_{01} J_{01}\\
+    &= \left( (0.5, -0.5) - \left( (1,0) - (0,1) \right) \right)\cdotp \begin{pmatrix}
+                                                                           1 & 0 \\ 0 & 1
+    \end{pmatrix} \cdotp \begin{pmatrix}
+                             1 & 0 & -1 & 0 \\ 0 & 1 & 0 & -1
+    \end{pmatrix}\\
+    &= (-0.5, 0.5)\cdotp \begin{pmatrix}
+                             1 & 0 \\ 0 & 1
+    \end{pmatrix} \cdotp \begin{pmatrix}
+                             1 & 0 & -1 & 0 \\ 0 & 1 & 0 & -1
+    \end{pmatrix}\\
+    &= (-0.5, 0.5, 0.5, -0.5).\\
+    \Rightarrow b &= b_0 \oplus b_1 \oplus b_{01}\\
+    &= (0,0) \oplus (0,0) \oplus (-0.5, 0.5, 0.5, -0.5)\\
+    &= (-0.5, 0.5, 0.5, -0.5)\\
+    H_0 &= J_{0}^T \Omega_0 J_{0}\\
+    &= \begin{pmatrix}
+           -1 & 0 \\ 0 & -1
+    \end{pmatrix} \cdotp \begin{pmatrix}
+                             10 & 0 \\ 0 & 10
+    \end{pmatrix} \cdotp \begin{pmatrix}
+                             -1 & 0 \\ 0 & -1
+    \end{pmatrix}\\
+    &= \begin{pmatrix}
+           10 & 0 \\ 0 & 10
+    \end{pmatrix}.\\
+    H_1 &= J_{1}^T \Omega_1 J_{1}\\
+    &= \begin{pmatrix}
+           10 & 0 \\ 0 & 10
+    \end{pmatrix}.\\
+    H_{01} &= J_{01}^T \Omega_{01} J_{01}\\
+    &= \begin{pmatrix}
+           1 & 0 \\ 0 & 1 \\ -1 & 0 \\ 0 & -1
+    \end{pmatrix} \cdotp \begin{pmatrix}
+                             1 & 0 \\ 0 & 1
+    \end{pmatrix} \cdotp \begin{pmatrix}
+                             1 & 0 & -1 & 0 \\ 0 & 1 & 0 & -1
+    \end{pmatrix}\\
+    &= \begin{pmatrix}
+           1 & 0 & -1 & 0\\ 0 & 1 & 0 & -1 \\ -1 & 0 & 1 & 0 \\ 0 & -1 & 0 & 1
+    \end{pmatrix}.\\
+    \Rightarrow H &= H_0 \oplus H_1 \oplus H_{01}\\
+    &= \begin{pmatrix}
+           10 & 0 \\ 0 & 10
+    \end{pmatrix} \oplus \begin{pmatrix}
+                             10 & 0 \\ 0 & 10
+    \end{pmatrix} \oplus \begin{pmatrix}
+                             1 & 0 & -1 & 0\\ 0 & 1 & 0 & -1 \\ -1 & 0 & 1 & 0 \\ 0 & -1 & 0 & 1
+    \end{pmatrix}\\
+    & = \begin{pmatrix}
+            11 & 0 & -1 & 0\\ 0 & 11 & 0 & -1 \\ -1 & 0 & 11 & 0 \\ 0 & -1 & 0 & 11
+    \end{pmatrix}
+\end{align}
+Now, the last step is to solve
+\begin{align}
+    H\Delta \chi^* &= -b\\
+    \begin{pmatrix}
+        11 & 0 & -1 & 0\\ 0 & 11 & 0 & -1 \\ -1 & 0 & 11 & 0 \\ 0 & -1 & 0 & 11
+    \end{pmatrix} \Delta \chi^* &=
+    \begin{pmatrix}
+        0.5 \\ -0.5 \\ -0.5 \\ 0.5
+    \end{pmatrix} \\
+    \Rightarrow \Delta \chi^* &= \frac{1}{24} \begin{pmatrix}
+                                                  1 \\ -1 \\ -1 \\ 1
+    \end{pmatrix}.
+\end{align}
+and apply the update
+\begin{align}
+    \chi^{(1)} &= \hat{\chi} + \Delta \chi^{*}\\
+    &= (0,1,1,0)^T + \frac{1}{24}(1, -1, -1, 1)^{T}\\
+    &\approx (0.04, 0.96, 0.96, 0.04).
+\end{align}
+Thus, our pose variables moved a little closer together, driven by the odometry constraint.
+
