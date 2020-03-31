@@ -1,6 +1,5 @@
 // TODO delete this file once done testing with this
 
-use kiss3d::window::Window;
 use crate::parser::json::JsonParser;
 use crate::parser::Parser;
 use crate::optimizer::optimize;

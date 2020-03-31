@@ -8,7 +8,6 @@ gs-rs is an implementation of a monocular graph based SLAM backend in pure rust.
 ## Example Usage
 
 ```
-use kiss3d::window::Window;
 use gs_rs::parser::json::JsonParser;
 use gs_rs::parser::Parser;
 use gs_rs::optimizer::optimize;
@@ -27,5 +26,6 @@ fn main() {
 
     // display the improved factor graph in a new window
     visualize(&factor_graph);
+
 }
 ```
