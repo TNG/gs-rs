@@ -1,0 +1,85 @@
+{
+  "vertices": [
+    {
+      "id": 0,
+      "type": "POSE2D_ANGLE",
+      "position": [
+        1.110221052476559e-16,
+        0.0
+      ],
+      "rotation": [
+        -3.141592653589793
+      ]
+    },
+    {
+      "id": 1,
+      "type": "POSE2D_ANGLE",
+      "position": [
+        1.1102230246251556e-16,
+        1.0
+      ],
+      "rotation": [
+        -3.141592653589793
+      ]
+    },
+    {
+      "id": 2,
+      "type": "POSE2D_ANGLE",
+      "position": [
+        1.5,
+        -0.5
+      ],
+      "rotation": [
+        -3.141592653589793
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "type": "ODOMETRY2D_ANGLE",
+      "vertices": [
+        0,
+        1
+      ],
+      "restriction": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "informationMatrix": [
+        10.0,
+        0.0,
+        0.0,
+        0.0,
+        10.0,
+        0.0,
+        0.0,
+        0.0,
+        1e-9
+      ]
+    },
+    {
+      "type": "ODOMETRY2D_ANGLE",
+      "vertices": [
+        1,
+        2
+      ],
+      "restriction": [
+        0.5,
+        -0.5,
+        0.0
+      ],
+      "informationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1e-10
+      ]
+    }
+  ]
+}

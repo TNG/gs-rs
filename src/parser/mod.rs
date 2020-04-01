@@ -30,10 +30,9 @@ pub trait Parser {
     /// Tries to parse a string to the factor graph model used in the context with files.
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String>;
 
-    // TODO implement after implementing conversion from FactorGraph to FactorGraphModel
     /// Tries to compose a file at the given path containing the serialized factor graph.
-    fn compose_file(_factor_graph: FactorGraph, _file_path: &str) {
-        unimplemented!()
+    fn compose_file(factor_graph: &FactorGraph, file_path: &str) -> Result<(), String> {
+        Self::compose_model_to_file(factor_graph.into(), file_path)
     }
 
     /// Tries to compose a file at the given path containing the factor graph model's serialization.
