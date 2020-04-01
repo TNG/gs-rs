@@ -94,22 +94,22 @@ fn handle_odometry_or_observation_2d(
     let H_k = jacobi_t * &right_mult;
     let target_matr_index = index_map[&target_id];
     let target_range = 3 * target_matr_index..3 * (target_matr_index + 1);
-    let H_i_i = H_k.index((..3, ..3));
-    let updated_H_i_i = &(H.index((var_range.clone(), var_range.clone())) + H_i_i);
+    let H_ii = H_k.index((..3, ..3));
+    let updated_H_ii = &(H.index((var_range.clone(), var_range.clone())) + H_ii);
     H.index_mut((var_range.clone(), var_range.clone()))
-        .copy_from(updated_H_i_i);
-    let H_i_j = H_k.index((..3, 3..));
-    let updated_H_i_j = &(H.index((var_range.clone(), target_range.clone())) + H_i_j);
+        .copy_from(updated_H_ii);
+    let H_ij = H_k.index((..3, 3..));
+    let updated_H_ij = &(H.index((var_range.clone(), target_range.clone())) + H_ij);
     H.index_mut((var_range.clone(), target_range.clone()))
-        .copy_from(updated_H_i_j);
-    let H_j_i = H_k.index((3.., ..3));
-    let updated_H_j_i = &(H.index((target_range.clone(), var_range.clone())) + H_j_i);
+        .copy_from(updated_H_ij);
+    let H_ji = H_k.index((3.., ..3));
+    let updated_H_ji = &(H.index((target_range.clone(), var_range.clone())) + H_ji);
     H.index_mut((target_range.clone(), var_range.clone()))
-        .copy_from(updated_H_j_i);
-    let H_j_j = H_k.index((3.., 3..));
-    let updated_H_j_j = &(H.index((target_range.clone(), target_range.clone())) + H_j_j);
+        .copy_from(updated_H_ji);
+    let H_jj = H_k.index((3.., 3..));
+    let updated_H_jj = &(H.index((target_range.clone(), target_range.clone())) + H_jj);
     H.index_mut((target_range.clone(), target_range.clone()))
-        .copy_from(updated_H_j_j);
+        .copy_from(updated_H_jj);
     dbg!(H); // TODO remove once bug is fixed
 
     // e_ij_x = (R_ij_T (R_i_T (x_j - x_i) - x_ij))
