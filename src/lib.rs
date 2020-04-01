@@ -8,6 +8,7 @@ extern crate kiss3d;
 extern crate nalgebra;
 extern crate petgraph;
 extern crate uuid;
+extern crate regex;
 
 pub mod demo;
 pub mod factor_graph;

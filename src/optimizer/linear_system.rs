@@ -1,9 +1,6 @@
 use crate::factor_graph::factor::{Factor, FactorType::*};
 use crate::factor_graph::FactorGraph;
-use nalgebra::{
-    DMatrix, DVector, Matrix3, Matrix3x6, Matrix6x3, Point2, Rotation2, RowVector2, RowVector3,
-    Vector2, Vector3,
-};
+use nalgebra::{DMatrix, DVector, Matrix3, Matrix3x6, Matrix6x3, Point2, Rotation2, RowVector3, Vector2, Vector3};
 use petgraph::visit::EdgeRef;
 use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
