@@ -1,6 +1,6 @@
 //! Conversion between factor graph structures and G2O files.
 
-use crate::parser::model::FactorGraphModel;
+use crate::parser::model::{FactorGraphModel, Vertex, Edge};
 use crate::parser::Parser;
 use regex::Regex;
 use crate::parser::json::JsonParser;
@@ -19,10 +19,9 @@ impl Parser for G2oParser {
     }
 
     fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
-        match JsonParser::compose_model_to_string(model) {
-            Ok(s) => Ok(Self::json_to_g2o(&s)),
-            Err(s) => Err(s),
-        }
+        let mut str_vec: Vec<String> = model.vertices.iter().map(Self::vertex_to_string).collect();
+        str_vec.extend::<Vec<String>>(model.edges.iter().map(Self::edge_to_string).collect());
+        Ok(str_vec.join("\n"))
     }
 }
 
@@ -50,23 +49,41 @@ impl G2oParser {
         json_string
     }
 
-    fn json_to_g2o(json_string: &str) -> String {
-        let mut g2o_string = json_string.to_owned();
+    fn vertex_to_string(v: &Vertex) -> String {
+        let mut tokens: Vec<String> = vec![];
+        match v.vertex_type.as_str() {
+            "POSE2D_ANGLE" => tokens.push(String::from("VERTEX_SE2")),
+            other_type => panic!(format!("Vertex type unsupported to be composed to G2O format: {}", other_type)),
+        }
+        tokens.push(v.id.to_string());
+        Self::append_f64_slice_to_string_vec(&mut tokens, &v.position);
+        Self::append_f64_slice_to_string_vec(&mut tokens, &v.rotation);
+        tokens.join(" ")
+    }
 
-        let start_end_regex = Regex::new("\\{\n  \"vertices\": \\[\n((\\S|\\s)*)\n  ]\n}").unwrap();
-        g2o_string = start_end_regex.replace(&g2o_string, "$1").to_string();
+    fn edge_to_string(e: &Edge) -> String {
+        let mut tokens: Vec<String> = vec![];
+        match e.edge_type.as_str() {
+            "ODOMETRY2D_ANGLE" => tokens.push(String::from("EDGE_SE2")),
+            other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
+        }
+        Self::append_usize_slice_to_string_vec(&mut tokens, e.vertices.as_slice());
+        Self::append_f64_slice_to_string_vec(&mut tokens, &e.restriction);
+        let lower_triangle: [usize; 6] = [0, 3, 4, 6, 7, 8];
+        Self::append_f64_slice_elements_to_string_vec(&mut tokens, &e.information_matrix, &lower_triangle);
+        tokens.join(" ")
+    }
 
-        let division_regex = Regex::new("  ],\n  \"edges\": \\[\n").unwrap();
-        g2o_string = division_regex.replace(&g2o_string, "").to_string();
+    fn append_f64_slice_to_string_vec(tokens: &mut Vec<String>, f64_slice: &[f64]) {
+        tokens.extend::<Vec<String>>(f64_slice.iter().map(|val| format!("{:?}", val)).collect());
+    }
 
-        let pose_var2d_regex = Regex::new(" {4}\\{\n {6}\"id\": (.*),\n {6}\"type\": \"POSE2D_ANGLE\",\n {6}\"position\": \\[\n {8}(.*),\n {8}(.*)\n {6}],\n {6}\"rotation\": \\[\n {8}(.*)\n {6}]\n {4}},?").unwrap();
-        g2o_string = pose_var2d_regex.replace_all(&g2o_string, "VERTEX_SE2 $1 $2 $3 $4").to_string();
+    fn append_usize_slice_to_string_vec(tokens: &mut Vec<String>, usize_slice: &[usize]) {
+        tokens.extend::<Vec<String>>(usize_slice.iter().map(|val| format!("{:?}", val)).collect());
+    }
 
-        // TODO finish regex replacement
-        let odometry_factor2d_regex = Regex::new(" {4}\\{").unwrap();
-        g2o_string = odometry_factor2d_regex.replace_all(&g2o_string, "EDGE_SE2 ... TODO").to_string();
-
-        g2o_string
+    fn append_f64_slice_elements_to_string_vec(tokens: &mut Vec<String>, f64_slice: &[f64], indices: &[usize]) {
+        tokens.extend::<Vec<String>>(indices.iter().map(|i| format!("{:?}", f64_slice[*i])).collect());
     }
 }
 
@@ -110,16 +127,12 @@ mod tests {
     }
 
     #[test]
-    fn test_dumb_json_to_g2o() {
+    fn test_dumb_compose_model_to_string() {
         init();
 
-        let file_path = "test_files/dumb.json";
-        let json_string = match fs::read_to_string(file_path) {
-            Ok(s) => s,
-            Err(_e) => panic!(format!("File could not be parsed: {}", file_path)),
-        };
-        // info!("\n{}", &json_string);
-        let g2o_string = G2oParser::json_to_g2o(&json_string);
+        let model = JsonParser::parse_file_to_model("test_files/dumb.json").unwrap();
+        // dbg!(&model);
+        let g2o_string = G2oParser::compose_model_to_string(model).unwrap();
         info!("\n{}", &g2o_string);
     }
 
