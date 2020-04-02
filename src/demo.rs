@@ -11,19 +11,20 @@ fn main() {
         Ok(factor_graph) => factor_graph,
         Err(str) => panic!(str),
     };
-    optimize(&factor_graph, 5);
+    optimize(&factor_graph, 0);
     visualize(&factor_graph);
 }
 
 use crate::parser::g2o::G2oParser;
+use std::collections::HashSet;
 
 #[test]
-fn g2o_test() {
-    let factor_graph = match G2oParser::parse_file("test_files/dumb.g2o") {
+fn fixed_vertices_test() {
+    let factor_graph = match JsonParser::parse_file("test_files/dumb.json") {
         Ok(factor_graph) => factor_graph,
         Err(str) => panic!(str),
     };
-    JsonParser::compose_file(&factor_graph, "test_files/dumb.json");
+    // JsonParser::compose_file(&factor_graph, "test_files/dumb.json");
     optimize(&factor_graph, 1);
-    JsonParser::compose_file(&factor_graph, "test_files/dumb_out.json");
+    JsonParser::compose_file(&factor_graph, "test_files/test/dumb_out.json");
 }

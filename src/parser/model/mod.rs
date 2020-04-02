@@ -2,6 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use std::collections::HashSet;
 
 mod converter;
 
@@ -10,6 +11,7 @@ mod converter;
 pub struct FactorGraphModel {
     pub vertices: Vec<Vertex>,
     pub edges: Vec<Edge>,
+    pub fixed_vertices: HashSet<usize>,
 }
 
 /// Structure containing a factor graph model's vertex, representing a variable.
@@ -33,11 +35,11 @@ pub struct Edge {
     pub information_matrix: [f64; 9],
 }
 
-// TODO make constructors below deprecated and remove once tests run without it?
+// TODO remove constructors below once tests run without them
 
 impl FactorGraphModel {
     pub fn new(vertices: Vec<Vertex>, edges: Vec<Edge>) -> Self {
-        FactorGraphModel { vertices, edges }
+        FactorGraphModel { vertices, edges, fixed_vertices: HashSet::new() }
     }
 }
 

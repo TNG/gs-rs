@@ -8,6 +8,7 @@ use crate::factor_graph::FactorGraph;
 use crate::parser::model::{Edge, FactorGraphModel, Vertex};
 use std::ops::Index;
 use petgraph::visit::EdgeRef;
+use std::collections::HashSet;
 
 impl From<FactorGraphModel> for FactorGraph<'_> {
     fn from(model: FactorGraphModel) -> Self {
@@ -34,7 +35,7 @@ impl From<FactorGraphModel> for FactorGraph<'_> {
 
 impl From<&FactorGraph<'_>> for FactorGraphModel {
     fn from(factor_graph: &FactorGraph) -> Self {
-        let mut model = FactorGraphModel { vertices: vec![], edges: vec![] };
+        let mut model = FactorGraphModel { vertices: vec![], edges: vec![], fixed_vertices: HashSet::new() };
         for node_index in &factor_graph.node_indices {
             let node = factor_graph.csr.index(*node_index);
             model.vertices.push(Vertex {

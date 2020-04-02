@@ -21,10 +21,14 @@ pub trait Variable<'a>: fmt::Debug {
     fn get_id(&self) -> Uuid;
     /// The variable's type. Should not change.
     fn get_type(&self) -> VariableType;
-    /// The variable's pose. May be subject to change.
+    /// The variable's pose. May be subject to change, unless the variable is fixed.
     /// Content for 2D variables: vec![pose_position_x, pose_position_y, pose_rotation]
     fn get_pose(&self) -> Vec<f64>;
+    /// Whether the variable is fixed or not. Fixed variables' poses are not subject to change.
+    fn is_fixed(&self) -> bool;
     // TODO rename to set_pose or maybe even change interface completely?
     /// Sets a new variable pose.
     fn update_pose(&self, update: Vec<f64>);
+    /// Make the variable fixed. Fixed variables' poses are not subject to change.
+    fn make_fixed(&self);
 }
