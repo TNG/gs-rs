@@ -4,6 +4,7 @@ use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;
 use petgraph::csr::{Csr, NodeIndex};
 use petgraph::Directed;
+use std::ops::Index;
 
 pub mod factor;
 pub mod variable;
@@ -20,4 +21,10 @@ pub struct FactorGraph<'a> {
     pub node_indices: Vec<NodeIndex<usize>>,
     /// The number of nodes which are dynamic, i.e. the number of fixed nodes subtracted of the total number of nodes.
     pub number_of_dynamic_nodes: usize,
+}
+
+impl<'a> FactorGraph<'a> {
+    pub fn get_var_at_csr_index(&self, csr_index: usize) -> &Box<dyn Variable<'a>> {
+        self.csr.index(csr_index)
+    }
 }
