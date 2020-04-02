@@ -18,4 +18,6 @@ pub struct FactorGraph<'a> {
     pub csr: FactorGraphCsr<'a>,
     /// The indices at which the factor graph's nodes can be found in csr.index(/*node_index*/).
     pub node_indices: Vec<NodeIndex<usize>>,
+    /// The number of nodes which are dynamic, i.e. the number of fixed nodes subtracted of the total number of nodes.
+    pub number_of_dynamic_nodes: usize,
 }

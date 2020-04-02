@@ -138,6 +138,7 @@ fn handle_position_2d(
     omega_k: &DMatrix<f64>,
     var_range: &Range<usize>,
 ) {
+    // TODO implement jacobian (copy paste from trash branch should work)
     let updated_H_k = &(H.index((var_range.clone(), var_range.clone())) + omega_k);
     H.index_mut((var_range.clone(), var_range.clone()))
         .copy_from(updated_H_k);

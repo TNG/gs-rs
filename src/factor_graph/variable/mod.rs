@@ -26,6 +26,8 @@ pub trait Variable<'a>: fmt::Debug {
     fn get_pose(&self) -> Vec<f64>;
     /// Whether the variable is fixed or not. Fixed variables' poses are not subject to change.
     fn is_fixed(&self) -> bool;
+    /// The variable's index in H and b. Fixed variables do not have such an index.
+    fn get_index(&self) -> Option<usize>;
     // TODO rename to set_pose or maybe even change interface completely?
     /// Sets a new variable pose.
     fn update_pose(&self, update: Vec<f64>);

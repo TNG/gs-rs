@@ -15,6 +15,7 @@ impl From<FactorGraphModel> for FactorGraph<'_> {
         let mut factor_graph = FactorGraph {
             csr: Csr::new(),
             node_indices: vec![],
+            number_of_dynamic_nodes: 0,
         };
 
         // TODO replace by some kind of for_each
@@ -104,12 +105,13 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
             .push(
                 factor_graph
                     .csr
-                    .add_node(Box::new(VehicleVariable2D::from_pose_and_id_and_fixed(
+                    .add_node(Box::new(VehicleVariable2D::from_full_config(
                         vertex.id,
                         vertex.position[0],
                         vertex.position[1],
                         vertex.rotation[0],
                         fixed,
+                        factor_graph.number_of_dynamic_nodes
                     ))),
             ),
         "LANDMARK2D_ANGLE" => factor_graph
@@ -117,16 +119,20 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
             .push(
                 factor_graph
                     .csr
-                    .add_node(Box::new(LandmarkVariable2D::from_pose_and_id_and_fixed(
+                    .add_node(Box::new(LandmarkVariable2D::from_full_config(
                         vertex.id,
                         vertex.position[0],
                         vertex.position[1],
                         vertex.rotation[0],
                         fixed,
+                        factor_graph.number_of_dynamic_nodes
                     ))),
             ),
         _ => {
             error!("Could not add vertex {:?}", vertex);
         }
+    };
+    if !fixed {
+        factor_graph.number_of_dynamic_nodes += 1;
     }
 }

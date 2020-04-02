@@ -9,8 +9,10 @@ pub struct LandmarkVariable2D {
     id: Uuid,
     pose: Rc<RefCell<[f64; 3]>>,
     fixed: bool,
+    index: Option<usize>,
 }
 
+// TODO remove all unused constructors?
 impl LandmarkVariable2D {
     /// Returns a new variable from a 2D position.
     pub fn from_position(x: f64, y: f64) -> Self {
@@ -18,6 +20,7 @@ impl LandmarkVariable2D {
             id: Uuid::new_v4(),
             pose: Rc::new(RefCell::new([x, y, 0.0])),
             fixed: false,
+            index: None,
         }
     }
 
@@ -27,6 +30,7 @@ impl LandmarkVariable2D {
             id: Uuid::new_v4(),
             pose: Rc::new(RefCell::new([x, y, phi])),
             fixed: false,
+            index: None,
         }
     }
 
@@ -36,15 +40,17 @@ impl LandmarkVariable2D {
             id: Uuid::from_u128(id as u128),
             pose: Rc::new(RefCell::new([x, y, phi])),
             fixed: false,
+            index: None,
         }
     }
 
     /// Returns a new variable from a 2D pose, a given ID and whether the variable is fixed.
-    pub fn from_pose_and_id_and_fixed(id: usize, x: f64, y: f64, phi: f64, fixed: bool) -> Self {
+    pub fn from_full_config(id: usize, x: f64, y: f64, phi: f64, fixed: bool, some_index: usize) -> Self {
         LandmarkVariable2D {
             id: Uuid::from_u128(id as u128),
             pose: Rc::new(RefCell::new([x, y, phi])),
             fixed,
+            index: if fixed { None } else { Some(some_index) },
         }
     }
 }
@@ -64,6 +70,10 @@ impl Variable<'_> for LandmarkVariable2D {
 
     fn is_fixed(&self) -> bool {
         self.fixed
+    }
+
+    fn get_index(&self) -> Option<usize> {
+        self.index
     }
 
     fn update_pose(&self, update: Vec<f64>) {
@@ -117,14 +127,27 @@ mod tests {
     }
 
     #[test]
-    fn test_from_pose_and_id_and_fixed() {
+    fn test_from_full_config_fixed() {
         init();
 
-        let test_variable = LandmarkVariable2D::from_pose_and_id_and_fixed(1, 3.0, 5.0, 0.1, true);
+        let test_variable = LandmarkVariable2D::from_full_config(1, 3.0, 5.0, 0.1, true, 0);
         info!("{:?}", &test_variable);
         assert_eq!(test_variable.get_pose(), &[3.0, 5.0, 0.1]);
         assert_eq!(test_variable.get_type(), VariableType::Landmark2D);
         assert_eq!(test_variable.is_fixed(), true);
+        assert_eq!(test_variable.get_index(), None);
+    }
+
+    #[test]
+    fn test_from_full_config_dynamic() {
+        init();
+
+        let test_variable = LandmarkVariable2D::from_full_config(1, 3.0, 5.0, 0.1, false, 0);
+        info!("{:?}", &test_variable);
+        assert_eq!(test_variable.get_pose(), &[3.0, 5.0, 0.1]);
+        assert_eq!(test_variable.get_type(), VariableType::Landmark2D);
+        assert_eq!(test_variable.is_fixed(), false);
+        assert_eq!(test_variable.get_index(), Some(0));
     }
 
     #[test]
