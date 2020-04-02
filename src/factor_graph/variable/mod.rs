@@ -29,6 +29,4 @@ pub trait Variable<'a>: fmt::Debug {
     // TODO rename to set_pose or maybe even change interface completely?
     /// Sets a new variable pose.
     fn update_pose(&self, update: Vec<f64>);
-    /// Make the variable fixed. Fixed variables' poses are not subject to change.
-    fn make_fixed(&self);
 }

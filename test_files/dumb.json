@@ -82,5 +82,8 @@
       ]
     }
   ],
-  "fixed_vertices": []
+  "fixed_vertices": [
+    0,
+    1
+  ]
 }

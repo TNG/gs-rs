@@ -15,6 +15,7 @@ pub struct G2oParser;
 
 impl Parser for G2oParser {
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String> {
+        // TODO stop relying on json for higher flexibility?
         JsonParser::parse_string_to_model(&Self::g2o_to_json(s))
     }
 

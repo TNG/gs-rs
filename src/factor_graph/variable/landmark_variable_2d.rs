@@ -8,7 +8,7 @@ use uuid::Uuid;
 pub struct LandmarkVariable2D {
     id: Uuid,
     pose: Rc<RefCell<[f64; 3]>>,
-    fixed: Rc<RefCell<bool>>,
+    fixed: bool,
 }
 
 impl LandmarkVariable2D {
@@ -17,7 +17,7 @@ impl LandmarkVariable2D {
         LandmarkVariable2D {
             id: Uuid::new_v4(),
             pose: Rc::new(RefCell::new([x, y, 0.0])),
-            fixed: Rc::new(RefCell::new(false)),
+            fixed: false,
         }
     }
 
@@ -26,7 +26,7 @@ impl LandmarkVariable2D {
         LandmarkVariable2D {
             id: Uuid::new_v4(),
             pose: Rc::new(RefCell::new([x, y, phi])),
-            fixed: Rc::new(RefCell::new(false)),
+            fixed: false,
         }
     }
 
@@ -35,7 +35,16 @@ impl LandmarkVariable2D {
         LandmarkVariable2D {
             id: Uuid::from_u128(id as u128),
             pose: Rc::new(RefCell::new([x, y, phi])),
-            fixed: Rc::new(RefCell::new(false)),
+            fixed: false,
+        }
+    }
+
+    /// Returns a new variable from a 2D pose, a given ID and whether the variable is fixed.
+    pub fn from_pose_and_id_and_fixed(id: usize, x: f64, y: f64, phi: f64, fixed: bool) -> Self {
+        LandmarkVariable2D {
+            id: Uuid::from_u128(id as u128),
+            pose: Rc::new(RefCell::new([x, y, phi])),
+            fixed,
         }
     }
 }
@@ -54,15 +63,11 @@ impl Variable<'_> for LandmarkVariable2D {
     }
 
     fn is_fixed(&self) -> bool {
-        *self.fixed.borrow()
+        self.fixed
     }
 
     fn update_pose(&self, update: Vec<f64>) {
         *self.pose.borrow_mut() = [update[0], update[1], update[2]];
-    }
-
-    fn make_fixed(&self) {
-        *self.fixed.borrow_mut() = true;
     }
 }
 
@@ -112,6 +117,17 @@ mod tests {
     }
 
     #[test]
+    fn test_from_pose_and_id_and_fixed() {
+        init();
+
+        let test_variable = LandmarkVariable2D::from_pose_and_id_and_fixed(1, 3.0, 5.0, 0.1, true);
+        info!("{:?}", &test_variable);
+        assert_eq!(test_variable.get_pose(), &[3.0, 5.0, 0.1]);
+        assert_eq!(test_variable.get_type(), VariableType::Landmark2D);
+        assert_eq!(test_variable.is_fixed(), true);
+    }
+
+    #[test]
     fn test_update_pose() {
         init();
 
@@ -121,13 +137,5 @@ mod tests {
         test_variable.update_pose(vec![2.0, 3.0, 0.5]);
         info!("{:?}", &test_variable);
         assert_eq!(test_variable.get_pose(), &[2.0, 3.0, 0.5]);
-    }
-
-    #[test]
-    fn test_make_fixed() {
-        let test_variable = LandmarkVariable2D::from_position(3.0, 5.0);
-        assert_eq!(test_variable.is_fixed(), false);
-        test_variable.make_fixed();
-        assert_eq!(test_variable.is_fixed(), true);
     }
 }

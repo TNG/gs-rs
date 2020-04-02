@@ -21,13 +21,13 @@ impl From<FactorGraphModel> for FactorGraph<'_> {
         model
             .vertices
             .iter()
-            .for_each(|x| add_vertex(&mut factor_graph, x));
+            .for_each(|v| add_vertex(&mut factor_graph, v, model.fixed_vertices.contains(&v.id)));
 
         // TODO replace by some kind of for_each
         model
             .edges
             .iter()
-            .for_each(|x| add_edge(&mut factor_graph, x));
+            .for_each(|e| add_edge(&mut factor_graph, e));
 
         factor_graph
     }
@@ -68,6 +68,9 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                     information_matrix: information_matrix_arr,
                 });
             }
+            if node.is_fixed() {
+                model.fixed_vertices.insert(node.get_id().as_u128() as usize);
+            }
         }
         model
     }
@@ -94,18 +97,19 @@ fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
     );
 }
 
-fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex) {
+fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
     match vertex.vertex_type.as_str() {
         "POSE2D_ANGLE" => factor_graph
             .node_indices
             .push(
                 factor_graph
                     .csr
-                    .add_node(Box::new(VehicleVariable2D::from_pose_and_id(
+                    .add_node(Box::new(VehicleVariable2D::from_pose_and_id_and_fixed(
                         vertex.id,
                         vertex.position[0],
                         vertex.position[1],
                         vertex.rotation[0],
+                        fixed,
                     ))),
             ),
         "LANDMARK2D_ANGLE" => factor_graph
@@ -113,11 +117,12 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex) {
             .push(
                 factor_graph
                     .csr
-                    .add_node(Box::new(LandmarkVariable2D::from_pose_and_id(
+                    .add_node(Box::new(LandmarkVariable2D::from_pose_and_id_and_fixed(
                         vertex.id,
                         vertex.position[0],
                         vertex.position[1],
                         vertex.rotation[0],
+                        fixed,
                     ))),
             ),
         _ => {

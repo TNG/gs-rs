@@ -26,5 +26,5 @@ fn fixed_vertices_test() {
     };
     // JsonParser::compose_file(&factor_graph, "test_files/dumb.json");
     optimize(&factor_graph, 1);
-    JsonParser::compose_file(&factor_graph, "test_files/test/dumb_out.json");
+    JsonParser::compose_file(&factor_graph, "test_files/dumb_out.json");
 }
