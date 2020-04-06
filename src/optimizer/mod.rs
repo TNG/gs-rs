@@ -26,10 +26,10 @@ pub fn optimize(graph: &FactorGraph, iterations: usize) {
 fn update_once(factor_graph: &FactorGraph) {
     let (H, b) = calculate_H_b(&factor_graph);
     // TODO clumsy, since the solver transforms the arguments back to nalgebra matrices
-    let solution = SparseCholeskySolver::solve(H, &(b * -1.0));
+    let sol = SparseCholeskySolver::solve(H, &(b * -1.0)).unwrap();
     factor_graph.node_indices.iter()
         .map(|i| factor_graph.get_var_at_csr_index(*i))
-        .for_each(|var| update_var(var, solution.as_ref().unwrap().as_slice()));
+        .for_each(|var| update_var(var, sol.as_slice()));
 }
 
 fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
@@ -39,9 +39,14 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
     let old_pose = var.get_pose();
     let index = var.get_index().unwrap();
     let correction = &solution[3*index..3*index+3];
-    let updated_pose = vec![old_pose[0] + correction[0],
-                            old_pose[1] + correction[1],
-                            (old_pose[2] + correction[2]) % (2.0 * PI) - PI];
+    println!("Vector Update: {:?}", correction);
+    let mut updated_rot = (old_pose[2] + correction[2]) % (2.0 * PI);
+    if updated_rot > PI {
+        updated_rot - 2.0 * PI;
+    } else if updated_rot < -PI {
+        updated_rot + 2.0 * PI;
+    }
+    let updated_pose = vec![old_pose[0] + correction[0], old_pose[1] + correction[1], updated_rot];
     var.update_pose(updated_pose);
 }
 

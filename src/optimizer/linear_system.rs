@@ -24,7 +24,7 @@ pub fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>)
 fn update_H_b(factor_graph: &FactorGraph, H: &mut DMatrix<f64>, b: &mut DVector<f64>, edge: EdgeReference<Factor, Directed, usize>) {
     let factor = edge.weight();
     match factor.factor_type {
-        Position2D => (),
+        Position2D => update_one_var_2d(H, b),
         Odometry2D | Observation2D => update_two_vars_2d(H, b, factor, &factor_graph.get_var_at_csr_index(edge.source()), &factor_graph.get_var_at_csr_index(edge.target())),
     };
 }
@@ -70,7 +70,7 @@ fn calc_two_var_jacobians_2d(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f
     let cos_i = rot_i.cos();
     let last_column_top = -sin_i * delta_pos[0] + cos_i * delta_pos[1];
     let last_column_mid = -cos_i * delta_pos[0] - sin_i * delta_pos[1];
-    let A_ij = R_ij_T * &Matrix3::from_vec(vec![         -cos_i,           sin_i,  0.0,   // transposed matrix is displayed
+    let A_ij = R_ij_T * &Matrix3::from_vec(vec![         -cos_i,           sin_i,  0.0,    // transposed matrix is displayed
                                                          -sin_i,          -cos_i,  0.0,
                                                 last_column_top, last_column_mid, -1.0,]);
     let B_ij = R_ij_T * &Matrix3::from_vec(vec![cos_i, -sin_i, 0.0,    // transposed matrix is displayed

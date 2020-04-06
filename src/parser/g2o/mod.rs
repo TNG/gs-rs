@@ -11,6 +11,7 @@ use crate::parser::json::JsonParser;
 /// Current expectations:
 /// 1) At least one vertex and edge exist.
 /// 2) All vertices are listed before any edges.
+/// 3) The vertex with ID 0 is fixed and all other vertices are not fixed.
 pub struct G2oParser;
 
 impl Parser for G2oParser {
