@@ -12,6 +12,7 @@ use crate::optimizer::linear_system::calculate_H_b;
 use crate::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::solver::Solver;
 use std::f64::consts::PI;
+use crate::factor_graph::variable::Variable;
 
 mod linear_system;
 
@@ -22,22 +23,25 @@ pub fn optimize(graph: &FactorGraph, iterations: usize) {
     }
 }
 
-fn update_once(graph: &FactorGraph) {
-    let (H, b) = calculate_H_b(&graph);
+fn update_once(factor_graph: &FactorGraph) {
+    let (H, b) = calculate_H_b(&factor_graph);
     // TODO clumsy, since the solver transforms the arguments back to nalgebra matrices
     let solution = SparseCholeskySolver::solve(H, &b);
-    izip!(&graph.node_indices, solution.unwrap().chunks(3).collect_vec())
-        .for_each(|(node_index, value)| update_single_variable(&graph, *node_index, value));
+    factor_graph.node_indices.iter()
+        .map(|i| factor_graph.get_var_at_csr_index(*i))
+        .for_each(|var| update_var(var, solution.as_ref().unwrap().as_slice()));
 }
 
-fn update_single_variable(graph: &FactorGraph, node_index: usize, value: &[f64]) {
-    let mut var = graph.csr.index(node_index);
-    let bla = var.borrow_mut().deref().get_pose();
-    let updated_pose = vec![
-        bla[0] + value[0],
-        bla[1] + value[1],
-        (bla[2] + value[2]) % (2.0 * PI) - PI,
-    ];
+fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
+    if var.is_fixed() {
+        return;
+    }
+    let old_pose = var.get_pose();
+    let index = var.get_index().unwrap();
+    let correction = &solution[3*index..3*index+3];
+    let updated_pose = vec![old_pose[0] + correction[0],
+                            old_pose[1] + correction[1],
+                            (old_pose[2] + correction[2]) % (2.0 * PI) - PI];
     var.update_pose(updated_pose);
 }
 
