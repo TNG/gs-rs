@@ -14,7 +14,6 @@ use crate::solver::Solver;
 use std::f64::consts::PI;
 
 mod linear_system;
-mod cleaner_linear_system; // TODO replace old linear_system once completed
 
 /// Optimizes a factor graph with the given number of iterations.
 pub fn optimize(graph: &FactorGraph, iterations: usize) {
