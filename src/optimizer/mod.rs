@@ -26,7 +26,7 @@ pub fn optimize(graph: &FactorGraph, iterations: usize) {
 fn update_once(factor_graph: &FactorGraph) {
     let (H, b) = calculate_H_b(&factor_graph);
     // TODO clumsy, since the solver transforms the arguments back to nalgebra matrices
-    let solution = SparseCholeskySolver::solve(H, &b);
+    let solution = SparseCholeskySolver::solve(H, &(b * -1.0));
     factor_graph.node_indices.iter()
         .map(|i| factor_graph.get_var_at_csr_index(*i))
         .for_each(|var| update_var(var, solution.as_ref().unwrap().as_slice()));

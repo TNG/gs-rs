@@ -45,7 +45,7 @@ impl G2oParser {
         // TODO support more variable and factor types
 
         let end_regex = Regex::new("},\n  ]\n}").unwrap();
-        json_string = end_regex.replace(&json_string, "}\n  ]\n}").to_string();
+        json_string = end_regex.replace(&json_string, "}\n  ],\n  \"fixed_vertices\": [\n    0\n  ]\n}").to_string();
 
         json_string
     }

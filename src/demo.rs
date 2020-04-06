@@ -19,12 +19,11 @@ use crate::parser::g2o::G2oParser;
 use std::collections::HashSet;
 
 #[test]
-fn fixed_vertices_test() {
-    let factor_graph = match JsonParser::parse_file("test_files/dumb.json") {
+fn rotation_change_test() {
+    let factor_graph = match G2oParser::parse_file("test_files/MIT_simple2D.g2o") {
         Ok(factor_graph) => factor_graph,
         Err(str) => panic!(str),
     };
-    // JsonParser::compose_file(&factor_graph, "test_files/dumb.json");
     optimize(&factor_graph, 1);
-    JsonParser::compose_file(&factor_graph, "test_files/dumb_out.json");
+    G2oParser::compose_file(&factor_graph, "test_files/MIT_simple2D_out.g2o");
 }
