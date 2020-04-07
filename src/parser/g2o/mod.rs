@@ -2,56 +2,27 @@
 
 use crate::parser::model::{FactorGraphModel, Vertex, Edge};
 use crate::parser::Parser;
-use regex::Regex;
-use crate::parser::json::JsonParser;
+use std::collections::HashSet;
 
 /// Implements G2O specific functions for parsing and composing files.
-/// Uses the JsonParser as an intermediate step.
-///
-/// Current expectations:
-/// 1) At least one vertex and edge exist.
-/// 2) All vertices are listed before any edges.
-/// 3) The vertex with ID 0 is fixed and all other vertices are not fixed.
 pub struct G2oParser;
 
 impl Parser for G2oParser {
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String> {
-        // TODO stop relying on json for higher flexibility?
-        JsonParser::parse_string_to_model(&Self::g2o_to_json(s))
+        let lines = s.split("\n");
+        // lines.into_iter();
+        Err(String::from("nix implemented n' stuff"))
     }
 
     fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
-        let mut str_vec: Vec<String> = model.vertices.iter().map(Self::vertex_to_string).collect();
+        let mut str_vec: Vec<String> = model.vertices.iter().map(|v| Self::vertex_to_string(v, &model.fixed_vertices)).collect();
         str_vec.extend::<Vec<String>>(model.edges.iter().map(Self::edge_to_string).collect());
         Ok(str_vec.join("\n"))
     }
 }
 
 impl G2oParser {
-    fn g2o_to_json(g2o_string: &str) -> String {
-        let mut json_string = ["{\n  \"vertices\":\n  [\n", g2o_string, "  ]\n}"].concat();
-
-        let fix_regex = Regex::new("FIX (.*)\n").unwrap();
-        json_string = fix_regex.replace(&json_string, "").to_string();
-
-        let pose_var2d_regex = Regex::new("VERTEX_SE2 (.*) (.*) (.*) (.*)").unwrap();
-        json_string = pose_var2d_regex.replace_all(&json_string, "    { \"id\": $1, \"type\": \"POSE2D_ANGLE\", \"position\": [$2, $3], \"rotation\": [$4] },").to_string();
-
-        let division_regex = Regex::new("},\nEDGE_SE2").unwrap();
-        json_string = division_regex.replace(&json_string, "}\n  ],\n  \"edges\":\n  [\nEDGE_SE2").to_string();
-
-        let odometry_factor2d_regex = Regex::new("EDGE_SE2 (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*) (.*)").unwrap();
-        json_string = odometry_factor2d_regex.replace_all(&json_string, "    { \"type\": \"ODOMETRY2D_ANGLE\", \"vertices\": [$1, $2], \"restriction\": [$3, $4, $5], \"informationMatrix\": [$6, $7, $8, $7, $9, $10, $8, $10, $11] },").to_string();
-
-        // TODO support more variable and factor types
-
-        let end_regex = Regex::new("},\n  ]\n}").unwrap();
-        json_string = end_regex.replace(&json_string, "}\n  ],\n  \"fixed_vertices\": [\n    0\n  ]\n}").to_string();
-
-        json_string
-    }
-
-    fn vertex_to_string(v: &Vertex) -> String {
+    fn vertex_to_string(v: &Vertex, fixed_vertices: &HashSet<usize>) -> String {
         let mut tokens: Vec<String> = vec![];
         match v.vertex_type.as_str() {
             "POSE2D_ANGLE" => tokens.push(String::from("VERTEX_SE2")),
@@ -60,7 +31,11 @@ impl G2oParser {
         tokens.push(v.id.to_string());
         Self::append_f64_slice_to_string_vec(&mut tokens, &v.position);
         Self::append_f64_slice_to_string_vec(&mut tokens, &v.rotation);
-        tokens.join(" ")
+        let mut vertex_string = tokens.join(" ");
+        if fixed_vertices.contains(&v.id) {
+            vertex_string.push_str(&format!("\nFIX {}", v.id));
+        }
+        vertex_string
     }
 
     fn edge_to_string(e: &Edge) -> String {
@@ -94,26 +69,13 @@ mod tests {
     use super::*;
     use log::LevelFilter;
     use std::fs;
+    use crate::parser::json::JsonParser;
 
     fn init() {
         let _ = env_logger::builder()
             .is_test(true)
             .filter_level(LevelFilter::Debug)
             .try_init();
-    }
-
-    #[test]
-    fn test_minimal_g2o_to_json() {
-        init();
-
-        let file_path = "test_files/minimal_size_and_types.g2o";
-        let g2o_string = match fs::read_to_string(file_path) {
-            Ok(s) => s,
-            Err(_e) => panic!(format!("File could not be parsed: {}", file_path)),
-        };
-        info!("\n{}", &g2o_string);
-        let json_string = G2oParser::g2o_to_json(&g2o_string);
-        info!("\n{}", &json_string);
     }
 
     #[test]
