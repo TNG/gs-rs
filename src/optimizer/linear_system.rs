@@ -24,15 +24,26 @@ pub fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>)
 fn update_H_b(factor_graph: &FactorGraph, H: &mut DMatrix<f64>, b: &mut DVector<f64>, edge: EdgeReference<Factor, Directed, usize>) {
     let factor = edge.weight();
     match factor.factor_type {
-        Position2D => update_one_var_2d(H, b),
+        Position2D => update_one_var_2d(H, b, factor, &factor_graph.get_var_at_csr_index(edge.source())),
         Odometry2D | Observation2D => update_two_vars_2d(H, b, factor, &factor_graph.get_var_at_csr_index(edge.source()), &factor_graph.get_var_at_csr_index(edge.target())),
     };
 }
 
 // TODO seperate files for each combination of number of vars and dimension?
 
-fn update_one_var_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>) {
-    // TODO implement
+fn update_one_var_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var: &Box<dyn Variable>) {
+    // TODO initialize variable and measurement tuples using get_pos_and_rot()
+    // TODO let (jacobi, jacobi_T) = calc_one_var_jacobians_2d();
+    // TODO let right_mult = &factor.information_matrix.content * jacobi;
+
+    // TODO update H
+
+    // TODO calculate error
+    // implementation should work like this:
+    // _inverseMeasurement * v1->estimate()
+    // as reference, the implementation for two vars works like this:
+    // _inverseMeasurement * (v1->estimate().inverse()*v2->estimate())
+    // TODO update b
 }
 
 fn calc_one_var_jacobians_2d() {
