@@ -4,7 +4,10 @@ use crate::parser::model::{FactorGraphModel, Vertex, Edge};
 use crate::parser::Parser;
 use std::collections::HashSet;
 
+// TODO add landmark support
 /// Implements G2O specific functions for parsing and composing files.
+/// Currently supported G2O vertices: VERTEX_SE2
+/// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2
 pub struct G2oParser;
 
 impl Parser for G2oParser {
@@ -35,7 +38,7 @@ impl G2oParser {
         }
         match tokens[0] {
             "VERTEX_SE2" => model.vertices.push(Self::parse_vertex(&tokens, line_number)),
-            "EDGE_SE2" => model.edges.push(Self::parse_edge(&tokens, line_number)),
+            "EDGE_SE2" | "EDGE_PRIOR_SE2" => model.edges.push(Self::parse_edge(&tokens, line_number)),
             "FIX" => {model.fixed_vertices.insert(Self::parse_fix(&tokens, line_number));},
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
@@ -51,12 +54,13 @@ impl G2oParser {
                 _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
             },
             position: [Self::parse_val(tokens[2], line_number), Self::parse_val(tokens[3], line_number)],
-            rotation: [Self::parse_val(tokens[4], line_number)]
+            rotation: [Self::parse_val(tokens[4], line_number)],
         }
     }
 
     fn parse_edge(tokens: &[&str], line_number: usize) -> Edge {
         let v_num = match tokens[0] {
+            "EDGE_PRIOR_SE2" => 1,
             "EDGE_SE2" => 2,
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
@@ -64,6 +68,7 @@ impl G2oParser {
         Self::assert_tokens(expected_length, tokens.len(), line_number);
         Edge {
             edge_type: match tokens[0] {
+                "EDGE_PRIOR_SE2" => String::from("PRIOR2D_ANGLE"),
                 "EDGE_SE2" => String::from("ODOMETRY2D_ANGLE"),
                 _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
             },
@@ -81,7 +86,7 @@ impl G2oParser {
                 information_matrix.iter_mut().enumerate()
                     .for_each(|(i, entry)| *entry = Self::parse_val(tokens[4+v_num+index_mapping[i]], line_number));
                 information_matrix
-            }
+            },
         }
     }
 
@@ -123,6 +128,7 @@ impl G2oParser {
     fn edge_to_string(e: &Edge) -> String {
         let mut tokens: Vec<String> = vec![];
         match e.edge_type.as_str() {
+            "PRIOR2D_ANGLE" => tokens.push(String::from("EDGE_PRIOR_SE2")),
             "ODOMETRY2D_ANGLE" => tokens.push(String::from("EDGE_SE2")),
             other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
         }
