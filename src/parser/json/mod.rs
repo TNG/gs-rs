@@ -30,6 +30,7 @@ mod tests {
     use super::*;
     use crate::parser::model::{Edge, Vertex};
     use log::LevelFilter;
+    use std::collections::HashSet;
 
     fn init() {
         let _ = env_logger::builder()
@@ -74,30 +75,46 @@ mod tests {
         dbg!("{:?}", &parsed_model);
 
         let vertices = vec![
-            Vertex::new(0, String::from("POSE2D_ANGLE"), [0.0, 1.0], [0.0]),
-            Vertex::new(1, String::from("POSE2D_ANGLE"), [1.0, 0.0], [0.0]),
+            Vertex {
+                id: 0,
+                vertex_type: String::from("POSE2D_ANGLE"),
+                position: [0.0, 1.0],
+                rotation: [0.0],
+            },
+            Vertex {
+                id: 1,
+                vertex_type: String::from("POSE2D_ANGLE"),
+                position: [1.0, 0.0],
+                rotation: [0.0],
+            },
         ];
         let edges = vec![
-            Edge::new(
-                String::from("PRIOR2D_ANGLE"),
-                vec![0],
-                [0.0, 1.0, 0.0],
-                [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
-            ),
-            Edge::new(
-                String::from("PRIOR2D_ANGLE"),
-                vec![1],
-                [1.0, 0.0, 0.0],
-                [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
-            ),
-            Edge::new(
-                String::from("ODOMETRY2D_ANGLE"),
-                vec![0, 1],
-                [0.5, -0.5, 0.0],
-                [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001],
-            ),
+            Edge {
+                edge_type: String::from("PRIOR2D_ANGLE"),
+                vertices: vec![0],
+                restriction: [0.0, 1.0, 0.0],
+                information_matrix: [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
+            },
+            Edge {
+                edge_type: String::from("PRIOR2D_ANGLE"),
+                vertices: vec![1],
+                restriction: [1.0, 0.0, 0.0],
+                information_matrix: [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
+            },
+            Edge {
+                edge_type: String::from("ODOMETRY2D_ANGLE"),
+                vertices: vec![0, 1],
+                restriction: [0.5, -0.5, 0.0],
+                information_matrix: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001],
+            },
         ];
-        let expected_model = FactorGraphModel::new(vertices, edges);
+        let mut fixed_vertices = HashSet::new();
+        fixed_vertices.insert(0);
+        let expected_model = FactorGraphModel {
+            vertices,
+            edges,
+            fixed_vertices,
+        };
         assert_eq!(parsed_model, expected_model);
     }
 
