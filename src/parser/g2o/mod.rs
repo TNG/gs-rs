@@ -9,9 +9,15 @@ pub struct G2oParser;
 
 impl Parser for G2oParser {
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String> {
+        let mut model = FactorGraphModel {
+            vertices: vec![],
+            edges: vec![],
+            fixed_vertices: HashSet::new(),
+        };
         let lines = s.split("\n");
-        // lines.into_iter();
-        Err(String::from("nix implemented n' stuff"))
+        lines.enumerate()
+            .for_each(|(i, line)| Self::parse_line(&mut model, line, i+1));
+        Ok(model)
     }
 
     fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
@@ -22,6 +28,82 @@ impl Parser for G2oParser {
 }
 
 impl G2oParser {
+    fn parse_line(model: &mut FactorGraphModel, line: &str, line_number: usize) {
+        let tokens: Vec<&str> = line.split_whitespace().collect();
+        if tokens.len() == 0 {
+            return;
+        }
+        match tokens[0] {
+            "VERTEX_SE2" => model.vertices.push(Self::parse_vertex(&tokens, line_number)),
+            "EDGE_SE2" => model.edges.push(Self::parse_edge(&tokens, line_number)),
+            "FIX" => {model.fixed_vertices.insert(Self::parse_fix(&tokens, line_number));},
+            _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
+        };
+    }
+
+    fn parse_vertex(tokens: &[&str], line_number: usize) -> Vertex {
+        let expected_length = 5;
+        Self::assert_tokens(expected_length, tokens.len(), line_number);
+        Vertex {
+            id: Self::parse_val(tokens[1], line_number),
+            vertex_type: match tokens[0] {
+                "VERTEX_SE2" => String::from("POSE2D_ANGLE"),
+                _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
+            },
+            position: [Self::parse_val(tokens[2], line_number), Self::parse_val(tokens[3], line_number)],
+            rotation: [Self::parse_val(tokens[4], line_number)]
+        }
+    }
+
+    fn parse_edge(tokens: &[&str], line_number: usize) -> Edge {
+        let v_num = match tokens[0] {
+            "EDGE_SE2" => 2,
+            _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
+        };
+        let expected_length = 10 + v_num;
+        Self::assert_tokens(expected_length, tokens.len(), line_number);
+        Edge {
+            edge_type: match tokens[0] {
+                "EDGE_SE2" => String::from("ODOMETRY2D_ANGLE"),
+                _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
+            },
+            vertices: tokens[1..1+v_num].iter()
+                .map(|s| Self::parse_val(s, line_number)).collect(),
+            restriction: {
+                let mut restriction = [0.0; 3];
+                restriction.iter_mut().enumerate()
+                    .for_each(|(i, entry)| *entry = Self::parse_val(tokens[1+v_num+i], line_number));
+                restriction
+            },
+            information_matrix: {
+                let mut information_matrix = [0.0; 9];
+                let index_mapping = [0, 1, 3, 1, 2, 4, 3, 4, 5];
+                information_matrix.iter_mut().enumerate()
+                    .for_each(|(i, entry)| *entry = Self::parse_val(tokens[4+v_num+index_mapping[i]], line_number));
+                information_matrix
+            }
+        }
+    }
+
+    fn parse_fix(tokens: &[&str], line_number: usize) -> usize {
+        let expected_length = 2;
+        Self::assert_tokens(expected_length, tokens.len(), line_number);
+        Self::parse_val(tokens[1], line_number)
+    }
+
+    fn assert_tokens(expected: usize, actual: usize, line_number: usize) {
+        if actual != expected {
+            panic!("Wrong number of tokens in line {}: Expected: {}; Actual: {}", line_number, expected, actual);
+        }
+    }
+
+    fn parse_val<T: std::str::FromStr>(s: &str, line_number: usize) -> T {
+        match s.parse() {
+            Ok(val) => val,
+            Err(str) => panic!("Could not parse the following value to the correct data type in line {}: {}", line_number, s),
+        }
+    }
+
     fn vertex_to_string(v: &Vertex, fixed_vertices: &HashSet<usize>) -> String {
         let mut tokens: Vec<String> = vec![];
         match v.vertex_type.as_str() {
@@ -82,12 +164,13 @@ mod tests {
     fn test_parse_minimal_file() {
         init();
 
-        let parsed_factor_graph =
+        let factor_graph =
             match G2oParser::parse_file("test_files/minimal_size_and_types.g2o") {
                 Ok(x) => x,
                 Err(str) => panic!(str),
             };
-        dbg!("{:?}", &parsed_factor_graph);
+        dbg!("{:?}", &factor_graph);
+        G2oParser::compose_file(&factor_graph, "test_files/minimal_size_and_types_copy.g2o");
     }
 
     #[test]
