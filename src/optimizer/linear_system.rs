@@ -48,6 +48,16 @@ fn update_one_var_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor
 
 fn calc_one_var_jacobians_2d() {
     // TODO implement
+    // two options that might be correct:
+    // 1) Daniel's code in trash branch -> return type would be Matrix2x3
+    // or
+    // 2) C++ code in g2o (edge_se2_prior.h) -> return type seems to be Matrix3
+    //     _jacobianOplusXi.setZero();
+    //     _jacobianOplusXi.block<2,2>(0,0)=_inverseMeasurement.rotation().toRotationMatrix();
+    //     _jacobianOplusXi(2,2)=1.;
+    //   i.e.
+    //     let rot_obj = Rotation3::from_axis_angle(&Vector3::z_axis(), -rot_ij);
+    //     rot_obj.matrix()
 }
 
 fn update_two_vars_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &Box<dyn Variable>, var_j: &Box<dyn Variable>) {
