@@ -27,8 +27,7 @@ pub fn visualize(factor_graph: &FactorGraph) {
         visual_factor_graph
             .lines
             .iter()
-            .map(|line| window.draw_line(&line[0], &line[1], &line[2]))
-            .for_each(drop);
+            .for_each(|line| window.draw_line(&line[0], &line[1], &line[2]));
     }
 }
 
@@ -172,8 +171,7 @@ mod test {
             visual_factor_graph
                 .lines
                 .iter()
-                .map(|line| window.draw_line(&line[0], &line[1], &line[2]))
-                .for_each(drop);
+                .for_each(|line| window.draw_line(&line[0], &line[1], &line[2]));
         }
     }
 }

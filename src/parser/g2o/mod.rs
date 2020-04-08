@@ -4,10 +4,16 @@ use crate::parser::model::{FactorGraphModel, Vertex, Edge};
 use crate::parser::Parser;
 use std::collections::HashSet;
 
-// TODO add landmark support
+// TODO add landmark support -> only consider position, not rotation
 /// Implements G2O specific functions for parsing and composing files.
+/// More information on the G2O file format: https://github.com/RainerKuemmerle/g2o/wiki/File-Format
+///
 /// Currently supported G2O vertices: VERTEX_SE2
 /// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2
+///
+/// Other limitations:
+/// - Comments are not supported. Files that include lines starting with a "#" can not be parsed.
+/// - Lines starting with "FIX" only expect one fixed vertex. If more than one vertex is fixed, multiple lines starting with "FIX" need to be used.
 pub struct G2oParser;
 
 impl Parser for G2oParser {
@@ -82,7 +88,7 @@ impl G2oParser {
             },
             information_matrix: {
                 let mut information_matrix = [0.0; 9];
-                let index_mapping = [0, 1, 3, 1, 2, 4, 3, 4, 5];
+                let index_mapping = [0, 1, 2, 1, 3, 4, 2, 4, 5];
                 information_matrix.iter_mut().enumerate()
                     .for_each(|(i, entry)| *entry = Self::parse_val(tokens[4+v_num+index_mapping[i]], line_number));
                 information_matrix
@@ -134,8 +140,8 @@ impl G2oParser {
         }
         Self::append_usize_slice_to_string_vec(&mut tokens, e.vertices.as_slice());
         Self::append_f64_slice_to_string_vec(&mut tokens, &e.restriction);
-        let lower_triangle: [usize; 6] = [0, 3, 4, 6, 7, 8];
-        Self::append_f64_slice_elements_to_string_vec(&mut tokens, &e.information_matrix, &lower_triangle);
+        let upper_triangle: [usize; 6] = [0, 1, 2, 4, 5, 8];
+        Self::append_f64_slice_elements_to_string_vec(&mut tokens, &e.information_matrix, &upper_triangle);
         tokens.join(" ")
     }
 
