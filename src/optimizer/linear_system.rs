@@ -1,5 +1,5 @@
 use crate::factor_graph::FactorGraph;
-use nalgebra::{DMatrix, DVector, Vector2, Rotation2, Rotation3, Vector3, Matrix3x6, Matrix6x3, Matrix3, Matrix, Dynamic, SliceStorage, U1, U6, RowVector3, Vector};
+use nalgebra::{DMatrix, DVector, Vector2, Rotation2, Rotation3, Vector3, Matrix3x6, Matrix6x3, Matrix3, Matrix, Dynamic, SliceStorage, U1, U3, U6, RowVector3, Vector, ArrayStorage};
 use crate::factor_graph::variable::Variable;
 use petgraph::csr::{Edges, EdgeReference};
 use petgraph::visit::EdgeRef;
@@ -32,22 +32,35 @@ fn update_H_b(factor_graph: &FactorGraph, H: &mut DMatrix<f64>, b: &mut DVector<
 // TODO seperate files for each combination of number of vars and dimension?
 
 fn update_one_var_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var: &Box<dyn Variable>) {
-    // TODO initialize variable and measurement tuples using get_pos_and_rot()
-    // TODO let (jacobi, jacobi_T) = calc_one_var_jacobians_2d();
-    // TODO let right_mult = &factor.information_matrix.content * jacobi;
+    if var.is_fixed() {
+        return;
+    }
+    let (pos_v, rot_v) = get_pos_and_rot(&var.get_pose());
+    let (pos_m, rot_m) = get_pos_and_rot(&factor.constraint);
+    let (jacobi, jacobi_T) = calc_one_var_jacobians_2d(rot_m);
+    let right_mult = &factor.information_matrix.content * jacobi;
 
-    // TODO update H
+    let H_update = jacobi_T * &right_mult;
+    update_H_submatrix_from_one_var_calc(H, &H_update, var);
 
-    // TODO calculate error
     // implementation should work like this:
     // _inverseMeasurement * v1->estimate()
     // as reference, the implementation for two vars works like this:
     // _inverseMeasurement * (v1->estimate().inverse()*v2->estimate())
-    // TODO update b
+    let err_pos = Rotation2::new(-rot_m) * (Rotation2::new(-rot_v) * pos_v - pos_m);
+    let mut err_rot = rot_v - rot_m;
+    let mut err_vec = err_pos.data.to_vec();
+    if err_rot > PI {
+        err_rot -= 2.0 * PI;
+    } else if err_rot < -PI {
+        err_rot += 2.0 * PI;
+    }
+    err_vec.push(err_rot);
+    let b_updates = (RowVector3::from_vec(err_vec) * &right_mult).transpose();
+    update_b_subvector_from_one_var_calc(b, &b_updates, var);
 }
 
-fn calc_one_var_jacobians_2d() {
-    // TODO implement
+fn calc_one_var_jacobians_2d(rot_m: f64) -> (Matrix3<f64>, Matrix3<f64>) {
     // two options that might be correct:
     // 1) Daniel's code in trash branch -> return type would be Matrix2x3
     // or
@@ -58,20 +71,22 @@ fn calc_one_var_jacobians_2d() {
     //   i.e.
     //     let rot_obj = Rotation3::from_axis_angle(&Vector3::z_axis(), -rot_ij);
     //     rot_obj.matrix()
+    let jacobian = *Rotation3::from_axis_angle(&Vector3::z_axis(), -rot_m).matrix();
+    (jacobian, jacobian.transpose())
 }
 
 fn update_two_vars_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &Box<dyn Variable>, var_j: &Box<dyn Variable>) {
     let (pos_i, rot_i) = get_pos_and_rot(&var_i.get_pose());
     let (pos_j, rot_j) = get_pos_and_rot(&var_j.get_pose());
-    let (pos_ij, rot_ij) = get_pos_and_rot(&factor.constraint); // TODO rename _ij so that it's clearer that measurements are meant?
+    let (pos_ij, rot_ij) = get_pos_and_rot(&factor.constraint);
     let (jacobi, jacobi_T) = calc_two_var_jacobians_2d(&pos_i, rot_i, &pos_j, rot_ij);
     let right_mult = &factor.information_matrix.content * jacobi;
 
     let H_updates = jacobi_T * &right_mult;
-    update_H_submatrix(H, &H_updates.index((..3, ..3)), var_i, var_i);
-    update_H_submatrix(H, &H_updates.index((..3, 3..)), var_i, var_j);
-    update_H_submatrix(H, &H_updates.index((3.., ..3)), var_j, var_i);
-    update_H_submatrix(H, &H_updates.index((3.., 3..)), var_j, var_j);
+    update_H_submatrix_from_two_var_calc(H, &H_updates.index((..3, ..3)), var_i, var_i);
+    update_H_submatrix_from_two_var_calc(H, &H_updates.index((..3, 3..)), var_i, var_j);
+    update_H_submatrix_from_two_var_calc(H, &H_updates.index((3.., ..3)), var_j, var_i);
+    update_H_submatrix_from_two_var_calc(H, &H_updates.index((3.., 3..)), var_j, var_j);
 
     let err_pos = Rotation2::new(-rot_ij) * (Rotation2::new(-rot_i) * (pos_j - pos_i) - pos_ij);
     let mut err_rot = rot_j - rot_i - rot_ij;
@@ -83,8 +98,8 @@ fn update_two_vars_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Facto
     }
     err_vec.push(err_rot);
     let b_updates = (RowVector3::from_vec(err_vec) * &right_mult).transpose();
-    update_b_subvector(b, &b_updates.index((..3, ..)), var_i);
-    update_b_subvector(b, &b_updates.index((3.., ..)), var_j);
+    update_b_subvector_from_two_var_calc(b, &b_updates.index((..3, ..)), var_i);
+    update_b_subvector_from_two_var_calc(b, &b_updates.index((3.., ..)), var_j);
 }
 
 fn calc_two_var_jacobians_2d(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f64>, rot_ij: f64) -> (Matrix3x6<f64>, Matrix6x3<f64>) {
@@ -113,7 +128,21 @@ fn get_pos_and_rot(pose: &[f64]) -> (Vector2<f64>, f64) {
     (Vector2::new(pose[0], pose[1],), pose[2])
 }
 
-fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U6>>, var_row: &Box<dyn Variable>, var_col: &Box<dyn Variable>) {
+fn update_H_submatrix_from_one_var_calc(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, U3, U3, ArrayStorage<f64,U3,U3>>, var: &Box<dyn Variable>) {
+    let index = var.get_index().unwrap();
+    let range = 3*index..3*index+3;
+    let updated_submatrix = &(H.index((range.clone(), range.clone(). clone())) + added_matrix);
+    H.index_mut((range.clone(), range)).copy_from(updated_submatrix);
+}
+
+fn update_b_subvector_from_one_var_calc(b: &mut DVector<f64>, added_vector: &Vector<f64, U3, ArrayStorage<f64,U3,U1>>, var: &Box<dyn Variable>) {
+    let index = var.get_index().unwrap();
+    let range = 3*index..3*index+3;
+    let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);
+    b.index_mut((range, ..)).copy_from(updated_subvector);
+}
+
+fn update_H_submatrix_from_two_var_calc(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U6>>, var_row: &Box<dyn Variable>, var_col: &Box<dyn Variable>) {
     if var_row.is_fixed() || var_col.is_fixed() {
         return;
     }
@@ -121,11 +150,11 @@ fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, 
     let col_index = var_col.get_index().unwrap();
     let row_range = 3*row_index..3*row_index+3;
     let col_range = 3*col_index..3*col_index+3;
-    let updated_submatrix = &(H.index((row_range.clone(), col_range. clone())) + added_matrix);
+    let updated_submatrix = &(H.index((row_range.clone(), col_range.clone())) + added_matrix);
     H.index_mut((row_range, col_range)).copy_from(updated_submatrix);
 }
 
-fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64,Dynamic,U1,U1,U6>>, var: &Box<dyn Variable>) {
+fn update_b_subvector_from_two_var_calc(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64,Dynamic,U1,U1,U6>>, var: &Box<dyn Variable>) {
     if var.is_fixed() {
         return;
     }
