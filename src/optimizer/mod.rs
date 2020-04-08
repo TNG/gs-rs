@@ -42,9 +42,9 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
     println!("Vector Update: {:?}", correction);
     let mut updated_rot = (old_pose[2] + correction[2]) % (2.0 * PI);
     if updated_rot > PI {
-        updated_rot - 2.0 * PI;
+        updated_rot -= 2.0 * PI;
     } else if updated_rot < -PI {
-        updated_rot + 2.0 * PI;
+        updated_rot += 2.0 * PI;
     }
     let updated_pose = vec![old_pose[0] + correction[0], old_pose[1] + correction[1], updated_rot];
     var.update_pose(updated_pose);

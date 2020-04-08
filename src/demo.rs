@@ -19,13 +19,11 @@ use crate::parser::g2o::G2oParser;
 use std::collections::HashSet;
 
 #[test]
-fn rotation_change_test() {
-    let factor_graph = match G2oParser::parse_file("test_files/mit50.g2o") {
+fn current_test() {
+    let factor_graph = match G2oParser::parse_file("test_files/MIT_simple2D.g2o") {
         Ok(factor_graph) => factor_graph,
         Err(str) => panic!(str),
     };
-    optimize(&factor_graph, 1);
-    // visualize(&G2oParser::parse_file("test_files/MIT_simple2D_sol10.g2o").unwrap());
-    // visualize(&factor_graph);
-    G2oParser::compose_file(&factor_graph, "test_files/mit50_out.g2o");
+    optimize(&factor_graph, 5);
+    G2oParser::compose_file(&factor_graph, "test_files/MIT_simple2D_out.g2o");
 }

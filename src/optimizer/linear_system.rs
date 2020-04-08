@@ -6,6 +6,7 @@ use petgraph::visit::EdgeRef;
 use crate::factor_graph::factor::{Factor, FactorType::*};
 use petgraph::Directed;
 use std::env::var;
+use std::f64::consts::PI;
 
 pub fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>) {
     let dim = factor_graph.number_of_dynamic_nodes * 3;
@@ -73,8 +74,13 @@ fn update_two_vars_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Facto
     update_H_submatrix(H, &H_updates.index((3.., 3..)), var_j, var_j);
 
     let err_pos = Rotation2::new(-rot_ij) * (Rotation2::new(-rot_i) * (pos_j - pos_i) - pos_ij);
-    let err_rot = rot_j - rot_i - rot_ij;
+    let mut err_rot = rot_j - rot_i - rot_ij;
     let mut err_vec = err_pos.data.to_vec();
+    if err_rot > PI {
+        err_rot -= 2.0 * PI;
+    } else if err_rot < -PI {
+        err_rot += 2.0 * PI;
+    }
     err_vec.push(err_rot);
     let b_updates = (RowVector3::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_updates.index((..3, ..)), var_i);
@@ -84,7 +90,7 @@ fn update_two_vars_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Facto
 fn calc_two_var_jacobians_2d(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f64>, rot_ij: f64) -> (Matrix3x6<f64>, Matrix6x3<f64>) {
     let rot_obj = Rotation3::from_axis_angle(&Vector3::z_axis(), -rot_ij);
     let R_ij_T = rot_obj.matrix();
-    let delta_pos_vec = pos_i - pos_j;
+    let delta_pos_vec = pos_j - pos_i;
     let delta_pos = delta_pos_vec.data.as_slice();
     let sin_i = rot_i.sin();
     let cos_i = rot_i.cos();
