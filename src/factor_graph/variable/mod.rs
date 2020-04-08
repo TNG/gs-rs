@@ -18,7 +18,7 @@ pub enum VariableType {
 /// Trait with expected functions that all variables should implement.
 pub trait Variable<'a>: fmt::Debug {
     /// The variable's ID. Should not change.
-    fn get_id(&self) -> Uuid;
+    fn get_id(&self) -> Uuid; // TODO change to usize?
     /// The variable's type. Should not change.
     fn get_type(&self) -> VariableType;
     /// The variable's pose. May be subject to change, unless the variable is fixed.

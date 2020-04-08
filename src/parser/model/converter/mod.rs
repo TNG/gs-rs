@@ -8,7 +8,7 @@ use crate::factor_graph::FactorGraph;
 use crate::parser::model::{Edge, FactorGraphModel, Vertex};
 use std::ops::Index;
 use petgraph::visit::EdgeRef;
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 
 impl From<FactorGraphModel> for FactorGraph<'_> {
     fn from(model: FactorGraphModel) -> Self {
@@ -16,6 +16,7 @@ impl From<FactorGraphModel> for FactorGraph<'_> {
             csr: Csr::new(),
             node_indices: vec![],
             number_of_dynamic_nodes: 0,
+            custom_to_csr_id_map: HashMap::new(),
         };
 
         // TODO replace by some kind of for_each
@@ -88,8 +89,8 @@ fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
         }
     };
     factor_graph.csr.add_edge(
-        edge.vertices[0],
-        edge.vertices[target_index],
+        factor_graph.custom_to_csr_id_map[&edge.vertices[0]],
+        factor_graph.custom_to_csr_id_map[&edge.vertices[target_index]],
         Factor {
             factor_type,
             constraint: edge.restriction.to_vec(),
@@ -132,6 +133,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
             error!("Could not add vertex {:?}", vertex);
         }
     };
+    factor_graph.custom_to_csr_id_map.insert(vertex.id, *factor_graph.node_indices.last().unwrap());
     if !fixed {
         factor_graph.number_of_dynamic_nodes += 1;
     }

@@ -20,10 +20,12 @@ use std::collections::HashSet;
 
 #[test]
 fn rotation_change_test() {
-    let factor_graph = match G2oParser::parse_file("test_files/MIT_simple2D.g2o") {
+    let factor_graph = match G2oParser::parse_file("test_files/mit50.g2o") {
         Ok(factor_graph) => factor_graph,
         Err(str) => panic!(str),
     };
     optimize(&factor_graph, 1);
-    G2oParser::compose_file(&factor_graph, "test_files/MIT_simple2D_out.g2o");
+    // visualize(&G2oParser::parse_file("test_files/MIT_simple2D_sol10.g2o").unwrap());
+    // visualize(&factor_graph);
+    G2oParser::compose_file(&factor_graph, "test_files/mit50_out.g2o");
 }
