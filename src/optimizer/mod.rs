@@ -52,8 +52,9 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
 #[cfg(test)]
 mod tests {
     use crate::optimizer::optimize;
-    use crate::parser::json::JsonParser;
+    use crate::parser::g2o::G2oParser;
     use crate::parser::Parser;
+    use crate::parser::model::FactorGraphModel;
 
     use log::LevelFilter;
     use std::time::SystemTime;
@@ -65,25 +66,37 @@ mod tests {
             .try_init();
     }
 
-    #[test]
-    fn iter_once() {
+    fn test_valid_optimization(file_name: &str, iterations: usize) {
         init();
-        let graph = JsonParser::parse_file_to_model("test_files/graphSLAM2dExample.json")
-            .unwrap()
-            .into();
-        info!("{:?}", SystemTime::now());
-        optimize(&graph, 1);
-        info!("{:?}", SystemTime::now());
+        let test_factor_graph = G2oParser::parse_file(&["test_files/optimizer_tests/", file_name, "_0.g2o"].concat()).unwrap();
+        optimize(&test_factor_graph, iterations);
+        let test_model = FactorGraphModel::from(&test_factor_graph);
+        let expected_model = G2oParser::parse_file_to_model(&["test_files/optimizer_tests/", file_name, "_", &iterations.to_string(), ".g2o"].concat()).unwrap();
+        assert_eq!(test_model, expected_model);
     }
 
     #[test]
-    fn iter_ten_times() {
-        init();
-        let graph = JsonParser::parse_file_to_model("test_files/graphSLAM2dExample.json")
-            .unwrap()
-            .into();
-        info!("{:?}", SystemTime::now());
-        optimize(&graph, 10);
-        info!("{:?}", SystemTime::now());
+    fn test_testing_function() {
+        test_valid_optimization("pos2d_and_odo2d", 0);
+    }
+
+    #[test]
+    fn test_only_pos2d_factors() {
+        test_valid_optimization("pos2d_only", 1);
+    }
+
+    #[test]
+    fn test_only_odo2d_factors() {
+        test_valid_optimization("odo2d_only", 1);
+   }
+
+    #[test]
+    fn test_pos2d_and_odo2d_factors() {
+        test_valid_optimization("pos2d_and_odo2d", 1);
+    }
+
+    #[test]
+    fn test_multiple_iterations() {
+        test_valid_optimization("pos2d_and_odo2d", 25);
     }
 }
