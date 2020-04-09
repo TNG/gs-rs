@@ -17,9 +17,14 @@ struct VisualFactorGraph {
     lines: Vec<[Point3<f32>; 3]>,
 }
 
-// TODO does not work multiple times in a single scope
+// TODO does not work multiple times in a single execution of the program
+// Things tried so far:
+// - Google -> nobody seems to have mentioned this problem before
+// - make window static -> causes problems as it has to be mutable and can not be moved
+// Possible solutions:
+// - do not tackle this problem, but instead support being able to visualize several factor graphs and jump between them
 /// Displays the visualization of the given factor graph in a new window.
-/// Does not work multiple times in a single scope.
+/// Does not work multiple times in a single execution of the program.
 pub fn visualize(factor_graph: &FactorGraph) {
     let mut window = Window::new("gs-rs");
     let visual_factor_graph = add_factor_graph_to_window(&mut window, &factor_graph);
@@ -159,21 +164,10 @@ mod test {
 
     #[test]
     #[ignore]
-    fn test_render_valid_file() {
+    fn test_visualize() {
         init();
 
-        let mut window = Window::new("gs-rs");
-        let visual_factor_graph: VisualFactorGraph =
-            match JsonParser::parse_file("test_files/fullTestGraph.json") {
-                Ok(factor_graph) => add_factor_graph_to_window(&mut window, &factor_graph),
-                Err(str) => panic!(str),
-            };
-
-        while window.render() {
-            visual_factor_graph
-                .lines
-                .iter()
-                .for_each(|line| window.draw_line(&line[0], &line[1], &line[2]));
-        }
+        let factor_graph = JsonParser::parse_file("test_files/fullTestGraph.json").unwrap();
+        visualize(&factor_graph);
     }
 }
