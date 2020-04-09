@@ -43,34 +43,20 @@ fn update_one_var_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor
     let H_update = jacobi_T * &right_mult;
     update_H_submatrix_from_one_var_calc(H, &H_update, var);
 
-    // implementation should work like this:
-    // _inverseMeasurement * v1->estimate()
-    // as reference, the implementation for two vars works like this:
-    // _inverseMeasurement * (v1->estimate().inverse()*v2->estimate())
-    let err_pos = Rotation2::new(-rot_m) * (Rotation2::new(-rot_v) * pos_v - pos_m);
+    let err_pos = Rotation2::new(-rot_m) * (pos_v - pos_m);
     let mut err_rot = rot_v - rot_m;
-    let mut err_vec = err_pos.data.to_vec();
     if err_rot > PI {
         err_rot -= 2.0 * PI;
     } else if err_rot < -PI {
         err_rot += 2.0 * PI;
     }
+    let mut err_vec = err_pos.data.to_vec();
     err_vec.push(err_rot);
-    let b_updates = (RowVector3::from_vec(err_vec) * &right_mult).transpose();
-    update_b_subvector_from_one_var_calc(b, &b_updates, var);
+    let b_update = (RowVector3::from_vec(err_vec) * &right_mult).transpose();
+    update_b_subvector_from_one_var_calc(b, &b_update, var);
 }
 
 fn calc_one_var_jacobians_2d(rot_m: f64) -> (Matrix3<f64>, Matrix3<f64>) {
-    // two options that might be correct:
-    // 1) Daniel's code in trash branch -> return type would be Matrix2x3
-    // or
-    // 2) C++ code in g2o (edge_se2_prior.h) -> return type seems to be Matrix3
-    //     _jacobianOplusXi.setZero();
-    //     _jacobianOplusXi.block<2,2>(0,0)=_inverseMeasurement.rotation().toRotationMatrix();
-    //     _jacobianOplusXi(2,2)=1.;
-    //   i.e.
-    //     let rot_obj = Rotation3::from_axis_angle(&Vector3::z_axis(), -rot_ij);
-    //     rot_obj.matrix()
     let jacobian = *Rotation3::from_axis_angle(&Vector3::z_axis(), -rot_m).matrix();
     (jacobian, jacobian.transpose())
 }
@@ -90,12 +76,12 @@ fn update_two_vars_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Facto
 
     let err_pos = Rotation2::new(-rot_ij) * (Rotation2::new(-rot_i) * (pos_j - pos_i) - pos_ij);
     let mut err_rot = rot_j - rot_i - rot_ij;
-    let mut err_vec = err_pos.data.to_vec();
     if err_rot > PI {
         err_rot -= 2.0 * PI;
     } else if err_rot < -PI {
         err_rot += 2.0 * PI;
     }
+    let mut err_vec = err_pos.data.to_vec();
     err_vec.push(err_rot);
     let b_updates = (RowVector3::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector_from_two_var_calc(b, &b_updates.index((..3, ..)), var_i);

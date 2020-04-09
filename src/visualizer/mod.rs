@@ -4,6 +4,7 @@ use std::ops::Index;
 
 use kiss3d::scene::SceneNode;
 use kiss3d::window::Window;
+use kiss3d::camera::ArcBall;
 use nalgebra::{Point3, Rotation3, Translation3, UnitQuaternion, Vector3};
 use petgraph::visit::EdgeRef;
 
@@ -23,7 +24,8 @@ pub fn visualize(factor_graph: &FactorGraph) {
     let mut window = Window::new("gs-rs");
     let visual_factor_graph = add_factor_graph_to_window(&mut window, &factor_graph);
 
-    while window.render() {
+    let mut cam = ArcBall::new(Point3::new(0.0, 0.0, 50.0), Point3::new(0.0, 0.0, 0.0));
+    while window.render_with_camera(&mut cam) {
         visual_factor_graph
             .lines
             .iter()
