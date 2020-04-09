@@ -19,16 +19,10 @@ impl From<FactorGraphModel> for FactorGraph<'_> {
             custom_to_csr_id_map: HashMap::new(),
         };
 
-        // TODO replace by some kind of for_each
-        model
-            .vertices
-            .iter()
+        model.vertices.iter()
             .for_each(|v| add_vertex(&mut factor_graph, v, model.fixed_vertices.contains(&v.id)));
 
-        // TODO replace by some kind of for_each
-        model
-            .edges
-            .iter()
+        model.edges.iter()
             .for_each(|e| add_edge(&mut factor_graph, e));
 
         factor_graph
