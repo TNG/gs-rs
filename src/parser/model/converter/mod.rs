@@ -41,7 +41,7 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
         for node_index in &factor_graph.node_indices {
             let node = factor_graph.csr.index(*node_index);
             model.vertices.push(Vertex {
-                id: node.get_id().as_u128() as usize,
+                id: node.get_id(),
                 vertex_type: match node.get_type() {
                     Vehicle2D => String::from("POSE2D_ANGLE"),
                     Landmark2D => String::from("LANDMARK2D_ANGLE"),
@@ -51,9 +51,9 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
             });
             for edge in factor_graph.csr.edges(*node_index) {
                 let factor: &Factor = edge.weight();
-                let mut edge_vertices = vec![node.get_id().as_u128() as usize];
+                let mut edge_vertices = vec![node.get_id()];
                 if edge.target() != *node_index {
-                    edge_vertices.push(factor_graph.csr.index(edge.target()).get_id().as_u128() as usize);
+                    edge_vertices.push(factor_graph.csr.index(edge.target()).get_id());
                 }
                 let mut restriction_arr = [0.0; 3];
                 restriction_arr.copy_from_slice(&factor.constraint.as_slice());
@@ -71,7 +71,7 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                 });
             }
             if node.is_fixed() {
-                model.fixed_vertices.insert(node.get_id().as_u128() as usize);
+                model.fixed_vertices.insert(node.get_id());
             }
         }
         model
@@ -106,7 +106,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
             .push(
                 factor_graph
                     .csr
-                    .add_node(Box::new(VehicleVariable2D::from_full_config(
+                    .add_node(Box::new(VehicleVariable2D::new(
                         vertex.id,
                         vertex.position[0],
                         vertex.position[1],
@@ -120,7 +120,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
             .push(
                 factor_graph
                     .csr
-                    .add_node(Box::new(LandmarkVariable2D::from_full_config(
+                    .add_node(Box::new(LandmarkVariable2D::new(
                         vertex.id,
                         vertex.position[0],
                         vertex.position[1],

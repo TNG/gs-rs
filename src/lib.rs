@@ -7,7 +7,6 @@ extern crate approx;
 extern crate kiss3d;
 extern crate nalgebra;
 extern crate petgraph;
-extern crate uuid;
 
 pub mod demo; // TODO remove once file (i.e., the mod) is deleted
 pub mod factor_graph;

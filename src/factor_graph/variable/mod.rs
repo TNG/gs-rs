@@ -1,7 +1,6 @@
 //! The internal representation of a factor graph's optimizable variable.
 
 use std::fmt;
-use uuid::Uuid;
 
 pub mod landmark_variable_2d;
 pub mod vehicle_variable_2d;
@@ -18,7 +17,7 @@ pub enum VariableType {
 /// Trait with expected functions that all variables should implement.
 pub trait Variable<'a>: fmt::Debug {
     /// The variable's ID. Should not change.
-    fn get_id(&self) -> Uuid; // TODO change to usize?
+    fn get_id(&self) -> usize;
     /// The variable's type. Should not change.
     fn get_type(&self) -> VariableType;
     /// The variable's pose. May be subject to change, unless the variable is fixed.
@@ -30,5 +29,5 @@ pub trait Variable<'a>: fmt::Debug {
     fn get_index(&self) -> Option<usize>;
     // TODO rename to set_pose or maybe even change interface completely?
     /// Sets a new variable pose.
-    fn update_pose(&self, update: Vec<f64>);
+    fn set_pose(&self, update: Vec<f64>);
 }
