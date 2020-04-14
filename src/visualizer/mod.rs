@@ -57,8 +57,8 @@ fn add_variables_and_factors(
     for variable_index in &factor_graph.node_indices {
         let variable = factor_graph.csr.index(*variable_index);
         let var_point = Point3::new(
-            variable.get_pose()[0] as f32,
-            variable.get_pose()[1] as f32,
+            variable.get_content()[0] as f32,
+            variable.get_content()[1] as f32,
             0.0 as f32,
         );
 
@@ -66,7 +66,7 @@ fn add_variables_and_factors(
         variable_object.set_local_translation(var_point.coords.into());
 
         let mut var_rotation_object = variable_object.add_capsule(0.02, 2.0);
-        let var_rotation = variable.get_pose()[2] as f32;
+        let var_rotation = variable.get_content()[2] as f32;
         var_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(
             &Vector3::z_axis(),
             var_rotation,
@@ -122,8 +122,8 @@ fn add_variables_and_factors(
             if factor.factor_type == Observation2D {
                 let observed_variable = factor_graph.csr.index(edge.target());
                 let observed_point = Point3::new(
-                    observed_variable.get_pose()[0] as f32,
-                    observed_variable.get_pose()[1] as f32,
+                    observed_variable.get_content()[0] as f32,
+                    observed_variable.get_content()[1] as f32,
                     0.0 as f32,
                 );
                 visual_factor_graph
@@ -132,8 +132,8 @@ fn add_variables_and_factors(
             } else if factor.factor_type == Odometry2D {
                 let observed_variable = factor_graph.csr.index(edge.target());
                 let observed_point = Point3::new(
-                    observed_variable.get_pose()[0] as f32,
-                    observed_variable.get_pose()[1] as f32,
+                    observed_variable.get_content()[0] as f32,
+                    observed_variable.get_content()[1] as f32,
                     0.0 as f32,
                 );
                 visual_factor_graph.lines.push([

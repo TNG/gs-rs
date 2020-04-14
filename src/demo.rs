@@ -6,6 +6,7 @@ use crate::parser::Parser;
 use crate::visualizer::visualize;
 
 #[test]
+#[ignore] // deprecated input file
 fn main() {
     let factor_graph = match JsonParser::parse_file("test_files/fullTestGraph.json") {
         Ok(factor_graph) => factor_graph,

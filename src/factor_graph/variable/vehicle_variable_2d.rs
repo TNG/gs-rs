@@ -33,7 +33,7 @@ impl Variable<'_> for VehicleVariable2D {
         VariableType::Vehicle2D
     }
 
-    fn get_pose(&self) -> Vec<f64> {
+    fn get_content(&self) -> Vec<f64> {
         (*self.pose.borrow_mut()).to_vec()
     }
 
@@ -45,7 +45,7 @@ impl Variable<'_> for VehicleVariable2D {
         self.range.clone()
     }
 
-    fn set_pose(&self, update: Vec<f64>) {
+    fn set_content(&self, update: Vec<f64>) {
         *self.pose.borrow_mut() = [update[0], update[1], update[2]];
     }
 }
@@ -68,7 +68,7 @@ mod tests {
 
         let test_variable = VehicleVariable2D::new(1, 3.0, 5.0, 0.1, true, None);
         info!("{:?}", &test_variable);
-        assert_eq!(test_variable.get_pose(), &[3.0, 5.0, 0.1]);
+        assert_eq!(test_variable.get_content(), &[3.0, 5.0, 0.1]);
         assert_eq!(test_variable.get_type(), VariableType::Vehicle2D);
         assert_eq!(test_variable.is_fixed(), true);
         assert_eq!(test_variable.get_range(), None);
@@ -80,21 +80,21 @@ mod tests {
 
         let test_variable = VehicleVariable2D::new(1, 3.0, 5.0, 0.1, false, Some(0..3));
         info!("{:?}", &test_variable);
-        assert_eq!(test_variable.get_pose(), &[3.0, 5.0, 0.1]);
+        assert_eq!(test_variable.get_content(), &[3.0, 5.0, 0.1]);
         assert_eq!(test_variable.get_type(), VariableType::Vehicle2D);
         assert_eq!(test_variable.is_fixed(), false);
         assert_eq!(test_variable.get_range(), Some(0..3));
     }
 
     #[test]
-    fn test_update_pose() {
+    fn test_update_content() {
         init();
 
         let test_variable = VehicleVariable2D::new(1, 1.0, 1.0, 0.1, false, Some(0..3));
         info!("{:?}", &test_variable);
-        assert_eq!(test_variable.get_pose(), &[1.0, 1.0, 0.1]);
-        test_variable.set_pose(vec![2.0, 3.0, 0.5]);
+        assert_eq!(test_variable.get_content(), &[1.0, 1.0, 0.1]);
+        test_variable.set_content(vec![2.0, 3.0, 0.5]);
         info!("{:?}", &test_variable);
-        assert_eq!(test_variable.get_pose(), &[2.0, 3.0, 0.5]);
+        assert_eq!(test_variable.get_content(), &[2.0, 3.0, 0.5]);
     }
 }

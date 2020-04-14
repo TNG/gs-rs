@@ -36,7 +36,7 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
     if var.is_fixed() {
         return;
     }
-    let old_pose = var.get_pose();
+    let old_pose = var.get_content();
     let range = var.get_range().unwrap();
     let correction = &solution[range];
     let mut updated_rot = (old_pose[2] + correction[2]) % (2.0 * PI);
@@ -46,7 +46,7 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
         updated_rot += 2.0 * PI;
     }
     let updated_pose = vec![old_pose[0] + correction[0], old_pose[1] + correction[1], updated_rot];
-    var.set_pose(updated_pose);
+    var.set_content(updated_pose);
 }
 
 #[cfg(test)]

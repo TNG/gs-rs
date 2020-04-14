@@ -41,30 +41,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_valid_file() {
-        init();
-
-        let parsed_factor_graph =
-            match JsonParser::parse_file("test_files/testTrajectory2DAngle.json") {
-                Ok(x) => x,
-                Err(str) => panic!(str),
-            };
-        dbg!("{:?}", &parsed_factor_graph);
-
-        // TODO remove code below or implement comparison technique for FactorGraph
-        // let vertices = vec![Vertex::new( 0, String::from("POSE2D_ANGLE"), [1.0, 0.0], [1.57] ),
-        //                     Vertex::new( 1, String::from("POSE2D_ANGLE"), [0.0, 1.0], [3.14] )];
-        // let edges = vec![Edge::new( String::from("PRIOR2D_ANGLE"), vec![0], [1.0, 0.0, 1.58],
-        //                             [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.5] ),
-        //                  Edge::new( String::from("PRIOR2D_ANGLE"), vec![1], [0.0, 1.0, 3.13],
-        //                             [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.5] ),
-        //                  Edge::new( String::from("ODOMETRY2D_ANGLE"), vec![0, 1], [1.0, 1.0, 1.57],
-        //                             [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.1] )];
-        // let expected_factor_graph = FactorGraphModel::new(vertices, edges).into();
-        // assert_eq!(parsed_factor_graph, expected_factor_graph);
-    }
-
-    #[test]
+    #[ignore] // TODO use valid file
     fn test_parse_valid_file_to_model() {
         init();
 
@@ -79,34 +56,32 @@ mod tests {
             Vertex {
                 id: 0,
                 vertex_type: String::from("POSE2D_ANGLE"),
-                position: [0.0, 1.0],
-                rotation: [0.0],
+                content: vec![0.0, 1.0, 0.0],
             },
             Vertex {
                 id: 1,
                 vertex_type: String::from("POSE2D_ANGLE"),
-                position: [1.0, 0.0],
-                rotation: [0.0],
+                content: vec![1.0, 0.0, 0.0],
             },
         ];
         let edges = vec![
             Edge {
                 edge_type: String::from("PRIOR2D_ANGLE"),
                 vertices: vec![0],
-                restriction: [0.0, 1.0, 0.0],
-                information_matrix: [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
+                restriction: vec![0.0, 1.0, 0.0],
+                information_matrix: vec![10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
             },
             Edge {
                 edge_type: String::from("PRIOR2D_ANGLE"),
                 vertices: vec![1],
-                restriction: [1.0, 0.0, 0.0],
-                information_matrix: [10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
+                restriction: vec![1.0, 0.0, 0.0],
+                information_matrix: vec![10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
             },
             Edge {
                 edge_type: String::from("ODOMETRY2D_ANGLE"),
                 vertices: vec![0, 1],
-                restriction: [0.5, -0.5, 0.0],
-                information_matrix: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001],
+                restriction: vec![0.5, -0.5, 0.0],
+                information_matrix: vec![1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001],
             },
         ];
         let mut fixed_vertices = HashSet::new();

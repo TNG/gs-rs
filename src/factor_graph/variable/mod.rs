@@ -21,13 +21,14 @@ pub trait Variable<'a>: fmt::Debug {
     fn get_id(&self) -> usize;
     /// The variable's type. Should not change.
     fn get_type(&self) -> VariableType;
-    /// The variable's pose. May be subject to change, unless the variable is fixed.
-    /// Content for 2D variables: vec![pose_position_x, pose_position_y, pose_rotation]
-    fn get_pose(&self) -> Vec<f64>;
+    /// The variable's pose or position. May be subject to change, unless the variable is fixed.
+    /// Content for 2D vehicle variables: vec![pose_position_x, pose_position_y, pose_rotation]
+    /// Content for 2D landmark variables: vec![pose_position_x, pose_position_y]
+    fn get_content(&self) -> Vec<f64>;
     /// Whether the variable is fixed or not. Fixed variables' poses are not subject to change.
     fn is_fixed(&self) -> bool;
     /// The variable's index range in H and b. Fixed variables do not have such a range.
     fn get_range(&self) -> Option<Range<usize>>;
     /// Sets a new variable pose.
-    fn set_pose(&self, update: Vec<f64>);
+    fn set_content(&self, update: Vec<f64>);
 }

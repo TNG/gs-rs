@@ -35,7 +35,7 @@ fn update_one_var_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor
     if var.is_fixed() {
         return;
     }
-    let (pos_v, rot_v) = get_pos_and_rot(&var.get_pose());
+    let (pos_v, rot_v) = get_pos_and_rot(&var.get_content());
     let (pos_m, rot_m) = get_pos_and_rot(&factor.constraint);
     let (jacobi, jacobi_T) = calc_one_var_jacobians_2d(rot_m);
     let right_mult = &factor.information_matrix.content * jacobi;
@@ -62,8 +62,8 @@ fn calc_one_var_jacobians_2d(rot_m: f64) -> (Matrix3<f64>, Matrix3<f64>) {
 }
 
 fn update_two_vars_2d(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &Box<dyn Variable>, var_j: &Box<dyn Variable>) {
-    let (pos_i, rot_i) = get_pos_and_rot(&var_i.get_pose());
-    let (pos_j, rot_j) = get_pos_and_rot(&var_j.get_pose());
+    let (pos_i, rot_i) = get_pos_and_rot(&var_i.get_content());
+    let (pos_j, rot_j) = get_pos_and_rot(&var_j.get_content());
     let (pos_ij, rot_ij) = get_pos_and_rot(&factor.constraint);
     let (jacobi, jacobi_T) = calc_two_var_jacobians_2d(&pos_i, rot_i, &pos_j, rot_ij);
     let right_mult = &factor.information_matrix.content * jacobi;

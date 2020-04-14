@@ -7,17 +7,17 @@ use std::ops::Range;
 #[derive(Debug)]
 pub struct LandmarkVariable2D {
     id: usize,
-    pose: Rc<RefCell<[f64; 3]>>,
+    position: Rc<RefCell<[f64; 2]>>,
     fixed: bool,
     range: Option<Range<usize>>,
 }
 
 impl LandmarkVariable2D {
     /// Returns a new variable from a 2D pose, a given ID and whether the variable is fixed.
-    pub fn new(id: usize, x: f64, y: f64, phi: f64, fixed: bool, optional_range: Option<Range<usize>>) -> Self {
+    pub fn new(id: usize, x: f64, y: f64, fixed: bool, optional_range: Option<Range<usize>>) -> Self {
         LandmarkVariable2D {
             id,
-            pose: Rc::new(RefCell::new([x, y, phi])),
+            position: Rc::new(RefCell::new([x, y])),
             fixed,
             range: optional_range,
         }
@@ -33,8 +33,8 @@ impl Variable<'_> for LandmarkVariable2D {
         VariableType::Landmark2D
     }
 
-    fn get_pose(&self) -> Vec<f64> {
-        (*self.pose.borrow_mut()).to_vec()
+    fn get_content(&self) -> Vec<f64> {
+        (*self.position.borrow_mut()).to_vec()
     }
 
     fn is_fixed(&self) -> bool {
@@ -45,8 +45,8 @@ impl Variable<'_> for LandmarkVariable2D {
         self.range.clone()
     }
 
-    fn set_pose(&self, update: Vec<f64>) {
-        *self.pose.borrow_mut() = [update[0], update[1], update[2]];
+    fn set_content(&self, update: Vec<f64>) {
+        *self.position.borrow_mut() = [update[0], update[1]];
     }
 }
 
@@ -66,9 +66,9 @@ mod tests {
     fn test_new_fixed() {
         init();
 
-        let test_variable = LandmarkVariable2D::new(1, 3.0, 5.0, 0.1, true, None);
+        let test_variable = LandmarkVariable2D::new(1, 3.0, 5.0, true, None);
         info!("{:?}", &test_variable);
-        assert_eq!(test_variable.get_pose(), &[3.0, 5.0, 0.1]);
+        assert_eq!(test_variable.get_content(), &[3.0, 5.0]);
         assert_eq!(test_variable.get_type(), VariableType::Landmark2D);
         assert_eq!(test_variable.is_fixed(), true);
         assert_eq!(test_variable.get_range(), None);
@@ -78,23 +78,23 @@ mod tests {
     fn test_new_dynamic() {
         init();
 
-        let test_variable = LandmarkVariable2D::new(1, 3.0, 5.0, 0.1, false, Some(0..3));
+        let test_variable = LandmarkVariable2D::new(1, 3.0, 5.0, false, Some(0..2));
         info!("{:?}", &test_variable);
-        assert_eq!(test_variable.get_pose(), &[3.0, 5.0, 0.1]);
+        assert_eq!(test_variable.get_content(), &[3.0, 5.0]);
         assert_eq!(test_variable.get_type(), VariableType::Landmark2D);
         assert_eq!(test_variable.is_fixed(), false);
-        assert_eq!(test_variable.get_range(), Some(0..3));
+        assert_eq!(test_variable.get_range(), Some(0..2));
     }
 
     #[test]
-    fn test_update_pose() {
+    fn test_update_content() {
         init();
 
-        let test_variable = LandmarkVariable2D::new(1, 1.0, 1.0, 0.1, false, Some(0..3));
+        let test_variable = LandmarkVariable2D::new(1, 1.0, 1.0, false, Some(0..2));
         info!("{:?}", &test_variable);
-        assert_eq!(test_variable.get_pose(), &[1.0, 1.0, 0.1]);
-        test_variable.set_pose(vec![2.0, 3.0, 0.5]);
+        assert_eq!(test_variable.get_content(), &[1.0, 1.0]);
+        test_variable.set_content(vec![2.0, 3.0]);
         info!("{:?}", &test_variable);
-        assert_eq!(test_variable.get_pose(), &[2.0, 3.0, 0.5]);
+        assert_eq!(test_variable.get_content(), &[2.0, 3.0]);
     }
 }

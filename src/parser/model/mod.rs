@@ -20,8 +20,7 @@ pub struct Vertex {
     pub id: usize,
     #[serde(rename = "type")]
     pub vertex_type: String,
-    pub position: [f64; 2],
-    pub rotation: [f64; 1],
+    pub content: Vec<f64>,
 }
 
 /// Structure containing a factor graph model's edge, representing a factor.
@@ -30,7 +29,7 @@ pub struct Edge {
     #[serde(rename = "type")]
     pub edge_type: String,
     pub vertices: Vec<usize>,
-    pub restriction: [f64; 3],
+    pub restriction: Vec<f64>,
     #[serde(rename = "informationMatrix")]
-    pub information_matrix: [f64; 9],
+    pub information_matrix: Vec<f64>,
 }

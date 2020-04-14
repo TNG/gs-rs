@@ -51,7 +51,7 @@ impl G2oParser {
     }
 
     fn parse_vertex(tokens: &[&str], line_number: usize) -> Vertex {
-        let expected_length = 5;
+        let expected_length = 5; // TODO change with landmarks
         Self::assert_tokens(expected_length, tokens.len(), line_number);
         Vertex {
             id: Self::parse_val(tokens[1], line_number),
@@ -59,18 +59,18 @@ impl G2oParser {
                 "VERTEX_SE2" => String::from("POSE2D_ANGLE"),
                 _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
             },
-            position: [Self::parse_val(tokens[2], line_number), Self::parse_val(tokens[3], line_number)],
-            rotation: [Self::parse_val(tokens[4], line_number)],
+            content: tokens[2..].iter()
+                .map(|s| Self::parse_val(s, line_number)).collect(),
         }
     }
 
     fn parse_edge(tokens: &[&str], line_number: usize) -> Edge {
-        let v_num = match tokens[0] {
-            "EDGE_PRIOR_SE2" => 1,
-            "EDGE_SE2" => 2,
+        let (v_num, c_len, index_mapping) = match tokens[0] {
+            "EDGE_PRIOR_SE2" => (1, 3, &[0, 1, 2, 1, 3, 4, 2, 4, 5]),
+            "EDGE_SE2" => (2, 3, &[0, 1, 2, 1, 3, 4, 2, 4, 5]),
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
-        let expected_length = 10 + v_num;
+        let expected_length = 10 + v_num; // TODO change with landmarks
         Self::assert_tokens(expected_length, tokens.len(), line_number);
         Edge {
             edge_type: match tokens[0] {
@@ -80,19 +80,10 @@ impl G2oParser {
             },
             vertices: tokens[1..1+v_num].iter()
                 .map(|s| Self::parse_val(s, line_number)).collect(),
-            restriction: {
-                let mut restriction = [0.0; 3];
-                restriction.iter_mut().enumerate()
-                    .for_each(|(i, entry)| *entry = Self::parse_val(tokens[1+v_num+i], line_number));
-                restriction
-            },
-            information_matrix: {
-                let mut information_matrix = [0.0; 9];
-                let index_mapping = [0, 1, 2, 1, 3, 4, 2, 4, 5];
-                information_matrix.iter_mut().enumerate()
-                    .for_each(|(i, entry)| *entry = Self::parse_val(tokens[4+v_num+index_mapping[i]], line_number));
-                information_matrix
-            },
+            restriction:tokens[1+v_num..1+v_num+c_len].iter()
+                .map(|s| Self::parse_val(s, line_number)).collect(),
+            information_matrix: index_mapping.iter()
+                .map(|i| Self::parse_val(tokens[1+v_num+c_len + *i as usize], line_number)).collect(),
         }
     }
 
@@ -122,8 +113,7 @@ impl G2oParser {
             other_type => panic!(format!("Vertex type unsupported to be composed to G2O format: {}", other_type)),
         }
         tokens.push(v.id.to_string());
-        Self::append_f64_slice_to_string_vec(&mut tokens, &v.position);
-        Self::append_f64_slice_to_string_vec(&mut tokens, &v.rotation);
+        Self::append_f64_slice_to_string_vec(&mut tokens, &v.content);
         let mut vertex_string = tokens.join(" ");
         if fixed_vertices.contains(&v.id) {
             vertex_string.push_str(&format!("\nFIX {}", v.id));
@@ -186,6 +176,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore] // deprecated input file
     fn test_dumb_compose_model_to_string() {
         init();
 
