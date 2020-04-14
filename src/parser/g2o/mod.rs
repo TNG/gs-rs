@@ -4,12 +4,11 @@ use crate::parser::model::{FactorGraphModel, Vertex, Edge};
 use crate::parser::Parser;
 use std::collections::HashSet;
 
-// TODO add landmark support -> only consider position, not rotation
 /// Implements G2O specific functions for parsing and composing files.
 /// More information on the G2O file format: https://github.com/RainerKuemmerle/g2o/wiki/File-Format
 ///
-/// Currently supported G2O vertices: VERTEX_SE2
-/// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2
+/// Currently supported G2O vertices: VERTEX_SE2, VERTEX_XY
+/// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2, EDGE_SE2_XY
 ///
 /// Other limitations:
 /// - Comments are not supported. Files that include lines starting with a "#" can not be parsed.
@@ -43,41 +42,40 @@ impl G2oParser {
             return;
         }
         match tokens[0] {
-            "VERTEX_SE2" => model.vertices.push(Self::parse_vertex(&tokens, line_number)),
-            "EDGE_SE2" | "EDGE_PRIOR_SE2" => model.edges.push(Self::parse_edge(&tokens, line_number)),
+            "VERTEX_SE2" | "VERTEX_XY" => model.vertices.push(Self::parse_vertex(&tokens, line_number)),
+            "EDGE_PRIOR_SE2" | "EDGE_SE2" | "EDGE_SE2_XY" => model.edges.push(Self::parse_edge(&tokens, line_number)),
             "FIX" => {model.fixed_vertices.insert(Self::parse_fix(&tokens, line_number));},
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
     }
 
     fn parse_vertex(tokens: &[&str], line_number: usize) -> Vertex {
-        let expected_length = 5; // TODO change with landmarks
+        let (type_str, c_len) = match tokens[0] {
+            "VERTEX_SE2" => ("POSE2D_ANGLE", 3),
+            "VERTEX_XY" => ("LANDMARK2D_ANGLE", 2),
+            _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
+        };
+        let expected_length = 2 + c_len;
         Self::assert_tokens(expected_length, tokens.len(), line_number);
         Vertex {
             id: Self::parse_val(tokens[1], line_number),
-            vertex_type: match tokens[0] {
-                "VERTEX_SE2" => String::from("POSE2D_ANGLE"),
-                _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
-            },
+            vertex_type: String::from(type_str),
             content: tokens[2..].iter()
                 .map(|s| Self::parse_val(s, line_number)).collect(),
         }
     }
 
     fn parse_edge(tokens: &[&str], line_number: usize) -> Edge {
-        let (v_num, c_len, index_mapping) = match tokens[0] {
-            "EDGE_PRIOR_SE2" => (1, 3, &[0, 1, 2, 1, 3, 4, 2, 4, 5]),
-            "EDGE_SE2" => (2, 3, &[0, 1, 2, 1, 3, 4, 2, 4, 5]),
+        let (type_str, v_num, c_len, index_mapping, upper_t_len) = match tokens[0] {
+            "EDGE_PRIOR_SE2" => ("PRIOR2D_ANGLE", 1, 3, vec![0, 1, 2, 1, 3, 4, 2, 4, 5], 6),
+            "EDGE_SE2" => ("ODOMETRY2D_ANGLE", 2, 3, vec![0, 1, 2, 1, 3, 4, 2, 4, 5], 6),
+            "EDGE_SE2_XY" => ("OBSERVATION2D_ANGLE", 2, 2, vec![0, 1, 1, 2], 3),
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
-        let expected_length = 10 + v_num; // TODO change with landmarks
+        let expected_length = 1 + v_num + c_len + upper_t_len;
         Self::assert_tokens(expected_length, tokens.len(), line_number);
         Edge {
-            edge_type: match tokens[0] {
-                "EDGE_PRIOR_SE2" => String::from("PRIOR2D_ANGLE"),
-                "EDGE_SE2" => String::from("ODOMETRY2D_ANGLE"),
-                _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
-            },
+            edge_type: String::from(type_str),
             vertices: tokens[1..1+v_num].iter()
                 .map(|s| Self::parse_val(s, line_number)).collect(),
             restriction:tokens[1+v_num..1+v_num+c_len].iter()
@@ -110,6 +108,7 @@ impl G2oParser {
         let mut tokens: Vec<String> = vec![];
         match v.vertex_type.as_str() {
             "POSE2D_ANGLE" => tokens.push(String::from("VERTEX_SE2")),
+            "LANDMARK2D_ANGLE" => tokens.push(String::from("VERTEX_XY")),
             other_type => panic!(format!("Vertex type unsupported to be composed to G2O format: {}", other_type)),
         }
         tokens.push(v.id.to_string());
@@ -126,11 +125,16 @@ impl G2oParser {
         match e.edge_type.as_str() {
             "PRIOR2D_ANGLE" => tokens.push(String::from("EDGE_PRIOR_SE2")),
             "ODOMETRY2D_ANGLE" => tokens.push(String::from("EDGE_SE2")),
+            "OBSERVATION2D_ANGLE" => tokens.push(String::from("EDGE_SE2_XY")),
             other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
         }
         Self::append_usize_slice_to_string_vec(&mut tokens, e.vertices.as_slice());
         Self::append_f64_slice_to_string_vec(&mut tokens, &e.restriction);
-        let upper_triangle: [usize; 6] = [0, 1, 2, 4, 5, 8];
+        let upper_triangle = match e.edge_type.as_str() {
+            "PRIOR2D_ANGLE" | "ODOMETRY2D_ANGLE" => vec![0, 1, 2, 4, 5, 8],
+            "OBSERVATION2D_ANGLE" => vec![0, 1, 3],
+            other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
+        };
         Self::append_f64_slice_elements_to_string_vec(&mut tokens, &e.information_matrix, &upper_triangle);
         tokens.join(" ")
     }
