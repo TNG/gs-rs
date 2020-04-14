@@ -37,8 +37,8 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
         return;
     }
     let old_pose = var.get_pose();
-    let index = var.get_index().unwrap();
-    let correction = &solution[3*index..3*index+3];
+    let range = var.get_range().unwrap();
+    let correction = &solution[range];
     let mut updated_rot = (old_pose[2] + correction[2]) % (2.0 * PI);
     if updated_rot > PI {
         updated_rot -= 2.0 * PI;

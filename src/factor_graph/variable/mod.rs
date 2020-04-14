@@ -1,6 +1,7 @@
 //! The internal representation of a factor graph's optimizable variable.
 
 use std::fmt;
+use std::ops::Range;
 
 pub mod landmark_variable_2d;
 pub mod vehicle_variable_2d;
@@ -25,8 +26,8 @@ pub trait Variable<'a>: fmt::Debug {
     fn get_pose(&self) -> Vec<f64>;
     /// Whether the variable is fixed or not. Fixed variables' poses are not subject to change.
     fn is_fixed(&self) -> bool;
-    /// The variable's index in H and b. Fixed variables do not have such an index.
-    fn get_index(&self) -> Option<usize>;
+    /// The variable's index range in H and b. Fixed variables do not have such a range.
+    fn get_range(&self) -> Option<Range<usize>>;
     /// Sets a new variable pose.
     fn set_pose(&self, update: Vec<f64>);
 }

@@ -6,7 +6,7 @@ use crate::factor_graph::variable::{
 };
 use crate::factor_graph::FactorGraph;
 use crate::parser::model::{Edge, FactorGraphModel, Vertex};
-use std::ops::Index;
+use std::ops::{Index, Range};
 use petgraph::visit::EdgeRef;
 use std::collections::{HashSet, HashMap};
 
@@ -15,7 +15,7 @@ impl From<FactorGraphModel> for FactorGraph<'_> {
         let mut factor_graph = FactorGraph {
             csr: Csr::new(),
             node_indices: vec![],
-            number_of_dynamic_nodes: 0,
+            matrix_dim: 0,
             custom_to_csr_id_map: HashMap::new(),
         };
 
@@ -95,40 +95,40 @@ fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
 
 fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
     match vertex.vertex_type.as_str() {
-        "POSE2D_ANGLE" => factor_graph
-            .node_indices
-            .push(
-                factor_graph
-                    .csr
-                    .add_node(Box::new(VehicleVariable2D::new(
-                        vertex.id,
-                        vertex.position[0],
-                        vertex.position[1],
-                        vertex.rotation[0],
-                        fixed,
-                        factor_graph.number_of_dynamic_nodes
-                    ))),
-            ),
-        "LANDMARK2D_ANGLE" => factor_graph
-            .node_indices
-            .push(
-                factor_graph
-                    .csr
-                    .add_node(Box::new(LandmarkVariable2D::new(
-                        vertex.id,
-                        vertex.position[0],
-                        vertex.position[1],
-                        vertex.rotation[0],
-                        fixed,
-                        factor_graph.number_of_dynamic_nodes
-                    ))),
-            ),
+        "POSE2D_ANGLE" => factor_graph.node_indices.push(
+            factor_graph.csr
+                .add_node(Box::new(VehicleVariable2D::new(
+                    vertex.id,
+                    vertex.position[0],
+                    vertex.position[1],
+                    vertex.rotation[0],
+                    fixed,
+                    add_var_to_matrix(&mut factor_graph.matrix_dim, 3, fixed),
+                ))),
+        ),
+        "LANDMARK2D_ANGLE" => factor_graph.node_indices.push(
+            factor_graph.csr
+                .add_node(Box::new(LandmarkVariable2D::new(
+                    vertex.id,
+                    vertex.position[0],
+                    vertex.position[1],
+                    vertex.rotation[0],
+                    fixed,
+                    add_var_to_matrix(&mut factor_graph.matrix_dim, 3, fixed),
+                ))),
+        ),
         _ => {
             error!("Could not add vertex {:?}", vertex);
         }
     };
     factor_graph.custom_to_csr_id_map.insert(vertex.id, *factor_graph.node_indices.last().unwrap());
-    if !fixed {
-        factor_graph.number_of_dynamic_nodes += 1;
+}
+
+fn add_var_to_matrix(dim: &mut usize, added_dim: usize, fixed: bool) -> Option<Range<usize>> {
+    if fixed {
+        None
+    } else {
+        *dim += added_dim;
+        Some(*dim-added_dim..*dim)
     }
 }

@@ -9,7 +9,7 @@ use std::env::var;
 use std::f64::consts::PI;
 
 pub fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>) {
-    let dim = factor_graph.number_of_dynamic_nodes * 3;
+    let dim = factor_graph.matrix_dim;
     let mut H = DMatrix::from_vec(dim, dim, vec![0.0; dim * dim]);
     let mut b = DVector::from_vec(vec![0.0; dim]);
 
@@ -111,19 +111,17 @@ fn calc_two_var_jacobians_2d(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f
 }
 
 fn get_pos_and_rot(pose: &[f64]) -> (Vector2<f64>, f64) {
-    (Vector2::new(pose[0], pose[1],), pose[2])
+    (Vector2::new(pose[0], pose[1]), pose[2])
 }
 
 fn update_H_submatrix_from_one_var_calc(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, U3, U3, ArrayStorage<f64,U3,U3>>, var: &Box<dyn Variable>) {
-    let index = var.get_index().unwrap();
-    let range = 3*index..3*index+3;
+    let range = var.get_range().unwrap();
     let updated_submatrix = &(H.index((range.clone(), range.clone(). clone())) + added_matrix);
     H.index_mut((range.clone(), range)).copy_from(updated_submatrix);
 }
 
 fn update_b_subvector_from_one_var_calc(b: &mut DVector<f64>, added_vector: &Vector<f64, U3, ArrayStorage<f64,U3,U1>>, var: &Box<dyn Variable>) {
-    let index = var.get_index().unwrap();
-    let range = 3*index..3*index+3;
+    let range = var.get_range().unwrap();
     let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);
     b.index_mut((range, ..)).copy_from(updated_subvector);
 }
@@ -132,10 +130,8 @@ fn update_H_submatrix_from_two_var_calc(H: &mut DMatrix<f64>, added_matrix: &Mat
     if var_row.is_fixed() || var_col.is_fixed() {
         return;
     }
-    let row_index = var_row.get_index().unwrap();
-    let col_index = var_col.get_index().unwrap();
-    let row_range = 3*row_index..3*row_index+3;
-    let col_range = 3*col_index..3*col_index+3;
+    let row_range = var_row.get_range().unwrap();
+    let col_range = var_col.get_range().unwrap();
     let updated_submatrix = &(H.index((row_range.clone(), col_range.clone())) + added_matrix);
     H.index_mut((row_range, col_range)).copy_from(updated_submatrix);
 }
@@ -144,8 +140,7 @@ fn update_b_subvector_from_two_var_calc(b: &mut DVector<f64>, added_vector: &Vec
     if var.is_fixed() {
         return;
     }
-    let index = var.get_index().unwrap();
-    let range = 3*index..3*index+3;
+    let range = var.get_range().unwrap();
     let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);
     b.index_mut((range, ..)).copy_from(updated_subvector);
 }

@@ -23,7 +23,7 @@ pub struct FactorGraph<'a> {
     /// Map from custom IDs as stated in the parsed file to internal CSR indices.
     pub custom_to_csr_id_map: HashMap<usize, NodeIndex<usize>>, // TODO combine with node_indices for less redundancy
     /// The number of nodes which are dynamic, i.e. the number of fixed nodes subtracted of the total number of nodes.
-    pub number_of_dynamic_nodes: usize,
+    pub matrix_dim: usize,
 }
 
 impl<'a> FactorGraph<'a> {
