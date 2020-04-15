@@ -3,22 +3,18 @@
     {
       "id": 0,
       "type": "POSE2D_ANGLE",
-      "position": [
+      "content": [
         0.0,
-        1.0
-      ],
-      "rotation": [
+        1.0,
         0.0
       ]
     },
     {
       "id": 1,
       "type": "POSE2D_ANGLE",
-      "position": [
+      "content": [
         1.0,
-        0.0
-      ],
-      "rotation": [
+        0.0,
         0.0
       ]
     }

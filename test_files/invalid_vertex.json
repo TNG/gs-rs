@@ -1,45 +1,29 @@
 {
   "vertices": [
     {
-      "id": 0,
+      "THIS_PART_IS_BROKEN": 0,
       "type": "POSE2D_ANGLE",
-      "position": [
+      "content": [
         0.0,
-        0.0
-      ],
-      "rotation": [
+        1.0,
         0.0
       ]
     },
     {
       "id": 1,
       "type": "POSE2D_ANGLE",
-      "position": [
-        0.0,
-        1.0
-      ],
-      "rotation": [
-        0.0
-      ]
-    },
-    {
-      "id": 2,
-      "type": "POSE2D_ANGLE",
-      "position": [
+      "content": [
         1.0,
-        0.0
-      ],
-      "rotation": [
+        0.0,
         0.0
       ]
     }
   ],
   "edges": [
     {
-      "type": "ODOMETRY2D_ANGLE",
+      "type": "PRIOR2D_ANGLE",
       "vertices": [
-        0,
-        1
+        0
       ],
       "restriction": [
         0.0,
@@ -55,14 +39,36 @@
         0.0,
         0.0,
         0.0,
-        1e-9
+        0.000001
+      ]
+    },
+    {
+      "type": "PRIOR2D_ANGLE",
+      "vertices": [
+        1
+      ],
+      "restriction": [
+        1.00,
+        0.00,
+        0.0
+      ],
+      "informationMatrix": [
+        10.0,
+        0.0,
+        0.0,
+        0.0,
+        10.0,
+        0.0,
+        0.0,
+        0.0,
+        0.000001
       ]
     },
     {
       "type": "ODOMETRY2D_ANGLE",
       "vertices": [
-        1,
-        2
+        0,
+        1
       ],
       "restriction": [
         0.5,
@@ -78,7 +84,7 @@
         0.0,
         0.0,
         0.0,
-        1e-10
+        0.000001
       ]
     }
   ],

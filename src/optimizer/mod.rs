@@ -13,9 +13,11 @@ use crate::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::solver::Solver;
 use std::f64::consts::PI;
 use crate::factor_graph::variable::Variable;
+use crate::factor_graph::variable::VariableType::Vehicle2D;
 
 mod linear_system;
 
+// TODO document how the optimization works
 /// Optimizes a factor graph with the given number of iterations.
 pub fn optimize(graph: &FactorGraph, iterations: usize) {
     for _i in 0..iterations {
@@ -36,17 +38,20 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
     if var.is_fixed() {
         return;
     }
-    let old_pose = var.get_content();
+    let old_content = var.get_content();
     let range = var.get_range().unwrap();
     let correction = &solution[range];
-    let mut updated_rot = (old_pose[2] + correction[2]) % (2.0 * PI);
-    if updated_rot > PI {
-        updated_rot -= 2.0 * PI;
-    } else if updated_rot < -PI {
-        updated_rot += 2.0 * PI;
+    let mut updated_content: Vec<f64> = old_content.iter().zip(correction.iter())
+        .map(|(old, cor)| old + cor).collect();
+    if var.get_type() == Vehicle2D {
+        updated_content[2] %= (2.0 * PI);
+        if updated_content[2] > PI {
+            updated_content[2] -= 2.0 * PI;
+        } else if updated_content[2] < -PI {
+            updated_content[2] += 2.0 * PI;
+        }
     }
-    let updated_pose = vec![old_pose[0] + correction[0], old_pose[1] + correction[1], updated_rot];
-    var.set_content(updated_pose);
+    var.set_content(updated_content);
 }
 
 #[cfg(test)]
@@ -98,5 +103,15 @@ mod tests {
     #[test]
     fn test_multiple_iterations() {
         test_valid_optimization("pos2d_and_odo2d", 25);
+    }
+
+    #[test]
+    fn test_only_obs2d_factors() {
+        test_valid_optimization("obs2d_mainly", 1);
+    }
+
+    #[test]
+    fn test_all_2d_factors() {
+        test_valid_optimization("full2d", 1);
     }
 }

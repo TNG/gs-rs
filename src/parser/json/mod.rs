@@ -43,12 +43,11 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // TODO use valid file
     fn test_parse_valid_file_to_model() {
         init();
 
         let parsed_model =
-            match JsonParser::parse_file_to_model("test_files/testTrajectory2DAngle.json") {
+            match JsonParser::parse_file_to_model("test_files/tiny_vehicle_only_2d.json") {
                 Ok(x) => x,
                 Err(str) => panic!(str),
             };
@@ -102,7 +101,7 @@ mod tests {
         init();
 
         let parsed_model: FactorGraphModel =
-            match JsonParser::parse_file_to_model("test_files/testBrokenTrajectory2DAngle.json") {
+            match JsonParser::parse_file_to_model("test_files/invalid_vertex.json") {
                 Ok(x) => x,
                 Err(str) => panic!(str),
             };

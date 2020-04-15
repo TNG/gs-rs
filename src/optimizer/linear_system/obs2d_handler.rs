@@ -3,7 +3,6 @@ use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;
 use std::f32::consts::PI;
 
-// TODO debug
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &Box<dyn Variable>, var_j: &Box<dyn Variable>) {
     let (pos_i, rot_i) = get_pos_and_rot(&var_i.get_content());
     let pos_j= get_pos(&var_j.get_content());
@@ -19,19 +18,9 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
 
     let err_pos = Rotation2::new(-rot_i) * (pos_j - pos_i) - pos_ij;
     let mut err_vec = err_pos.data.to_vec();
-    // remove
-    println!("Observation Error: {:?}\n", err_vec); // ALWAYS CORRECT
-    // remove
     let b_updates = (RowVector2::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_updates.index((..3, ..)), var_i);
     update_b_subvector(b, &b_updates.index((3.., ..)), var_j);
-    // remove
-    print!("From b: {}", &b_updates.index((..3, ..))); // ONLY NEGATIVE IN THE FIRST TWO ENTRIES, AFTER THAT ALWAYS INCORRECT
-    print!("From A: {}", &H_updates.index((..3, ..3))); // ONLY CORRECT IN FIRST ENTRY, AFTER THAT ALWAYS INCORRECT
-    print!("To b: {}", &b_updates.index((3.., ..))); // ALWAYS NEGATIVE (BUT OTHERWISE CORRECT)
-    print!("To A: {}", &H_updates.index((3.., 3..))); // ALWAYS CORRECT
-    // Jacobians are always correct as well
-    // remove
 }
 
 fn calc_jacobians(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f64>) -> (Matrix2x5<f64>, Matrix5x2<f64>) {
