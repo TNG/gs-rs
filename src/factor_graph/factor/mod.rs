@@ -20,7 +20,10 @@ pub struct Factor {
     /// The factor's type.
     pub factor_type: FactorType,
     /// The factor's constraint.
-    /// Content for 2D factors: vec![pose_position_x, pose_position_y, pose_rotation]
+    ///
+    /// Content for Position2D and Odometry2D: vec![position_x, position_y, rotation]
+    ///
+    /// Content for Observation2D: vec![position_x, position_y]
     pub constraint: Vec<f64>,
     /// The factor's wrapped information matrix, equalling the inverse of the factor's mean matrix.
     pub information_matrix: InformationMatrix,

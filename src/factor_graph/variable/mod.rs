@@ -11,7 +11,7 @@ pub mod vehicle_variable_2d;
 pub enum VariableType {
     /// Vehicle pose (position and rotation) in 2D.
     Vehicle2D,
-    /// Vehicle pose (position and rotation) in 2D.
+    /// Landmark position in 2D.
     Landmark2D,
 }
 
@@ -23,9 +23,9 @@ pub trait Variable<'a>: fmt::Debug {
     fn get_type(&self) -> VariableType;
     /// The variable's pose or position. May be subject to change, unless the variable is fixed.
     ///
-    /// Content for 2D vehicle variables: vec![pose_position_x, pose_position_y, pose_rotation]
+    /// Content for 2D vehicle variables: vec![position_x, position_y, rotation]
     ///
-    /// Content for 2D landmark variables: vec![pose_position_x, pose_position_y]
+    /// Content for 2D landmark variables: vec![position_x, position_y]
     fn get_content(&self) -> Vec<f64>;
     /// Whether the variable is fixed or not. Fixed variables' poses are not subject to change.
     fn is_fixed(&self) -> bool;

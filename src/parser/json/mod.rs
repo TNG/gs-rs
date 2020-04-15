@@ -5,6 +5,8 @@ use crate::parser::Parser;
 
 // TODO properly document Json file format
 /// Implements JSON specific functions for parsing and composing files.
+///
+/// Uses the JSON representation of [FactorGraphModel](../model/struct.FactorGraphModel.html).
 pub struct JsonParser;
 
 impl Parser for JsonParser {
