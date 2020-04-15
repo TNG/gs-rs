@@ -3,6 +3,7 @@ use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;
 use std::f32::consts::PI;
 
+// TODO debug
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &Box<dyn Variable>, var_j: &Box<dyn Variable>) {
     let (pos_i, rot_i) = get_pos_and_rot(&var_i.get_content());
     let pos_j= get_pos(&var_j.get_content());
@@ -24,33 +25,27 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     let b_updates = (RowVector2::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_updates.index((..3, ..)), var_i);
     update_b_subvector(b, &b_updates.index((3.., ..)), var_j);
-
+    // remove
     print!("From b: {}", &b_updates.index((..3, ..))); // ONLY NEGATIVE IN THE FIRST TWO ENTRIES, AFTER THAT ALWAYS INCORRECT
     print!("From A: {}", &H_updates.index((..3, ..3))); // ONLY CORRECT IN FIRST ENTRY, AFTER THAT ALWAYS INCORRECT
     print!("To b: {}", &b_updates.index((3.., ..))); // ALWAYS NEGATIVE (BUT OTHERWISE CORRECT)
     print!("To A: {}", &H_updates.index((3.., 3..))); // ALWAYS CORRECT
+    // Jacobians are always correct as well
+    // remove
 }
 
 fn calc_jacobians(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f64>) -> (Matrix2x5<f64>, Matrix5x2<f64>) {
-    // let rot_obj = Rotation3::from_axis_angle(&Vector3::z_axis(), -rot_ij);
-    // let R_ij_T = rot_obj.matrix();
     let delta_pos_vec = pos_j - pos_i;
     let delta_pos = delta_pos_vec.data.as_slice();
     let sin_i = rot_i.sin();
     let cos_i = rot_i.cos();
-    let last_column_top = -sin_i * delta_pos[0] + cos_i * delta_pos[1];
-    let last_column_mid = -cos_i * delta_pos[0] - sin_i * delta_pos[1];
-    let A_ij = &Matrix2x3::from_vec(vec![         -cos_i,           sin_i,    // transposed matrix is displayed
-                                                  -sin_i,          -cos_i,
-                                         last_column_top, last_column_mid,]);
-    let B_ij = &Matrix2::from_vec(vec![cos_i, -sin_i,    // transposed matrix is displayed
-                                       sin_i,  cos_i,]);
-
-    let mut jacobian = Matrix2x5::from_vec(vec![0.0; 10]);
-    jacobian.index_mut((.., ..3)).copy_from(&A_ij);
-    jacobian.index_mut((.., 3..)).copy_from(&B_ij);
-    print!("Observation Jacobian_i: {}", &A_ij); // ALWAYS CORRECT
-    print!("Observation Jacobian_j: {}", &B_ij); // ALWAYS CORRECT
+    let mid_col_top = -sin_i * delta_pos[0] + cos_i * delta_pos[1];
+    let mid_col_bot = -cos_i * delta_pos[0] - sin_i * delta_pos[1];
+    let jacobian = Matrix2x5::from_vec(vec![     -cos_i,       sin_i,    // transposed matrix is displayed
+                                                 -sin_i,      -cos_i,
+                                            mid_col_top, mid_col_bot,
+                                                  cos_i,      -sin_i,
+                                                  sin_i,       cos_i,]);
     (jacobian, jacobian.transpose())
 }
 

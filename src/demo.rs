@@ -21,10 +21,10 @@ use std::collections::HashSet;
 
 #[test]
 fn current_test() {
-    let factor_graph = match G2oParser::parse_file("test_files/optimizer_tests/obs2d_only_0.g2o") {
+    let factor_graph = match G2oParser::parse_file("test_files/obst.g2o") {
         Ok(factor_graph) => factor_graph,
         Err(str) => panic!(str),
     };
     optimize(&factor_graph, 1);
-    G2oParser::compose_file(&factor_graph, "test_files/optimizer_tests/obs2d_only_1.g2o");
+    G2oParser::compose_file(&factor_graph, "test_files/obst1.g2o");
 }
