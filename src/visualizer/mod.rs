@@ -50,10 +50,8 @@ fn add_factor_graph_to_window(
     visual_factor_graph
 }
 
-fn add_variables_and_factors(
-    visual_factor_graph: &mut VisualFactorGraph,
-    factor_graph: &FactorGraph,
-) {
+// TODO split up into multiple functions
+fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor_graph: &FactorGraph) {
     for variable_index in &factor_graph.node_indices {
         let variable = factor_graph.csr.index(*variable_index);
         let var_point = Point3::new(
@@ -65,13 +63,15 @@ fn add_variables_and_factors(
         let mut variable_object = visual_factor_graph.scene_node.add_sphere(0.1);
         variable_object.set_local_translation(var_point.coords.into());
 
-        let mut var_rotation_object = variable_object.add_capsule(0.02, 2.0);
-        let var_rotation = variable.get_content()[2] as f32;
-        var_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(
-            &Vector3::z_axis(),
-            var_rotation,
-        ));
-        var_rotation_object.prepend_to_local_translation(&Translation3::new(0.0, 0.20, 0.0));
+        if variable.get_type() == Vehicle2D {
+            let mut var_rotation_object = variable_object.add_capsule(0.02, 2.0);
+            let var_rotation = variable.get_content()[2] as f32;
+            var_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(
+                &Vector3::z_axis(),
+                var_rotation,
+            ));
+            var_rotation_object.prepend_to_local_translation(&Translation3::new(0.0, 0.20, 0.0));
+        }
 
         match variable.get_type() {
             Vehicle2D => variable_object.set_color(1.0, 0.0, 0.0),
@@ -85,15 +85,12 @@ fn add_variables_and_factors(
                 factor.constraint[1] as f32,
                 0.0 as f32,
             );
-            let factor_rotation = factor.constraint[2] as f32;
-            let (meas_point, meas_rotation) = match factor.factor_type {
-                Position2D => (factor_point, factor_rotation),
+            let meas_point = match factor.factor_type {
+                Position2D => factor_point,
                 Odometry2D | Observation2D => {
+                    let var_rotation = variable.get_content()[2] as f32;
                     let local_point = Rotation3::new(Vector3::z() * var_rotation) * factor_point;
-                    (
-                        (var_point.coords + local_point.coords).into(),
-                        var_rotation + factor_rotation,
-                    )
+                    (var_point.coords + local_point.coords).into()
                 }
             };
 
@@ -106,13 +103,24 @@ fn add_variables_and_factors(
             let mut measurement_object = visual_factor_graph.scene_node.add_cube(0.16, 0.16, 0.16);
             measurement_object.set_local_translation(meas_point.coords.into());
 
-            let mut measured_rotation_object = measurement_object.add_capsule(0.04, 1.5);
-            measured_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(
-                &Vector3::z_axis(),
-                meas_rotation,
-            ));
-            measured_rotation_object
-                .prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
+            if factor.factor_type == Position2D || factor.factor_type == Odometry2D {
+                let factor_rotation = factor.constraint[2] as f32;
+                let meas_rotation = match factor.factor_type {
+                    Position2D => factor_rotation,
+                    Odometry2D => {
+                        let var_rotation = variable.get_content()[2] as f32;
+                        var_rotation + factor_rotation
+                    },
+                    _ => panic!("Internal Error at visualization of unsupported rotation."),
+                };
+                let mut measured_rotation_object = measurement_object.add_capsule(0.04, 1.5);
+                measured_rotation_object.set_local_rotation(UnitQuaternion::from_axis_angle(
+                    &Vector3::z_axis(),
+                    meas_rotation,
+                ));
+                measured_rotation_object
+                    .prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
+            }
 
             measurement_object.set_color(r, g, b);
 
