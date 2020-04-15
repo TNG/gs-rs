@@ -22,7 +22,9 @@ pub trait Variable<'a>: fmt::Debug {
     /// The variable's type. Should not change.
     fn get_type(&self) -> VariableType;
     /// The variable's pose or position. May be subject to change, unless the variable is fixed.
+    ///
     /// Content for 2D vehicle variables: vec![pose_position_x, pose_position_y, pose_rotation]
+    ///
     /// Content for 2D landmark variables: vec![pose_position_x, pose_position_y]
     fn get_content(&self) -> Vec<f64>;
     /// Whether the variable is fixed or not. Fixed variables' poses are not subject to change.

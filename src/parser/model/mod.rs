@@ -2,7 +2,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 mod converter;
 
@@ -11,7 +11,7 @@ mod converter;
 pub struct FactorGraphModel {
     pub vertices: Vec<Vertex>,
     pub edges: Vec<Edge>,
-    pub fixed_vertices: HashSet<usize>,
+    pub fixed_vertices: BTreeSet<usize>,
 }
 
 /// Structure containing a factor graph model's vertex, representing a variable.

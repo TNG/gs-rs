@@ -17,7 +17,7 @@ fn main() {
 }
 
 use crate::parser::g2o::G2oParser;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 #[test]
 fn current_test() {

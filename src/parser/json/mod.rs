@@ -31,7 +31,7 @@ mod tests {
     use super::*;
     use crate::parser::model::{Edge, Vertex};
     use log::LevelFilter;
-    use std::collections::HashSet;
+    use std::collections::BTreeSet;
 
     fn init() {
         let _ = env_logger::builder()
@@ -84,7 +84,7 @@ mod tests {
                 information_matrix: vec![1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001],
             },
         ];
-        let mut fixed_vertices = HashSet::new();
+        let mut fixed_vertices = BTreeSet::new();
         fixed_vertices.insert(0);
         let expected_model = FactorGraphModel {
             vertices,

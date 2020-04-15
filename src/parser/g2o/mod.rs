@@ -2,17 +2,15 @@
 
 use crate::parser::model::{FactorGraphModel, Vertex, Edge};
 use crate::parser::Parser;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 /// Implements G2O specific functions for parsing and composing files.
+///
 /// More information on the G2O file format: https://github.com/RainerKuemmerle/g2o/wiki/File-Format
 ///
 /// Currently supported G2O vertices: VERTEX_SE2, VERTEX_XY
-/// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2, EDGE_SE2_XY
 ///
-/// Other limitations:
-/// - Comments are not supported. Files that include lines starting with a "#" can not be parsed.
-/// - Lines starting with "FIX" only expect one fixed vertex. If more than one vertex is fixed, multiple lines starting with "FIX" need to be used.
+/// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2, EDGE_SE2_XY
 pub struct G2oParser;
 
 impl Parser for G2oParser {
@@ -20,7 +18,7 @@ impl Parser for G2oParser {
         let mut model = FactorGraphModel {
             vertices: vec![],
             edges: vec![],
-            fixed_vertices: HashSet::new(),
+            fixed_vertices: BTreeSet::new(),
         };
         let lines = s.split("\n");
         lines.enumerate()
@@ -38,13 +36,13 @@ impl Parser for G2oParser {
 impl G2oParser {
     fn parse_line(model: &mut FactorGraphModel, line: &str, line_number: usize) {
         let tokens: Vec<&str> = line.split_whitespace().collect();
-        if tokens.len() == 0 {
+        if tokens.len() == 0 || line.starts_with('#') {
             return;
         }
         match tokens[0] {
             "VERTEX_SE2" | "VERTEX_XY" => model.vertices.push(Self::parse_vertex(&tokens, line_number)),
             "EDGE_PRIOR_SE2" | "EDGE_SE2" | "EDGE_SE2_XY" => model.edges.push(Self::parse_edge(&tokens, line_number)),
-            "FIX" => {model.fixed_vertices.insert(Self::parse_fix(&tokens, line_number));},
+            "FIX" => {model.fixed_vertices.extend(Self::parse_fix(&tokens, line_number));},
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
     }
@@ -85,10 +83,12 @@ impl G2oParser {
         }
     }
 
-    fn parse_fix(tokens: &[&str], line_number: usize) -> usize {
-        let expected_length = 2;
-        Self::assert_tokens(expected_length, tokens.len(), line_number);
-        Self::parse_val(tokens[1], line_number)
+    fn parse_fix(tokens: &[&str], line_number: usize) -> BTreeSet<usize> {
+        if tokens.len() == 1 {
+            panic!("Empty set of fixed vertices in line {}: Expected at least one vertex ID.", line_number);
+        }
+        tokens[1..].iter()
+            .map(|s| Self::parse_val(s, line_number)).collect()
     }
 
     fn assert_tokens(expected: usize, actual: usize, line_number: usize) {
@@ -104,7 +104,7 @@ impl G2oParser {
         }
     }
 
-    fn vertex_to_string(v: &Vertex, fixed_vertices: &HashSet<usize>) -> String {
+    fn vertex_to_string(v: &Vertex, fixed_vertices: &BTreeSet<usize>) -> String {
         let mut tokens: Vec<String> = vec![];
         match v.vertex_type.as_str() {
             "POSE2D_ANGLE" => tokens.push(String::from("VERTEX_SE2")),
@@ -114,6 +114,7 @@ impl G2oParser {
         tokens.push(v.id.to_string());
         Self::append_f64_slice_to_string_vec(&mut tokens, &v.content);
         let mut vertex_string = tokens.join(" ");
+        // TODO see if compatible with original g2o, otherwise print set of fixed vertices in one line
         if fixed_vertices.contains(&v.id) {
             vertex_string.push_str(&format!("\nFIX {}", v.id));
         }
