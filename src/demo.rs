@@ -13,6 +13,6 @@ fn current_test() {
         Ok(factor_graph) => factor_graph,
         Err(str) => panic!(str),
     };
-    optimize(&factor_graph, 1);
-    G2oParser::compose_file(&factor_graph, "test_files/optimizer_tests/full2d_1.g2o");
+    optimize(&factor_graph, 25);
+    // G2oParser::compose_file(&factor_graph, "test_files/optimizer_tests/full2d_25.g2o");
 }

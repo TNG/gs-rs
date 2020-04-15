@@ -101,17 +101,17 @@ mod tests {
     }
 
     #[test]
-    fn test_multiple_iterations() {
-        test_valid_optimization("pos2d_and_odo2d", 25);
-    }
-
-    #[test]
-    fn test_only_obs2d_factors() {
+    fn test_mainly_obs2d_factors() {
         test_valid_optimization("obs2d_mainly", 1);
     }
 
     #[test]
     fn test_all_2d_factors() {
         test_valid_optimization("full2d", 1);
+    }
+
+    #[test]
+    fn test_multiple_iterations() {
+        test_valid_optimization("full2d", 25);
     }
 }
