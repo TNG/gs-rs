@@ -39,6 +39,7 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                 vertex_type: match node.get_type() {
                     Vehicle2D => String::from("POSE2D_ANGLE"),
                     Landmark2D => String::from("LANDMARK2D_ANGLE"),
+                    Vehicle3D => String::from("POSE3D_ANGLE"),
                 },
                 content: node.get_content(),
             });
@@ -53,6 +54,7 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                         Position2D => String::from("PRIOR2D_ANGLE"),
                         Odometry2D => String::from("ODOMETRY2D_ANGLE"),
                         Observation2D => String::from("OBSERVATION2D_ANGLE"),
+                        Odometry3D => String::from("ODOMETRY3D_ANGLE"),
                     },
                     vertices: edge_vertices,
                     restriction: factor.constraint.clone(),

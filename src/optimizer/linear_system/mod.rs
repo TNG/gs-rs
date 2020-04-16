@@ -28,5 +28,6 @@ fn update_H_b(factor_graph: &FactorGraph, H: &mut DMatrix<f64>, b: &mut DVector<
         Position2D => pos2d_handler::update_H_b(H, b, factor, &factor_graph.get_var_at_csr_index(edge.source())),
         Odometry2D => odo2d_handler::update_H_b(H, b, factor, &factor_graph.get_var_at_csr_index(edge.source()), &factor_graph.get_var_at_csr_index(edge.target())),
         Observation2D => obs2d_handler::update_H_b(H, b, factor, &factor_graph.get_var_at_csr_index(edge.source()), &factor_graph.get_var_at_csr_index(edge.target())),
+        Odometry3D => unimplemented!(),
     };
 }

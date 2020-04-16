@@ -74,7 +74,7 @@ fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor
         }
 
         match variable.get_type() {
-            Vehicle2D => variable_object.set_color(1.0, 0.0, 0.0),
+            Vehicle2D | Vehicle3D => variable_object.set_color(1.0, 0.0, 0.0),
             Landmark2D => variable_object.set_color(0.0, 1.0, 0.0),
         };
 
@@ -91,12 +91,13 @@ fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor
                     let var_rotation = variable.get_content()[2] as f32;
                     let local_point = Rotation3::new(Vector3::z() * var_rotation) * factor_point;
                     (var_point.coords + local_point.coords).into()
-                }
+                },
+                Odometry3D => unimplemented!(),
             };
 
             let (r, g, b) = match factor.factor_type {
                 Position2D => (1.0, 0.5, 0.5),
-                Odometry2D => (0.5, 0.5, 1.0),
+                Odometry2D | Odometry3D => (0.5, 0.5, 1.0),
                 Observation2D => (0.5, 1.0, 0.5),
             };
 
