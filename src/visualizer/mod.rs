@@ -29,6 +29,7 @@ pub fn visualize(factor_graph: &FactorGraph) {
     let mut window = Window::new("gs-rs");
     let visual_factor_graph = add_factor_graph_to_window(&mut window, &factor_graph);
 
+    // TODO dynamic initial position
     let mut cam = ArcBall::new(Point3::new(0.0, 0.0, 50.0), Point3::new(0.0, 0.0, 0.0));
     while window.render_with_camera(&mut cam) {
         visual_factor_graph
@@ -158,10 +159,8 @@ fn add_variables_and_factors(visual_factor_graph: &mut VisualFactorGraph, factor
 #[cfg(test)]
 mod test {
     use log::LevelFilter;
-
     use crate::parser::json::JsonParser;
     use crate::parser::Parser;
-
     use super::*;
 
     fn init() {
