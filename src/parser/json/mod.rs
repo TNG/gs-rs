@@ -12,7 +12,7 @@ pub struct JsonParser;
 impl Parser for JsonParser {
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String> {
         match serde_json::from_str::<FactorGraphModel>(s) {
-            Ok(model) => Ok(model),
+            Ok(model) => Ok(model), // TODO verify_model(model) which checks that no invalid types or wrongly sized vectors are used
             Err(e) => Err(format!("Parsing to FactorGraphModel unsuccessful: {}", e)),
         }
     }

@@ -3,34 +3,27 @@
     {
       "id": 0,
       "type": "POSE2D_ANGLE",
-      "position": [
+      "content": [
         1.0,
-        0.0
-      ],
-      "rotation": [
+        0.0,
         1.57
       ]
     },
     {
       "id": 1,
       "type": "POSE2D_ANGLE",
-      "position": [
+      "content": [
         0.0,
-        1.0
-      ],
-      "rotation": [
+        1.0,
         3.14
       ]
     },
     {
       "id": 2,
       "type": "LANDMARK2D_ANGLE",
-      "position": [
+      "content": [
         1.5,
         2.0
-      ],
-      "rotation": [
-        3.14
       ]
     }
   ],
@@ -110,16 +103,10 @@
       ],
       "restriction": [
         0.0,
-        -1.0,
-        1.57
+        -1.0
       ],
       "informationMatrix": [
         1.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0,
-        0.0,
         0.0,
         0.0,
         1.0

@@ -11,9 +11,12 @@ use std::collections::BTreeSet;
 /// Currently supported G2O vertices: VERTEX_SE2, VERTEX_XY
 ///
 /// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2, EDGE_SE2_XY
+///
+/// Note: Currently panics instead of returning an Err() when parsing an invalid file.
 pub struct G2oParser;
 
 impl Parser for G2oParser {
+    // TODO return Err() instead of panicing when parsing an invalid file
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String> {
         let mut model = FactorGraphModel {
             vertices: vec![],
