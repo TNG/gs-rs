@@ -9,10 +9,10 @@ use std::collections::BTreeSet;
 
 #[test]
 fn current_test() {
-    let factor_graph = match G2oParser::parse_file("test_files/optimizer_tests/full2d_0.g2o") {
+    let factor_graph = match G2oParser::parse_file("data_files/optimizer_tests/full2d_0.g2o") {
         Ok(factor_graph) => factor_graph,
         Err(str) => panic!(str),
     };
     optimize(&factor_graph, 25);
-    // G2oParser::compose_file(&factor_graph, "test_files/optimizer_tests/full2d_25.g2o");
+    // G2oParser::compose_file(&factor_graph, "data_files/optimizer_tests/full2d_25.g2o");
 }

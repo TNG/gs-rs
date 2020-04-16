@@ -175,7 +175,7 @@ mod test {
     fn test_visualize() {
         init();
 
-        let factor_graph = JsonParser::parse_file("test_files/fullTestGraph.json").unwrap();
+        let factor_graph = JsonParser::parse_file("data_files/fullTestGraph.json").unwrap();
         visualize(&factor_graph);
     }
 }

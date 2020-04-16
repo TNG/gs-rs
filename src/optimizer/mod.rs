@@ -73,10 +73,10 @@ mod tests {
 
     fn test_valid_optimization(file_name: &str, iterations: usize) {
         init();
-        let test_factor_graph = G2oParser::parse_file(&["test_files/optimizer_tests/", file_name, "_0.g2o"].concat()).unwrap();
+        let test_factor_graph = G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat()).unwrap();
         optimize(&test_factor_graph, iterations);
         let test_model = FactorGraphModel::from(&test_factor_graph);
-        let expected_model = G2oParser::parse_file_to_model(&["test_files/optimizer_tests/", file_name, "_", &iterations.to_string(), ".g2o"].concat()).unwrap();
+        let expected_model = G2oParser::parse_file_to_model(&["data_files/optimizer_tests/", file_name, "_", &iterations.to_string(), ".g2o"].concat()).unwrap();
         assert_eq!(test_model, expected_model);
     }
 
@@ -114,4 +114,17 @@ mod tests {
     fn test_multiple_iterations() {
         test_valid_optimization("full2d", 25);
     }
+
+
+
+    // TODO remove if unused
+    // fn bench_optimization(file_name: &str, iterations: usize) {
+    //     let factor_graph = G2oParser::parse_file(&["data_files/benchmark_input/", file_name, ".g2o"].concat()).unwrap();
+    //     optimize(&factor_graph, iterations);
+    // }
+    //
+    // #[bench]
+    // fn bench_mit_2d() {
+    //     bench_optimization("MIT_2D", 10);
+    // }
 }

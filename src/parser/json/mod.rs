@@ -47,7 +47,7 @@ mod tests {
         init();
 
         let parsed_model =
-            match JsonParser::parse_file_to_model("test_files/tiny_vehicle_only_2d.json") {
+            match JsonParser::parse_file_to_model("data_files/tiny_vehicle_only_2d.json") {
                 Ok(x) => x,
                 Err(str) => panic!(str),
             };
@@ -101,7 +101,7 @@ mod tests {
         init();
 
         let parsed_model: FactorGraphModel =
-            match JsonParser::parse_file_to_model("test_files/invalid_vertex.json") {
+            match JsonParser::parse_file_to_model("data_files/invalid_vertex.json") {
                 Ok(x) => x,
                 Err(str) => panic!(str),
             };
@@ -117,7 +117,7 @@ mod tests {
         init();
 
         let parsed_model: FactorGraphModel =
-            match JsonParser::parse_file_to_model("test_files/missing_file.json") {
+            match JsonParser::parse_file_to_model("data_files/missing_file.json") {
                 Ok(x) => x,
                 Err(str) => panic!(str),
             };

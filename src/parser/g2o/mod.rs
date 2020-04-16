@@ -175,12 +175,12 @@ mod tests {
         init();
 
         let factor_graph =
-            match G2oParser::parse_file("test_files/minimal_size_and_types.g2o") {
+            match G2oParser::parse_file("data_files/minimal_size_and_types.g2o") {
                 Ok(x) => x,
                 Err(str) => panic!(str),
             };
         dbg!("{:?}", &factor_graph);
-        G2oParser::compose_file(&factor_graph, "test_files/minimal_size_and_types_copy.g2o");
+        G2oParser::compose_file(&factor_graph, "data_files/minimal_size_and_types_copy.g2o");
     }
 
     #[test]
@@ -188,7 +188,7 @@ mod tests {
     fn test_dumb_compose_model_to_string() {
         init();
 
-        let model = JsonParser::parse_file_to_model("test_files/dumb.json").unwrap();
+        let model = JsonParser::parse_file_to_model("data_files/dumb.json").unwrap();
         // dbg!(&model);
         let g2o_string = G2oParser::compose_model_to_string(model).unwrap();
         info!("\n{}", &g2o_string);
