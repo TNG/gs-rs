@@ -2,7 +2,7 @@ use petgraph::csr::Csr;
 
 use crate::factor_graph::factor::{Factor, FactorType::*};
 use crate::factor_graph::variable::{
-    VariableType::*, landmark_variable_2d::LandmarkVariable2D, vehicle_variable_2d::VehicleVariable2D,
+    VariableType::*, landmark_variable_2d::LandmarkVariable2D, vehicle_variable_2d::VehicleVariable2D, vehicle_variable_3d::VehicleVariable3D,
 };
 use crate::factor_graph::FactorGraph;
 use crate::parser::model::{Edge, FactorGraphModel, Vertex};
@@ -74,10 +74,8 @@ fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
         "PRIOR2D_ANGLE" => (0, Position2D),
         "ODOMETRY2D_ANGLE" => (1, Odometry2D),
         "OBSERVATION2D_ANGLE" => (1, Observation2D),
-        _ => {
-            error!("Could not add edge {:?}", edge);
-            return;
-        }
+        "ODOMETRY3D_ANGLE" => (1, Odometry3D),
+        other_type => panic!("Unsupported edge type in the model: {}", other_type),
     };
     factor_graph.csr.add_edge(
         factor_graph.custom_to_csr_id_map[&edge.vertices[0]],
@@ -113,9 +111,22 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     add_var_to_matrix(&mut factor_graph.matrix_dim, 2, fixed),
                 ))),
         ),
-        _ => {
-            error!("Could not add vertex {:?}", vertex);
-        }
+        "POSE3D_ANGLE" => factor_graph.node_indices.push(
+            factor_graph.csr
+                .add_node(Box::new(VehicleVariable3D::new(
+                    vertex.id,
+                    vertex.content[0],
+                    vertex.content[1],
+                    vertex.content[2],
+                    vertex.content[3],
+                    vertex.content[4],
+                    vertex.content[5],
+                    vertex.content[6],
+                    fixed,
+                    add_var_to_matrix(&mut factor_graph.matrix_dim, 7, fixed),
+                ))),
+        ),
+        other_type => panic!("Unsupported vertex type in the model: {}", other_type),
     };
     factor_graph.custom_to_csr_id_map.insert(vertex.id, *factor_graph.node_indices.last().unwrap());
 }

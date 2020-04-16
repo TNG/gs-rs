@@ -9,11 +9,11 @@ use std::collections::BTreeSet;
 
 #[test]
 fn current_test() {
-    let g2o_model = match G2oParser::parse_file_to_model("data_files/sphere_3D.g2o") {
+    let g2o_graph = match G2oParser::parse_file("data_files/sphere_3D.g2o") {
         Ok(model) => model,
         Err(str) => panic!(str),
     };
-    let json_model = match JsonParser::parse_file_to_model("data_files/sphere_3D.json") {
+    let json_graph = match JsonParser::parse_file("data_files/sphere_3D.json") {
         Ok(model) => model,
         Err(str) => panic!(str),
     };
