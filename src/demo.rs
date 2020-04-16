@@ -9,10 +9,12 @@ use std::collections::BTreeSet;
 
 #[test]
 fn current_test() {
-    let factor_graph = match G2oParser::parse_file("data_files/optimizer_tests/full2d_0.g2o") {
-        Ok(factor_graph) => factor_graph,
+    let g2o_model = match G2oParser::parse_file_to_model("data_files/sphere_3D.g2o") {
+        Ok(model) => model,
         Err(str) => panic!(str),
     };
-    optimize(&factor_graph, 25);
-    // G2oParser::compose_file(&factor_graph, "data_files/optimizer_tests/full2d_25.g2o");
+    let json_model = match JsonParser::parse_file_to_model("data_files/sphere_3D.json") {
+        Ok(model) => model,
+        Err(str) => panic!(str),
+    };
 }

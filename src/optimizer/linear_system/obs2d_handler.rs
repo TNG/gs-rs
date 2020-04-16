@@ -17,7 +17,7 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     update_H_submatrix(H, &H_updates.index((3.., 3..)), var_j, var_j);
 
     let err_pos = Rotation2::new(-rot_i) * (pos_j - pos_i) - pos_ij;
-    let mut err_vec = err_pos.data.to_vec();
+    let err_vec = err_pos.data.to_vec();
     let b_updates = (RowVector2::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_updates.index((..3, ..)), var_i);
     update_b_subvector(b, &b_updates.index((3.., ..)), var_j);

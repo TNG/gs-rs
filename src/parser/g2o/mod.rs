@@ -8,9 +8,11 @@ use std::collections::BTreeSet;
 ///
 /// More information on the G2O file format: https://github.com/RainerKuemmerle/g2o/wiki/File-Format
 ///
-/// Currently supported G2O vertices: VERTEX_SE2, VERTEX_XY
+/// Currently supported G2O vertices: VERTEX_SE2, VERTEX_XY, VERTEX_SE3:QUAT (*)
 ///
-/// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2, EDGE_SE2_XY
+/// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2, EDGE_SE2_XY, EDGE_SE3:QUAT (*)
+///
+/// (*) Support only for FactorGraphModel.
 ///
 /// Note: Currently panics instead of returning an Err() when parsing an invalid file.
 pub struct G2oParser;
@@ -43,8 +45,12 @@ impl G2oParser {
             return;
         }
         match tokens[0] {
-            "VERTEX_SE2" | "VERTEX_XY" => model.vertices.push(Self::parse_vertex(&tokens, line_number)),
-            "EDGE_PRIOR_SE2" | "EDGE_SE2" | "EDGE_SE2_XY" => model.edges.push(Self::parse_edge(&tokens, line_number)),
+            "VERTEX_SE2" | "VERTEX_XY"
+            | "VERTEX_SE3:QUAT"
+            => model.vertices.push(Self::parse_vertex(&tokens, line_number)),
+            "EDGE_PRIOR_SE2" | "EDGE_SE2" | "EDGE_SE2_XY"
+            | "EDGE_SE3:QUAT"
+            => model.edges.push(Self::parse_edge(&tokens, line_number)),
             "FIX" => {model.fixed_vertices.extend(Self::parse_fix(&tokens, line_number));},
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
@@ -54,6 +60,7 @@ impl G2oParser {
         let (type_str, c_len) = match tokens[0] {
             "VERTEX_SE2" => ("POSE2D_ANGLE", 3),
             "VERTEX_XY" => ("LANDMARK2D_ANGLE", 2),
+            "VERTEX_SE3:QUAT" => ("POSE3D_ANGLE", 7),
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
         let expected_length = 2 + c_len;
@@ -67,10 +74,11 @@ impl G2oParser {
     }
 
     fn parse_edge(tokens: &[&str], line_number: usize) -> Edge {
-        let (type_str, v_num, c_len, index_mapping, upper_t_len) = match tokens[0] {
-            "EDGE_PRIOR_SE2" => ("PRIOR2D_ANGLE", 1, 3, vec![0, 1, 2, 1, 3, 4, 2, 4, 5], 6),
-            "EDGE_SE2" => ("ODOMETRY2D_ANGLE", 2, 3, vec![0, 1, 2, 1, 3, 4, 2, 4, 5], 6),
-            "EDGE_SE2_XY" => ("OBSERVATION2D_ANGLE", 2, 2, vec![0, 1, 1, 2], 3),
+        let (type_str, v_num, c_len, (index_mapping, upper_t_len)) = match tokens[0] {
+            "EDGE_PRIOR_SE2" => ("PRIOR2D_ANGLE", 1, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
+            "EDGE_SE2" => ("ODOMETRY2D_ANGLE", 2, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
+            "EDGE_SE2_XY" => ("OBSERVATION2D_ANGLE", 2, 2, Self::get_index_mapping_vec_and_upper_t_len(2)),
+            "EDGE_SE3:QUAT" => ("ODOMETRY3D_ANGLE", 2, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
         let expected_length = 1 + v_num + c_len + upper_t_len;
@@ -82,8 +90,22 @@ impl G2oParser {
             restriction:tokens[1+v_num..1+v_num+c_len].iter()
                 .map(|s| Self::parse_val(s, line_number)).collect(),
             information_matrix: index_mapping.iter()
-                .map(|i| Self::parse_val(tokens[1+v_num+c_len + *i as usize], line_number)).collect(),
+                .map(|i| Self::parse_val(tokens[1+v_num+c_len + *i], line_number)).collect(),
         }
+    }
+
+    fn get_index_mapping_vec_and_upper_t_len(dim: usize) -> (Vec<usize>, usize) {
+        let mut full_matrix_vec: Vec<usize> = vec![0; dim * dim];
+        let mut upper_t_len = 0;
+        for i in 0..dim {
+            for j in i..dim {
+                full_matrix_vec[i*dim + j] = upper_t_len;
+                full_matrix_vec[i + j*dim] = upper_t_len;
+                upper_t_len += 1;
+            }
+        }
+        let upper_t_len = dim * (dim+1) / 2;
+        (full_matrix_vec, upper_t_len)
     }
 
     fn parse_fix(tokens: &[&str], line_number: usize) -> BTreeSet<usize> {
