@@ -25,9 +25,9 @@ pub fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>)
 fn update_H_b(factor_graph: &FactorGraph, H: &mut DMatrix<f64>, b: &mut DVector<f64>, edge: EdgeReference<Factor, Directed, usize>) {
     let factor = edge.weight();
     match factor.factor_type {
-        Position2D => pos2d_handler::update_H_b(H, b, factor, &factor_graph.get_var_at_csr_index(edge.source())),
-        Odometry2D => odo2d_handler::update_H_b(H, b, factor, &factor_graph.get_var_at_csr_index(edge.source()), &factor_graph.get_var_at_csr_index(edge.target())),
-        Observation2D => obs2d_handler::update_H_b(H, b, factor, &factor_graph.get_var_at_csr_index(edge.source()), &factor_graph.get_var_at_csr_index(edge.target())),
+        Position2D => pos2d_handler::update_H_b(H, b, factor, &factor_graph.get_var(edge.source())),
+        Odometry2D => odo2d_handler::update_H_b(H, b, factor, &factor_graph.get_var(edge.source()), &factor_graph.get_var(edge.target())),
+        Observation2D => obs2d_handler::update_H_b(H, b, factor, &factor_graph.get_var(edge.source()), &factor_graph.get_var(edge.target())),
         Odometry3D => unimplemented!(),
     };
 }

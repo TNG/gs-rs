@@ -27,7 +27,8 @@ pub struct FactorGraph<'a> {
 }
 
 impl<'a> FactorGraph<'a> {
-    pub fn get_var_at_csr_index(&self, csr_index: usize) -> &Box<dyn Variable<'a>> {
+    /// Returns the variable at the corresponding internal CSR index.
+    pub fn get_var(&self, csr_index: usize) -> &Box<dyn Variable<'a>> {
         self.csr.index(csr_index)
     }
 }

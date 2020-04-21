@@ -3,7 +3,7 @@
 #![allow(non_snake_case)]
 
 use std::borrow::BorrowMut;
-use std::ops::{Deref, Index};
+use std::ops::Deref;
 
 use itertools::Itertools;
 
@@ -30,7 +30,7 @@ fn update_once(factor_graph: &FactorGraph) {
     // TODO clumsy, since the solver transforms the arguments back to nalgebra matrices
     let sol = SparseCholeskySolver::solve(H, &(b * -1.0)).unwrap();
     factor_graph.node_indices.iter()
-        .map(|i| factor_graph.get_var_at_csr_index(*i))
+        .map(|i| factor_graph.get_var(*i))
         .for_each(|var| update_var(var, sol.as_slice()));
 }
 
