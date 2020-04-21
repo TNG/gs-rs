@@ -41,9 +41,10 @@ fn add_factor_graph_to_window(window: &mut Window, factor_graph: &FactorGraph) -
     factor_graph.node_indices.iter()
         .for_each(|i| add_var(&mut visual_factor_graph, factor_graph.get_var(*i)));
 
-    factor_graph.node_indices.iter()
-        .for_each(|i| factor_graph.csr.edges(*i)
-            .for_each(|edge| add_factor(&mut visual_factor_graph, edge.weight(), factor_graph.get_var(edge.source()), factor_graph.get_var(edge.target()))));
+    // TODO implement for 3D
+    // factor_graph.node_indices.iter()
+    //     .for_each(|i| factor_graph.csr.edges(*i)
+    //         .for_each(|edge| add_factor(&mut visual_factor_graph, edge.weight(), factor_graph.get_var(edge.source()), factor_graph.get_var(edge.target()))));
 
     visual_factor_graph
 }
@@ -163,6 +164,7 @@ mod test {
     use crate::parser::json::JsonParser;
     use crate::parser::Parser;
     use super::*;
+    use crate::parser::g2o::G2oParser;
 
     fn init() {
         let _ = env_logger::builder()
@@ -173,10 +175,18 @@ mod test {
 
     #[test]
     #[ignore]
-    fn test_visualize() {
+    fn test_visualize_2d() {
         init();
 
-        let factor_graph = JsonParser::parse_file("data_files/fullTestGraph.json").unwrap();
+        let factor_graph = JsonParser::parse_file("data_files/full_2d_visualization.json").unwrap();
+        visualize(&factor_graph);
+    }
+
+    #[test]
+    fn test_visualize_3d() {
+        init();
+
+        let factor_graph = G2oParser::parse_file("data_files/mini_3d.g2o").unwrap();
         visualize(&factor_graph);
     }
 }

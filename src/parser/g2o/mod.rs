@@ -60,7 +60,7 @@ impl G2oParser {
         let (type_str, c_len) = match tokens[0] {
             "VERTEX_SE2" => ("POSE2D_ANGLE", 3),
             "VERTEX_XY" => ("LANDMARK2D_ANGLE", 2),
-            "VERTEX_SE3:QUAT" => ("POSE3D_ANGLE", 7),
+            "VERTEX_SE3:QUAT" => ("POSE3D_QUAT", 7),
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
         let expected_length = 2 + c_len;
@@ -78,7 +78,7 @@ impl G2oParser {
             "EDGE_PRIOR_SE2" => ("PRIOR2D_ANGLE", 1, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
             "EDGE_SE2" => ("ODOMETRY2D_ANGLE", 2, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
             "EDGE_SE2_XY" => ("OBSERVATION2D_ANGLE", 2, 2, Self::get_index_mapping_vec_and_upper_t_len(2)),
-            "EDGE_SE3:QUAT" => ("ODOMETRY3D_ANGLE", 2, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
+            "EDGE_SE3:QUAT" => ("ODOMETRY3D_QUAT", 2, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
         let expected_length = 1 + v_num + c_len + upper_t_len;

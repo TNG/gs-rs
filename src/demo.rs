@@ -13,8 +13,4 @@ fn current_test() {
         Ok(model) => model,
         Err(str) => panic!(str),
     };
-    let json_graph = match JsonParser::parse_file("data_files/sphere_3D.json") {
-        Ok(model) => model,
-        Err(str) => panic!(str),
-    };
 }

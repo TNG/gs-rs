@@ -39,7 +39,7 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                 vertex_type: match node.get_type() {
                     Vehicle2D => String::from("POSE2D_ANGLE"),
                     Landmark2D => String::from("LANDMARK2D_ANGLE"),
-                    Vehicle3D => String::from("POSE3D_ANGLE"),
+                    Vehicle3D => String::from("POSE3D_QUAT"),
                 },
                 content: node.get_content(),
             });
@@ -54,7 +54,7 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                         Position2D => String::from("PRIOR2D_ANGLE"),
                         Odometry2D => String::from("ODOMETRY2D_ANGLE"),
                         Observation2D => String::from("OBSERVATION2D_ANGLE"),
-                        Odometry3D => String::from("ODOMETRY3D_ANGLE"),
+                        Odometry3D => String::from("ODOMETRY3D_QUAT"),
                     },
                     vertices: edge_vertices,
                     restriction: factor.constraint.clone(),
@@ -74,7 +74,7 @@ fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
         "PRIOR2D_ANGLE" => (0, Position2D),
         "ODOMETRY2D_ANGLE" => (1, Odometry2D),
         "OBSERVATION2D_ANGLE" => (1, Observation2D),
-        "ODOMETRY3D_ANGLE" => (1, Odometry3D),
+        "ODOMETRY3D_QUAT" => (1, Odometry3D),
         other_type => panic!("Unsupported edge type in the model: {}", other_type),
     };
     factor_graph.csr.add_edge(
@@ -111,7 +111,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     add_var_to_matrix(&mut factor_graph.matrix_dim, 2, fixed),
                 ))),
         ),
-        "POSE3D_ANGLE" => factor_graph.node_indices.push(
+        "POSE3D_QUAT" => factor_graph.node_indices.push(
             factor_graph.csr
                 .add_node(Box::new(VehicleVariable3D::new(
                     vertex.id,

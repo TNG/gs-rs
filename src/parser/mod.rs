@@ -8,6 +8,8 @@ pub mod g2o;
 pub mod json;
 pub mod model;
 
+// TODO struct DynamicParser: uses Parser corresponding to file type
+
 // Trait to be used by all parsers with the basic file parsing and composition functionality.
 pub trait Parser {
     /// Tries to parse a file at the given path to the internal factor graph representation.
