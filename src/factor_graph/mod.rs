@@ -18,7 +18,7 @@ pub type FactorGraphCsr<'a> = Csr<Box<dyn Variable<'a>>, Factor, Directed, usize
 pub struct FactorGraph<'a> {
     /// The factor graph's CSR (compressed sparse row) representation.
     pub csr: FactorGraphCsr<'a>,
-    /// The indices at which the factor graph's nodes can be found in csr.index(/*node_index*/).
+    /// The indices at which the factor graph's nodes can be found in get_var_at_csr_index(/*node_index*/).
     pub node_indices: Vec<NodeIndex<usize>>,
     /// Map from custom IDs as stated in the parsed file to internal CSR indices.
     pub custom_to_csr_id_map: HashMap<usize, NodeIndex<usize>>, // TODO combine with node_indices for less redundancy
