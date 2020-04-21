@@ -1,7 +1,7 @@
 //! Handles the graphical user interface.
 
 use kiss3d::scene::SceneNode;
-use nalgebra::{Point3, UnitQuaternion, Vector3, Translation3, Rotation3};
+use nalgebra::{Point3, UnitQuaternion, Vector3, Translation3, Rotation3, Quaternion};
 use kiss3d::window::Window;
 use kiss3d::camera::ArcBall;
 use petgraph::visit::EdgeRef;
@@ -50,7 +50,10 @@ fn add_factor_graph_to_window(window: &mut Window, factor_graph: &FactorGraph) -
 }
 
 fn add_var(visual_factor_graph: &mut VisualFactorGraph, var: &Box<dyn Variable>) {
-    let var_point = get_point_from_2d(&var.get_content());
+    let var_point = match var.get_type() {
+        Vehicle2D | Landmark2D => get_point_from_2d(&var.get_content()),
+        Vehicle3D => get_point_from_3d(&var.get_content()),
+    };
     let mut var_object = add_var_core(visual_factor_graph, &var_point);
     handle_var_rotation(var, &mut var_object);
     color_var_object(var, &mut var_object);
@@ -71,13 +74,20 @@ fn add_var_core(visual_factor_graph: &mut VisualFactorGraph, var_point: &Point3<
 }
 
 fn handle_var_rotation(var: &Box<dyn Variable>, var_object: &mut SceneNode) {
+    if var.get_type() != Vehicle2D && var.get_type() != Vehicle3D {
+        return;
+    }
+    let mut rot_object = var_object.add_capsule(0.02, 2.0);
     if var.get_type() == Vehicle2D {
-        let mut rot_object = var_object.add_capsule(0.02, 2.0);
         rot_object.set_local_rotation(
             UnitQuaternion::from_axis_angle(&Vector3::z_axis(), get_rot_from_2d(&var.get_content()))
         );
-        rot_object.prepend_to_local_translation(&Translation3::new(0.0, 0.20, 0.0));
+    } else if var.get_type() == Vehicle3D {
+        rot_object.set_local_rotation(
+            get_rot_from_3d(&var.get_content())
+        );
     }
+    rot_object.prepend_to_local_translation(&Translation3::new(0.0, 0.20, 0.0));
 }
 
 fn color_var_object(var: &Box<dyn Variable>, var_object: &mut SceneNode) {
@@ -156,6 +166,25 @@ fn get_point_from_2d(content: &[f64]) -> Point3<f32> {
 
 fn get_rot_from_2d(content: &[f64]) -> f32 {
     content[2] as f32
+}
+
+fn get_point_from_3d(content: &[f64]) -> Point3<f32> {
+    Point3::new(
+        content[0] as f32,
+        content[1] as f32,
+        content[2] as f32,
+    )
+}
+
+fn get_rot_from_3d(content: &[f64]) -> UnitQuaternion<f32> {
+    UnitQuaternion::from_quaternion(
+        Quaternion::new(
+            content[6] as f32,
+            content[3] as f32,
+            content[4] as f32,
+            content[5] as f32,
+        )
+    )
 }
 
 #[cfg(test)]
