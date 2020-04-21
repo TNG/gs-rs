@@ -41,10 +41,9 @@ fn add_factor_graph_to_window(window: &mut Window, factor_graph: &FactorGraph) -
     factor_graph.node_indices.iter()
         .for_each(|i| add_var(&mut visual_factor_graph, factor_graph.get_var(*i)));
 
-    // TODO implement for 3D
-    // factor_graph.node_indices.iter()
-    //     .for_each(|i| factor_graph.csr.edges(*i)
-    //         .for_each(|edge| add_factor(&mut visual_factor_graph, edge.weight(), factor_graph.get_var(edge.source()), factor_graph.get_var(edge.target()))));
+    factor_graph.node_indices.iter()
+        .for_each(|i| factor_graph.csr.edges(*i)
+            .for_each(|edge| add_factor(&mut visual_factor_graph, edge.weight(), factor_graph.get_var(edge.source()), factor_graph.get_var(edge.target()))));
 
     visual_factor_graph
 }
@@ -64,7 +63,10 @@ fn add_factor(visual_factor_graph: &mut VisualFactorGraph, factor: &Factor, sour
     let mut meas_object = add_factor_core(visual_factor_graph, &meas_point);
     handle_factor_rotation(factor, &mut meas_object, source);
     color_meas_object(factor, &mut meas_object);
-    add_factor_lines(visual_factor_graph, factor, meas_point, get_point_from_2d(&source.get_content()), get_point_from_2d(&target.get_content()));
+    match factor.factor_type {
+        Position2D | Odometry2D | Observation2D => add_factor_lines(visual_factor_graph, factor, meas_point, get_point_from_2d(&source.get_content()), get_point_from_2d(&target.get_content())),
+        Odometry3D => add_factor_lines(visual_factor_graph, factor, meas_point, get_point_from_3d(&source.get_content()), get_point_from_3d(&target.get_content())),
+    };
 }
 
 fn add_var_core(visual_factor_graph: &mut VisualFactorGraph, var_point: &Point3<f32>) -> SceneNode {
@@ -98,7 +100,10 @@ fn color_var_object(var: &Box<dyn Variable>, var_object: &mut SceneNode) {
 }
 
 fn calc_meas_point(factor: &Factor, source: &Box<dyn Variable>) -> Point3<f32> {
-    let factor_point = get_point_from_2d(&factor.constraint);
+    let factor_point = match factor.factor_type {
+        Position2D | Odometry2D | Observation2D => get_point_from_2d(&factor.constraint),
+        Odometry3D => get_point_from_3d(&factor.constraint),
+    };
     match factor.factor_type {
         Position2D => factor_point,
         Odometry2D | Observation2D => {
@@ -106,7 +111,7 @@ fn calc_meas_point(factor: &Factor, source: &Box<dyn Variable>) -> Point3<f32> {
             let local_point = Rotation3::new(Vector3::z() * source_rot) * factor_point;
             (get_point_from_2d(&source.get_content()).coords + local_point.coords).into()
         },
-        Odometry3D => unimplemented!(),
+        Odometry3D => factor_point, // TODO calculate measured point
     }
 }
 
@@ -117,6 +122,7 @@ fn add_factor_core(visual_factor_graph: &mut VisualFactorGraph, meas_point: &Poi
 }
 
 fn handle_factor_rotation(factor: &Factor, meas_object: &mut SceneNode, source: &Box<dyn Variable>) {
+    // TODO display rotation of Odometry3D factors
     if factor.factor_type == Position2D || factor.factor_type == Odometry2D {
         let factor_rot = get_rot_from_2d(&factor.constraint);
         let meas_rot = match factor.factor_type {
@@ -156,6 +162,7 @@ fn get_factor_color(factor: &Factor) -> (f32, f32, f32) {
 }
 
 
+// TODO differentiate between factors and variables rather than 2D/3D -> check here instead after passing Factor/Variable reference
 fn get_point_from_2d(content: &[f64]) -> Point3<f32> {
     Point3::new(
         content[0] as f32,
