@@ -9,8 +9,7 @@ use std::collections::BTreeSet;
 
 #[test]
 fn current_test() {
-    let g2o_graph = match G2oParser::parse_file("data_files/sphere_3D.g2o") {
-        Ok(model) => model,
-        Err(str) => panic!(str),
-    };
+    let factor_graph = G2oParser::parse_file("data_files/sphere_3D.g2o").unwrap();
+    optimize(&factor_graph, 1);
+    G2oParser::compose_file(&factor_graph, "data_files/sphere_3D_sol1.g2o");
 }
