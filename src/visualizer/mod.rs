@@ -224,6 +224,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_visualize_3d() {
         init();
 

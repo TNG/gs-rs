@@ -115,16 +115,4 @@ mod tests {
         test_valid_optimization("full2d", 25);
     }
 
-
-
-    // TODO remove if unused
-    // fn bench_optimization(file_name: &str, iterations: usize) {
-    //     let factor_graph = G2oParser::parse_file(&["data_files/benchmark_input/", file_name, ".g2o"].concat()).unwrap();
-    //     optimize(&factor_graph, iterations);
-    // }
-    //
-    // #[bench]
-    // fn bench_mit_2d() {
-    //     bench_optimization("MIT_2D", 10);
-    // }
 }

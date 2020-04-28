@@ -18,7 +18,7 @@ use std::collections::BTreeSet;
 pub struct G2oParser;
 
 impl Parser for G2oParser {
-    // TODO return Err() instead of panicing when parsing an invalid file
+    // TODO return Err() instead of panicking when parsing an invalid file
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String> {
         let mut model = FactorGraphModel {
             vertices: vec![],

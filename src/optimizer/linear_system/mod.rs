@@ -8,6 +8,7 @@ use petgraph::visit::EdgeRef;
 mod pos2d_handler;
 mod odo2d_handler;
 mod obs2d_handler;
+mod odo3d_handler;
 
 pub fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>) {
     let dim = factor_graph.matrix_dim;
@@ -28,6 +29,6 @@ fn update_H_b(factor_graph: &FactorGraph, H: &mut DMatrix<f64>, b: &mut DVector<
         Position2D => pos2d_handler::update_H_b(H, b, factor, &factor_graph.get_var(edge.source())),
         Odometry2D => odo2d_handler::update_H_b(H, b, factor, &factor_graph.get_var(edge.source()), &factor_graph.get_var(edge.target())),
         Observation2D => obs2d_handler::update_H_b(H, b, factor, &factor_graph.get_var(edge.source()), &factor_graph.get_var(edge.target())),
-        Odometry3D => unimplemented!(),
+        Odometry3D => odo3d_handler::update_H_b(H, b, factor, &factor_graph.get_var(edge.source()), &factor_graph.get_var(edge.target())),
     };
 }
