@@ -102,7 +102,11 @@ fn calc_meas_point(factor: &Factor, source: &Box<dyn Variable>) -> Point3<f32> {
             let local_point = Rotation3::new(Vector3::z() * source_rot) * factor_point;
             (get_var_point(source).coords + local_point.coords).into()
         },
-        Odometry3D => factor_point, // TODO calculate measured point
+        Odometry3D => {
+            let source_rot = get_rot_from_3d(&source.get_content());
+            let local_point = source_rot.to_rotation_matrix() * factor_point;
+            (get_var_point(source).coords + local_point.coords).into()
+        }
     }
 }
 
@@ -113,7 +117,6 @@ fn add_factor_core(visual_factor_graph: &mut VisualFactorGraph, meas_point: &Poi
 }
 
 fn handle_factor_rotation(factor: &Factor, meas_object: &mut SceneNode, source: &Box<dyn Variable>) {
-    // TODO display rotation of Odometry3D factors
     if factor.factor_type == Position2D || factor.factor_type == Odometry2D {
         let factor_rot = get_rot_from_2d(&factor.constraint);
         let meas_rot = match factor.factor_type {
@@ -125,6 +128,12 @@ fn handle_factor_rotation(factor: &Factor, meas_object: &mut SceneNode, source: 
         meas_rot_object.set_local_rotation(
             UnitQuaternion::from_axis_angle(&Vector3::z_axis(), meas_rot)
         );
+        meas_rot_object.prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
+    } else if factor.factor_type == Odometry3D {
+        let factor_rot = get_rot_from_3d(&factor.constraint);
+        let meas_rot = factor_rot * get_rot_from_3d(&source.get_content());
+        let mut meas_rot_object = meas_object.add_capsule(0.04, 1.5);
+        meas_rot_object.set_local_rotation(meas_rot);
         meas_rot_object.prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
     }
 }
