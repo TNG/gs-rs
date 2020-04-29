@@ -39,16 +39,15 @@ fn calc_jacobians(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f64>, rot_ij
     let cos_i = rot_i.cos();
     let last_column_top = -sin_i * delta_pos[0] + cos_i * delta_pos[1];
     let last_column_mid = -cos_i * delta_pos[0] - sin_i * delta_pos[1];
-    let A_ij = R_ij_T * &Matrix3::from_vec(vec![         -cos_i,           sin_i,  0.0,    // transposed matrix is displayed
-                                                         -sin_i,          -cos_i,  0.0,
-                                                last_column_top, last_column_mid, -1.0,]);
-    let B_ij = R_ij_T * &Matrix3::from_vec(vec![cos_i, -sin_i, 0.0,    // transposed matrix is displayed
-                                                sin_i,  cos_i, 0.0,
-                                                  0.0,    0.0, 1.0,]);
-
+    let jacobian_i = R_ij_T * &Matrix3::from_vec(vec![         -cos_i,           sin_i,  0.0,    // transposed matrix is displayed
+                                                               -sin_i,          -cos_i,  0.0,
+                                                      last_column_top, last_column_mid, -1.0,]);
+    let jacobian_j = R_ij_T * &Matrix3::from_vec(vec![cos_i, -sin_i, 0.0,    // transposed matrix is displayed
+                                                      sin_i,  cos_i, 0.0,
+                                                        0.0,    0.0, 1.0,]);
     let mut jacobian = Matrix3x6::from_vec(vec![0.0; 18]);
-    jacobian.index_mut((.., ..3)).copy_from(&A_ij);
-    jacobian.index_mut((.., 3..)).copy_from(&B_ij);
+    jacobian.index_mut((.., ..3)).copy_from(&jacobian_i);
+    jacobian.index_mut((.., 3..)).copy_from(&jacobian_j);
     (jacobian, jacobian.transpose())
 }
 
