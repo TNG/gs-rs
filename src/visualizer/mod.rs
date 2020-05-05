@@ -96,7 +96,7 @@ fn color_var_object(var: &Box<dyn Variable>, var_object: &mut SceneNode) {
 fn calc_meas_point(factor: &Factor, source: &Box<dyn Variable>) -> Point3<f32> {
     let factor_point = get_factor_point(factor);
     match factor.factor_type {
-        Position2D => factor_point,
+        Position2D | Position3D => factor_point,
         Odometry2D | Observation2D => {
             let source_rot = get_rot_from_2d(&source.get_content());
             let local_point = Rotation3::new(Vector3::z() * source_rot) * factor_point;
@@ -155,7 +155,7 @@ fn add_factor_lines(visual_factor_graph: &mut VisualFactorGraph, factor: &Factor
 
 fn get_factor_color(factor: &Factor) -> (f32, f32, f32) {
     match factor.factor_type {
-        Position2D => (1.0, 0.5, 0.5),
+        Position2D | Position3D => (1.0, 0.5, 0.5),
         Odometry2D | Odometry3D => (0.5, 0.5, 1.0),
         Observation2D => (0.5, 1.0, 0.5),
     }
@@ -179,7 +179,7 @@ fn get_factor_point(factor: &Factor) -> Point3<f32> {
         factor.constraint[1] as f32,
         match factor.factor_type {
             Position2D | Odometry2D | Observation2D => 0.0 as f32,
-            Odometry3D => factor.constraint[2] as f32,
+            Position3D | Odometry3D => factor.constraint[2] as f32,
         },
     )
 }

@@ -54,6 +54,7 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                         Position2D => String::from("PRIOR2D_ANGLE"),
                         Odometry2D => String::from("ODOMETRY2D_ANGLE"),
                         Observation2D => String::from("OBSERVATION2D_ANGLE"),
+                        Position3D => String::from("PRIOR3D_QUAT"),
                         Odometry3D => String::from("ODOMETRY3D_QUAT"),
                     },
                     vertices: edge_vertices,
@@ -74,6 +75,7 @@ fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
         "PRIOR2D_ANGLE" => (0, Position2D),
         "ODOMETRY2D_ANGLE" => (1, Odometry2D),
         "OBSERVATION2D_ANGLE" => (1, Observation2D),
+        "PRIOR3D_QUAT" => (0, Position3D),
         "ODOMETRY3D_QUAT" => (1, Odometry3D),
         other_type => panic!("Unsupported edge type in the model: {}", other_type),
     };

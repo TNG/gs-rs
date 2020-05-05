@@ -8,11 +8,11 @@ use std::collections::BTreeSet;
 ///
 /// More information on the G2O file format: https://github.com/RainerKuemmerle/g2o/wiki/File-Format
 ///
-/// Currently supported G2O vertices: VERTEX_SE2, VERTEX_XY, VERTEX_SE3:QUAT (*)
+/// Currently supported G2O vertices: VERTEX_SE2, VERTEX_XY, VERTEX_SE3:QUAT
 ///
-/// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2, EDGE_SE2_XY, EDGE_SE3:QUAT (*)
+/// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2, EDGE_SE2_XY, EDGE_SE3_PRIOR (*), EDGE_SE3:QUAT
 ///
-/// (*) Support only for FactorGraphModel.
+/// (*) The keyword PARAMS_SE3OFFSET is not supported yet, therefore EDGE_SE3_PRIOR is not usable currently.
 ///
 /// Note: Currently panics instead of returning an Err() when parsing an invalid file.
 pub struct G2oParser;
@@ -49,7 +49,7 @@ impl G2oParser {
             | "VERTEX_SE3:QUAT"
             => model.vertices.push(Self::parse_vertex(&tokens, line_number)),
             "EDGE_PRIOR_SE2" | "EDGE_SE2" | "EDGE_SE2_XY"
-            | "EDGE_SE3:QUAT"
+            | "EDGE_SE3_PRIOR" | "EDGE_SE3:QUAT"
             => model.edges.push(Self::parse_edge(&tokens, line_number)),
             "FIX" => {model.fixed_vertices.extend(Self::parse_fix(&tokens, line_number));},
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
@@ -78,6 +78,7 @@ impl G2oParser {
             "EDGE_PRIOR_SE2" => ("PRIOR2D_ANGLE", 1, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
             "EDGE_SE2" => ("ODOMETRY2D_ANGLE", 2, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
             "EDGE_SE2_XY" => ("OBSERVATION2D_ANGLE", 2, 2, Self::get_index_mapping_vec_and_upper_t_len(2)),
+            "EDGE_SE3_PRIOR" => ("PRIOR3D_QUAT", 1, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
             "EDGE_SE3:QUAT" => ("ODOMETRY3D_QUAT", 2, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
@@ -128,6 +129,8 @@ impl G2oParser {
             Err(str) => panic!("Could not parse the following value to the correct data type in line {}: {}", line_number, s),
         }
     }
+
+    // TODO support g2o file composition for 3D
 
     fn vertex_to_string(v: &Vertex, fixed_vertices: &BTreeSet<usize>) -> String {
         let mut tokens: Vec<String> = vec![];
