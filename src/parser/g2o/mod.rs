@@ -130,13 +130,12 @@ impl G2oParser {
         }
     }
 
-    // TODO support g2o file composition for 3D
-
     fn vertex_to_string(v: &Vertex, fixed_vertices: &BTreeSet<usize>) -> String {
         let mut tokens: Vec<String> = vec![];
         match v.vertex_type.as_str() {
             "POSE2D_ANGLE" => tokens.push(String::from("VERTEX_SE2")),
             "LANDMARK2D_ANGLE" => tokens.push(String::from("VERTEX_XY")),
+            "POSE3D_QUAT" => tokens.push(String::from("VERTEX_SE3:QUAT")),
             other_type => panic!(format!("Vertex type unsupported to be composed to G2O format: {}", other_type)),
         }
         tokens.push(v.id.to_string());
@@ -155,17 +154,29 @@ impl G2oParser {
             "PRIOR2D_ANGLE" => tokens.push(String::from("EDGE_PRIOR_SE2")),
             "ODOMETRY2D_ANGLE" => tokens.push(String::from("EDGE_SE2")),
             "OBSERVATION2D_ANGLE" => tokens.push(String::from("EDGE_SE2_XY")),
+            "ODOMETRY3D_QUAT" => tokens.push(String::from("EDGE_SE3:QUAT")),
             other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
         }
         Self::append_usize_slice_to_string_vec(&mut tokens, e.vertices.as_slice());
         Self::append_f64_slice_to_string_vec(&mut tokens, &e.restriction);
         let upper_triangle = match e.edge_type.as_str() {
-            "PRIOR2D_ANGLE" | "ODOMETRY2D_ANGLE" => vec![0, 1, 2, 4, 5, 8],
-            "OBSERVATION2D_ANGLE" => vec![0, 1, 3],
+            "PRIOR2D_ANGLE" | "ODOMETRY2D_ANGLE" => Self::get_upper_triangle_indices(3),
+            "OBSERVATION2D_ANGLE" => Self::get_upper_triangle_indices(2),
+            "ODOMETRY3D_QUAT" => Self::get_upper_triangle_indices(6),
             other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
         };
         Self::append_f64_slice_elements_to_string_vec(&mut tokens, &e.information_matrix, &upper_triangle);
         tokens.join(" ")
+    }
+
+    fn get_upper_triangle_indices(dim: usize) -> Vec<usize> {
+        let mut indices: Vec<usize> = vec![];
+        for i in 0..dim {
+            for j in i..dim {
+                indices.push(i*dim+j)
+            }
+        }
+        indices
     }
 
     fn append_f64_slice_to_string_vec(tokens: &mut Vec<String>, f64_slice: &[f64]) {
