@@ -15,14 +15,22 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
 }
 
 fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isometry3<f64>) -> (MatrixMN<f64, U6, U12>, MatrixMN<f64, U12, U6>) {
-    let A_ij = iso_ij.inverse();
-    let B_ij = iso_i.inverse() * iso_j;
+    // iso_i, iso_j, iso_ij (i.e. all parameters) CORRECT
+    let A_ij = iso_ij.inverse(); // CORRECT
+    let B_ij: Isometry3<f64> = iso_i.inverse() * iso_j; // CORRECT
+
+    // INCORRECT
+    // first error translation correct, after that starts getting slightly worse; rotation incorrect from beginning on
+    // g2o seems to be using this operator implementation: https://eigen.tuxfamily.org/dox/classEigen_1_1Transform.html#title46
     let Err_ij = A_ij * B_ij;
+
     let A_rot = A_ij.rotation.to_rotation_matrix();
     let B_rot = B_ij.rotation.to_rotation_matrix();
     let Err_rot = Err_ij.rotation.to_rotation_matrix();
 
-    let dq_dR = MatrixMN::<f64, U3, U9>::from_vec(vec![0.0; 27]); // TODO calculate dq_dR
+    let dq_dR = calc_dq_dR(&Err_rot.matrix());
+    print!("dq_dR:{}", &dq_dR);
+    print!("ret:{}", &Err_rot.matrix());
 
     let mut jacobian_i = Matrix6::from_vec(vec![0.0; 36]);
     let mut jacobian_j = Matrix6::from_vec(vec![0.0; 36]);
@@ -36,6 +44,41 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
     jacobian.index_mut((.., ..6)).copy_from(&jacobian_i);
     jacobian.index_mut((.., 6..)).copy_from(&jacobian_j);
     (jacobian, jacobian.transpose())
+}
+
+// formula implemented according to Chapter 10.3.2 in
+// https://jinyongjeong.github.io/Download/SE3/jlblanco2010geometry3d_techrep.pdf
+//
+// However: g2o passes the Error rotation matrix which always has 1s in the diagonal
+//          (at least in the test output). This would mean that (trace - 1.0) / 2.0
+//          would always equal 1 and always the special case would have to be called,
+//          which does not equal the test output of g2o.
+//
+// TODO rename to ln_R_derivative_wrt_R() once everything is correct
+fn calc_dq_dR(matr: &Matrix3<f64>) -> MatrixMN<f64, U3, U9> {
+    let m = matr;
+    let trace = get(m,0,0) + get(m,1,1) + get(m,2,2);
+    let cos = (trace - 1.0) / 2.0;
+    // TODO return special case if cos > 0.999999...
+    if cos > 0.999999 {
+        println!("special case with cos: {}", cos);
+    }
+    let sin = (1.0 - cos*cos).sqrt();
+    let angle = sin.asin(); // TODO correct angle?
+    let factor = (angle*cos - sin) / (4.0*sin*sin*sin);
+    let a1 = (get(m,2,1) - get(m,1,2)) * factor;
+    let a2 = (get(m,0,2) - get(m,2,0)) * factor;
+    let a3 = (get(m,1,0) - get(m,0,1)) * factor;
+    let b = angle / (2.0*sin);
+    MatrixMN::<f64, U3, U9>::from_vec(vec![ a1,  a2,  a3,   // transposed matrix is displayed
+                                           0.0, 0.0,   b,
+                                           0.0,  -b, 0.0,
+                                           0.0, 0.0,  -b,
+                                            a1,  a2,  a3,
+                                             b, 0.0, 0.0,
+                                           0.0,   b, 0.0,
+                                            -b, 0.0, 0.0,
+                                            a1,  a2,  a3,])
 }
 
 fn skew_trans(trans: &Translation3<f64>) -> Matrix3<f64> {
@@ -63,13 +106,13 @@ fn skew_matr_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> MatrixM
     ret
 }
 
-fn get(m: &Matrix3<f64>, row: usize, col: usize) -> f64 {
-    m.data.as_slice()[col*3 + row]
-}
-
 fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
     Isometry3::from_parts(
         Translation3::new(pose[0], pose[1], pose[2]),
         UnitQuaternion::from_quaternion(Quaternion::new(pose[6], pose[3], pose[4], pose[5])),
     )
+}
+
+fn get(m: &Matrix3<f64>, row: usize, col: usize) -> f64 {
+    m.data.as_slice()[row*3 + col]
 }
