@@ -125,7 +125,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     vertex.content[5],
                     vertex.content[6],
                     fixed,
-                    add_var_to_matrix(&mut factor_graph.matrix_dim, 7, fixed),
+                    add_var_to_matrix(&mut factor_graph.matrix_dim, 6, fixed),
                 ))),
         ),
         other_type => panic!("Unsupported vertex type in the model: {}", other_type),

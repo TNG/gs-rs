@@ -1,4 +1,4 @@
-use nalgebra::{DMatrix, DVector, Vector3, UnitQuaternion, Quaternion, MatrixMN, Isometry3, Translation3, U6, U12, U3, U9, Matrix6, Rotation3, Matrix3};
+use nalgebra::{DMatrix, DVector, Vector3, UnitQuaternion, Quaternion, MatrixMN, Isometry3, Translation3, U6, U12, U3, U9, Matrix6, Rotation3, Matrix3, Matrix, Dynamic, SliceStorage, U1, RowVector6, Vector};
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;
 use std::f64::consts::PI;
@@ -9,9 +9,30 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     let iso_j = get_isometry(&var_j.get_content());
     let iso_ij = get_isometry(&factor.constraint);
     let (jacobi, jacobi_T) = calc_jacobians(&iso_i, &iso_j, &iso_ij);
+    let right_mult = &factor.information_matrix.content * jacobi;
 
+    let H_updates = jacobi_T * &right_mult;
+    update_H_submatrix(H, &H_updates.index((..6, ..6)), var_i, var_i);
+    update_H_submatrix(H, &H_updates.index((..6, 6..)), var_i, var_j);
+    update_H_submatrix(H, &H_updates.index((6.., ..6)), var_j, var_i);
+    update_H_submatrix(H, &H_updates.index((6.., 6..)), var_j, var_j);
 
-    // TODO take a look at g2o and implement
+    // TODO adjust code for 3D
+    // let err_pos = iso_ij * iso_i.inverse() * iso_j;
+    // let err_vec = err_pos.data.to_vec();
+
+    // err_vec should look something like this:
+    // Vector6 v;
+    // v.block<3,1>(3,0) = toCompactQuaternion(extractRotation(t));
+    // v.block<3,1>(0,0) = t.translation();
+    // return v;
+
+    // let b_updates = (RowVector6::from_vec(err_vec) * &right_mult).transpose();
+    // update_b_subvector(b, &b_updates.index((..6, ..)), var_i);
+    // update_b_subvector(b, &b_updates.index((6.., ..)), var_j);
+
+    print!("From A:{}", &H_updates.index((..6, ..6))); // rather incorrect
+    print!("To A:{}", &H_updates.index((6.., 6..))); // fairly correct
 }
 
 fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isometry3<f64>) -> (MatrixMN<f64, U6, U12>, MatrixMN<f64, U12, U6>) {
@@ -38,7 +59,6 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
     jacobian_j.index_mut((..3, ..3)).copy_from(Err_rot.matrix());
     jacobian_i.index_mut((..3, 3..)).copy_from(&(A_rot.matrix() * skew_trans(&B_ij.translation).transpose())); // TODO negate skew_trans? (g2o output is the exact negative) -> remove .transpose() (= *1.0 as skew-symmetric and diagonal = [0])
     jacobian_i.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_T_and_mult_parts(&B_rot.matrix(), &A_rot.matrix())));
-    print!("ret:{}", skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix()));
     jacobian_j.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
 
     print!("Odometry Jacobian_i:{}", &jacobian_i);
@@ -161,4 +181,23 @@ fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
 
 fn get(m: &Matrix3<f64>, row: usize, col: usize) -> f64 {
     m.data.as_slice()[row*3 + col]
+}
+
+fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U12>>, var_row: &Box<dyn Variable>, var_col: &Box<dyn Variable>) {
+    if var_row.is_fixed() || var_col.is_fixed() {
+        return;
+    }
+    let row_range = var_row.get_range().unwrap();
+    let col_range = var_col.get_range().unwrap();
+    let updated_submatrix = &(H.index((row_range.clone(), col_range.clone())) + added_matrix);
+    H.index_mut((row_range, col_range)).copy_from(updated_submatrix);
+}
+
+fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64,Dynamic,U1,U1,U12>>, var: &Box<dyn Variable>) {
+    if var.is_fixed() {
+        return;
+    }
+    let range = var.get_range().unwrap();
+    let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);
+    b.index_mut((range, ..)).copy_from(updated_subvector);
 }
