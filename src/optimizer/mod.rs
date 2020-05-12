@@ -13,7 +13,7 @@ use crate::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::solver::Solver;
 use std::f64::consts::PI;
 use crate::factor_graph::variable::Variable;
-use crate::factor_graph::variable::VariableType::Vehicle2D;
+use crate::factor_graph::variable::VariableType::{Vehicle2D, Vehicle3D};
 
 mod linear_system;
 
@@ -36,6 +36,9 @@ fn update_once(factor_graph: &FactorGraph) {
 
 fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
     if var.is_fixed() {
+        return;
+    }
+    if var.get_type() == Vehicle3D { // TODO optimize Vehicle3D
         return;
     }
     let old_content = var.get_content();

@@ -17,21 +17,16 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     update_H_submatrix(H, &H_updates.index((6.., ..6)), var_j, var_i);
     update_H_submatrix(H, &H_updates.index((6.., 6..)), var_j, var_j);
 
-    // TODO adjust code for 3D
-    // let err_pos = iso_ij * iso_i.inverse() * iso_j;
-    // let err_vec = err_pos.data.to_vec();
+    let err = iso_ij * iso_i.inverse() * iso_j;
+    let mut err_vec = err.translation.vector.data.to_vec();
+    err_vec.extend_from_slice(&err.rotation.quaternion().coords.data.to_vec()[..3]);
+    let b_updates = (RowVector6::from_vec(err_vec) * &right_mult).transpose();
+    update_b_subvector(b, &b_updates.index((..6, ..)), var_i);
+    update_b_subvector(b, &b_updates.index((6.., ..)), var_j);
 
-    // err_vec should look something like this:
-    // Vector6 v;
-    // v.block<3,1>(3,0) = toCompactQuaternion(extractRotation(t));
-    // v.block<3,1>(0,0) = t.translation();
-    // return v;
-
-    // let b_updates = (RowVector6::from_vec(err_vec) * &right_mult).transpose();
-    // update_b_subvector(b, &b_updates.index((..6, ..)), var_i);
-    // update_b_subvector(b, &b_updates.index((6.., ..)), var_j);
-
+    print!("From b:{}", &b_updates.index((..6, ..))); // very incorrect
     print!("From A:{}", &H_updates.index((..6, ..6))); // rather incorrect
+    print!("To b:{}", &b_updates.index((6.., ..))); // very incorrect
     print!("To A:{}", &H_updates.index((6.., 6..))); // fairly correct
 }
 
