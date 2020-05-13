@@ -24,10 +24,14 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     update_b_subvector(b, &b_updates.index((..6, ..)), var_i);
     update_b_subvector(b, &b_updates.index((6.., ..)), var_j);
 
-    print!("From b:{}", &b_updates.index((..6, ..))); // very incorrect
-    print!("From A:{}", &H_updates.index((..6, ..6))); // rather incorrect
-    print!("To b:{}", &b_updates.index((6.., ..))); // very incorrect
-    print!("To A:{}", &H_updates.index((6.., 6..))); // fairly correct
+    if !var_i.is_fixed() {
+        print!("From b:{}", &b_updates.index((..6, ..))); // very incorrect
+        print!("From A:{}", &H_updates.index((..6, ..6))); // rather incorrect
+    }
+    if !var_j.is_fixed() {
+        print!("To b:{}", &b_updates.index((6.., ..))); // very incorrect
+        print!("To A:{}", &H_updates.index((6.., 6..))); // fairly correct
+    }
 }
 
 fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isometry3<f64>) -> (MatrixMN<f64, U6, U12>, MatrixMN<f64, U12, U6>) {
@@ -59,7 +63,7 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
     jacobian_i.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_T_and_mult_parts(&B_rot.matrix(), &A_rot.matrix())));
     jacobian_j.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
 
-    print!("ret:{}", dq_dR); // ALMOST CORRECT
+    // print!("ret:{}", dq_dR); // ALMOST CORRECT
 
     print!("Odometry Jacobian_i:{}", &jacobian_i); // top left: CORRECT        | top right: CORRECT | bottom left: CORRECT | bottom right: SLIGHTLY INCORRECT
     print!("Odometry Jacobian_j:{}", &jacobian_j); // top left: ALMOST CORRECT | top right: CORRECT | bottom left: CORRECT | bottom right: ALMOST CORRECT
@@ -130,9 +134,10 @@ fn calc_dq_dR(matr: &Matrix3<f64>) -> MatrixMN<f64, U3, U9> {
 fn skew_trans(trans: &Translation3<f64>) -> Matrix3<f64> {
     let t = 2.0 * trans.vector;
     let data = t.data.as_slice();
-    Matrix3::from_vec(vec![     0.0,  data[2], -data[1],   // transposed matrix is displayed
-                           -data[2],      0.0,  data[0],
-                            data[1], -data[0],      0.0,])
+    // to match g2o output, skewing seems to need to return skew_T
+    Matrix3::from_vec(vec![     0.0, -data[2],  data[1],   // transposed matrix is displayed
+                            data[2],      0.0, -data[0],
+                           -data[1],  data[0],      0.0,])
 }
 
 fn skew_matr_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> MatrixMN<f64, U9, U3> {
