@@ -25,48 +25,34 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     update_b_subvector(b, &b_updates.index((6.., ..)), var_j);
 
     if !var_i.is_fixed() {
-        print!("From b:{}", &b_updates.index((..6, ..))); // very incorrect
-        print!("From A:{}", &H_updates.index((..6, ..6))); // rather incorrect
+        print!("From b:{}", &b_updates.index((..6, ..))); // INCORRECT
+        print!("From A:{}", &H_updates.index((..6, ..6))); // top left and bottom right INCORRECT
     }
     if !var_j.is_fixed() {
-        print!("To b:{}", &b_updates.index((6.., ..))); // very incorrect
-        print!("To A:{}", &H_updates.index((6.., 6..))); // fairly correct
+        print!("To b:{}", &b_updates.index((6.., ..))); // INCORRECT
+        print!("To A:{}", &H_updates.index((6.., 6..))); // possibly correct \fpu errors (only includes identity matrix and minimal numbers)
     }
 }
 
 fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isometry3<f64>) -> (MatrixMN<f64, U6, U12>, MatrixMN<f64, U12, U6>) {
-    // iso_i, iso_j, iso_ij (i.e. all parameters) CORRECT
-    let A_ij = iso_ij.inverse(); // CORRECT
-    let B_ij = iso_i.inverse() * iso_j; // CORRECT
-
-    // TODO check if solution is okay with this error calculation
-    // INCORRECT... or is Rust just more precise?
-    // first error translation correct, after that starts getting slightly worse; rotation incorrect from beginning on
-    // g2o seems to be using this operator implementation: https://eigen.tuxfamily.org/dox/classEigen_1_1Transform.html#title46
-    // Code should be found starting in line 1515: https://github.com/eigenteam/eigen-git-mirror/blob/master/Eigen/src/Geometry/Transform.h
+    let A_ij = iso_ij.inverse();
+    let B_ij = iso_i.inverse() * iso_j;
     let Err_ij = A_ij * B_ij;
-
     let A_rot = A_ij.rotation.to_rotation_matrix();
     let B_rot = B_ij.rotation.to_rotation_matrix();
     let Err_rot = Err_ij.rotation.to_rotation_matrix();
-
-    let dq_dR = calc_dq_dR(&Err_rot.matrix());
+    let dq_dR = calc_dq_dR(&Err_rot.matrix()); // variable name taken over from g2o
 
     let mut jacobian_i = Matrix6::from_vec(vec![0.0; 36]);
     let mut jacobian_j = Matrix6::from_vec(vec![0.0; 36]);
     jacobian_i.index_mut((..3, ..3)).copy_from(&(-1.0 * A_rot.matrix()));
     jacobian_j.index_mut((..3, ..3)).copy_from(Err_rot.matrix());
-
-    // comparing to g2o, the skew functions used in the following snippet return a transposed result
-    // in the tests, skew_trans seems to work the same as in g2o
     jacobian_i.index_mut((..3, 3..)).copy_from(&(A_rot.matrix() * skew_trans(&B_ij.translation).transpose()));
     jacobian_i.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_T_and_mult_parts(&B_rot.matrix(), &A_rot.matrix())));
     jacobian_j.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
 
-    // print!("ret:{}", dq_dR); // ALMOST CORRECT
-
-    print!("Odometry Jacobian_i:{}", &jacobian_i); // top left: CORRECT        | top right: CORRECT | bottom left: CORRECT | bottom right: SLIGHTLY INCORRECT
-    print!("Odometry Jacobian_j:{}", &jacobian_j); // top left: ALMOST CORRECT | top right: CORRECT | bottom left: CORRECT | bottom right: ALMOST CORRECT
+    print!("Odometry Jacobian_i:{}", &jacobian_i); // CORRECT \fpu errors
+    print!("Odometry Jacobian_j:{}", &jacobian_j); // CORRECT \fpu errors
 
     let mut jacobian = MatrixMN::<f64, U6, U12>::from_vec(vec![0.0; 72]);
     jacobian.index_mut((.., ..6)).copy_from(&jacobian_i);
@@ -134,7 +120,7 @@ fn calc_dq_dR(matr: &Matrix3<f64>) -> MatrixMN<f64, U3, U9> {
 fn skew_trans(trans: &Translation3<f64>) -> Matrix3<f64> {
     let t = 2.0 * trans.vector;
     let data = t.data.as_slice();
-    // to match g2o output, skewing seems to need to return skew_T
+    // to match g2o output, skew seems to need to return skew_T
     Matrix3::from_vec(vec![     0.0, -data[2],  data[1],   // transposed matrix is displayed
                             data[2],      0.0, -data[0],
                            -data[1],  data[0],      0.0,])
@@ -263,19 +249,18 @@ mod tests {
         // variable Tb of last factor in first iteration of mini_3d.g2o
         let b_trans = Translation3::new(-0.0199389, 2.43871, -0.14102);
         let actual = skew_trans(&b_trans).transpose();
-        let expected = Matrix3::from_vec(vec![      0.0,   0.282041,   4.87743,    // transposed matrix is displayed
-                                              -0.282041,        0.0, 0.0398779,
-                                               -4.87743, -0.0398779,       0.0,]);
+        let expected = Matrix3::from_vec(vec![      0.0,  -0.282041,   -4.87743,    // transposed matrix is displayed
+                                               0.282041,        0.0, -0.0398779,
+                                                4.87743,  0.0398779,        0.0,]);
         info!("Actual: {}", actual);
         info!("Expected: {}", expected);
         relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-5 + 1e-10);
     }
 
     #[test]
-    fn test_skew_matr_and_mult_parts() {
+    fn test_skew_matr_T_and_mult_parts() {
         init();
-        // TODO remove _f64.round() which was used to have a cleaner output for debugging
-        let actual = skew_matr_and_mult_parts(
+        let actual = skew_matr_T_and_mult_parts(
             // variable Rb of last factor in first iteration of mini_3d.g2o
             &Matrix3::<f64>::from_vec(vec![  0.999284, -0.0244698, 0.0288424,    // transposed matrix is displayed
                                             0.0150356,   0.956688,  0.290726,
