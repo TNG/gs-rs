@@ -38,9 +38,6 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
     if var.is_fixed() {
         return;
     }
-    if var.get_type() == Vehicle3D { // TODO optimize Vehicle3D
-        return;
-    }
     let old_content = var.get_content();
     let range = var.get_range().unwrap();
     let correction = &solution[range];
@@ -53,6 +50,8 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
         } else if updated_content[2] < -PI {
             updated_content[2] += 2.0 * PI;
         }
+    } else if var.get_type() == Vehicle3D {
+        updated_content.push(old_content[6]); // TODO this is wrong, all seven entries can change
     }
     var.set_content(updated_content);
 }

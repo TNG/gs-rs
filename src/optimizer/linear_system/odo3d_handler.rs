@@ -54,13 +54,14 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
     jacobian_j.index_mut((..3, ..3)).copy_from(Err_rot.matrix());
 
     // comparing to g2o, the skew functions used in the following snippet return a transposed result
-    jacobian_i.index_mut((..3, 3..)).copy_from(&(A_rot.matrix() * skew_trans(&B_ij.translation)));
-    jacobian_i.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_and_mult_parts(&B_rot.matrix(), &A_rot.matrix())));
-    jacobian_j.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_T_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
+    // in the tests, skew_trans seems to work the same as in g2o
+    jacobian_i.index_mut((..3, 3..)).copy_from(&(A_rot.matrix() * skew_trans(&B_ij.translation).transpose()));
+    jacobian_i.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_T_and_mult_parts(&B_rot.matrix(), &A_rot.matrix())));
+    jacobian_j.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
 
     print!("ret:{}", dq_dR); // ALMOST CORRECT
 
-    print!("Odometry Jacobian_i:{}", &jacobian_i); // top left: CORRECT | top right: CORRECT | bottom left: CORRECT | bottom right: SLIGHTLY INCORRECT
+    print!("Odometry Jacobian_i:{}", &jacobian_i); // top left: CORRECT        | top right: CORRECT | bottom left: CORRECT | bottom right: SLIGHTLY INCORRECT
     print!("Odometry Jacobian_j:{}", &jacobian_j); // top left: ALMOST CORRECT | top right: CORRECT | bottom left: CORRECT | bottom right: ALMOST CORRECT
 
     let mut jacobian = MatrixMN::<f64, U6, U12>::from_vec(vec![0.0; 72]);
@@ -209,4 +210,104 @@ fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, 
     let range = var.get_range().unwrap();
     let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);
     b.index_mut((range, ..)).copy_from(updated_subvector);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use log::LevelFilter;
+    use std::time::SystemTime;
+
+    fn init() {
+        let _ = env_logger::builder()
+            .is_test(true)
+            .filter_level(LevelFilter::Debug)
+            .try_init();
+    }
+
+    fn relative_eq_slice(actual: &[f64], expected: &[f64], epsilon: f64) {
+        actual.iter().zip(expected.iter())
+            .for_each(|(a, e)| assert!(relative_eq!(a, e, epsilon = epsilon)));
+    }
+
+    #[test]
+    fn test_testing_helper_positive() {
+        init();
+        let actual   = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let expected = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        relative_eq_slice(&actual, &expected, 1e-10);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_testing_helper_negative() {
+        init();
+        let actual   = vec![1.01, 2.0, 3.0, 4.0, 5.0];
+        let expected = vec![1.0,  2.0, 3.0, 4.0, 5.0];
+        relative_eq_slice(&actual, &expected, 1e-10);
+    }
+
+    #[test]
+    fn test_dq_dR() {
+        init();
+        // variable Re of last factor in first iteration of mini_3d.g2o
+        let err_rot_matrix = Matrix3::from_vec(vec![         1.0,  -7.7835e-07, 5.74141e-08,    // transposed matrix is displayed
+                                                     7.99504e-07,          1.0, 1.14998e-07,
+                                                    -7.15592e-08, -1.46825e-07,         1.0,]);
+        let actual = calc_dq_dR(&err_rot_matrix);
+        let a1 = -8.18195e-09;
+        let a2 =  4.03041e-09;
+        let a3 =  4.93079e-08;
+        let b =          0.25;
+        let expected = MatrixMN::<f64, U3, U9>::from_vec(vec![ a1,  a2,  a3,    // transposed matrix is displayed
+                                                              0.0, 0.0,   b,
+                                                              0.0,  -b, 0.0,
+                                                              0.0, 0.0,  -b,
+                                                               a1,  a2,  a3,
+                                                                b, 0.0, 0.0,
+                                                              0.0,   b, 0.0,
+                                                               -b, 0.0, 0.0,
+                                                               a1,  a2,  a3,]);
+        info!("Actual: {}", actual);
+        info!("Expected: {}", expected);
+        relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-10);
+    }
+
+    #[test]
+    fn test_skew_trans() {
+        init();
+        // variable Tb of last factor in first iteration of mini_3d.g2o
+        let b_trans = Translation3::new(-0.0199389, 2.43871, -0.14102);
+        let actual = skew_trans(&b_trans).transpose();
+        let expected = Matrix3::from_vec(vec![      0.0,   0.282041,   4.87743,    // transposed matrix is displayed
+                                              -0.282041,        0.0, 0.0398779,
+                                               -4.87743, -0.0398779,       0.0,]);
+        info!("Actual: {}", actual);
+        info!("Expected: {}", expected);
+        relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-5 + 1e-10);
+    }
+
+    #[test]
+    fn test_skew_matr_T_and_mult_parts() {
+        init();
+        // TODO remove _f64.round() which was used to have a cleaner output for debugging
+        let actual = skew_matr_T_and_mult_parts(
+            // variable Rb of last factor in first iteration of mini_3d.g2o
+            &Matrix3::<f64>::from_vec(vec![  0.999284, -0.0244698, 6.95278e-310_f64.round(),    // transposed matrix is displayed
+                                            0.0150356,   0.956688,     0.290726,
+                                           -0.0347072,  -0.290084,     0.956372,]),
+            // variable Ra of last factor in first iteration of mini_3d.g2o
+            &Matrix3::<f64>::from_vec(vec![  0.999284, 0.0150348, 6.95266e-310_f64.round(),    // transposed matrix is displayed
+                                           -0.0244691,  0.956688, 6.95266e-310_f64.round(),
+                                            0.0288425,  0.290726, 6.95266e-310_f64.round(),]),
+        );
+        let expected = MatrixMN::<f64, U9, U3>::from_vec(vec![ 5.23021e-08, 0.0694143, 0.0300711, -0.0694142,  2.85328e-07,   -1.99857, -0.0300695,    1.99857,  2.91287e-07,    // transposed matrix is displayed
+                                                               3.41719e-07,  0.580168,   1.91338,  -0.580168,  4.58219e-07,  0.0489397,   -1.91338, -0.0489382, -1.44105e-07,
+                                                              -1.52217e-06,  -1.91274,  0.581451,    1.91274, -1.52261e-06, -0.0576846,  -0.581452,  0.0576852, -3.31386e-08,]);
+        info!("Actual: {}", actual);
+        info!("Expected: {}", expected);
+        relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-5 + 1e-10);
+    }
+
 }
