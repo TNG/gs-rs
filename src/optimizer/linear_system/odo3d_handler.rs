@@ -81,42 +81,6 @@ fn calc_dq_dR(matr: &Matrix3<f64>) -> MatrixMN<f64, U3, U9> {
                                             a1,  a2,  a3,])
 }
 
-/*// TODO remove commented out calc_dq_dR if it stays unused
-// formula implemented according to Chapter 10.3.2 in
-// https://jinyongjeong.github.io/Download/SE3/jlblanco2010geometry3d_techrep.pdf
-//
-// However: g2o passes the Error rotation matrix which always has 1s in the diagonal
-//          (at least in the test output). This would mean that (trace - 1.0) / 2.0
-//          would always equal 1 and always the special case would have to be called,
-//          which does not equal the test output of g2o.
-//
-// TODO rename to ln_R_derivative_wrt_R() once everything is correct
-fn calc_dq_dR(matr: &Matrix3<f64>) -> MatrixMN<f64, U3, U9> {
-    let m = matr;
-    let trace = get(m,0,0) + get(m,1,1) + get(m,2,2);
-    let cos = (trace - 1.0) / 2.0;
-    // TODO return special case if cos > 0.999999...
-    if cos > 0.999999 {
-        println!("special case with cos: {}", cos);
-    }
-    let sin = (1.0 - cos*cos).sqrt();
-    let angle = sin.asin(); // TODO correct angle?
-    let factor = (angle*cos - sin) / (4.0*sin*sin*sin);
-    let a1 = (get(m,2,1) - get(m,1,2)) * factor;
-    let a2 = (get(m,0,2) - get(m,2,0)) * factor;
-    let a3 = (get(m,1,0) - get(m,0,1)) * factor;
-    let b = angle / (2.0*sin);
-    MatrixMN::<f64, U3, U9>::from_vec(vec![ a1,  a2,  a3,   // transposed matrix is displayed
-                                           0.0, 0.0,   b,
-                                           0.0,  -b, 0.0,
-                                           0.0, 0.0,  -b,
-                                            a1,  a2,  a3,
-                                             b, 0.0, 0.0,
-                                           0.0,   b, 0.0,
-                                            -b, 0.0, 0.0,
-                                            a1,  a2,  a3,])
-}*/
-
 fn skew_trans(trans: &Translation3<f64>) -> Matrix3<f64> {
     let t = 2.0 * trans.vector;
     let data = t.data.as_slice();
