@@ -55,8 +55,8 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
     print!("Odometry Jacobian_j:{}", &jacobian_j); // CORRECT \fpu errors
 
     // TODO project jacobians through the manifold
-    jacobian_i *= calc_manifold(iso_i);
-    jacobian_j *= calc_manifold(iso_j);
+    // jacobian_i *= calc_manifold(iso_i);
+    // jacobian_j *= calc_manifold(iso_j);
 
     let mut jacobian = MatrixMN::<f64, U6, U12>::from_vec(vec![0.0; 72]);
     jacobian.index_mut((.., ..6)).copy_from(&jacobian_i);
