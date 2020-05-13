@@ -136,50 +136,28 @@ fn skew_trans(trans: &Translation3<f64>) -> Matrix3<f64> {
 }
 
 fn skew_matr_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> MatrixMN<f64, U9, U3> {
-    let m = &(2.0 * matr);
-    let matr_x = mult * Matrix3::from_vec(vec![        0.0,         0.0,         0.0,    // transposed matrix is displayed
-                                               -get(m,2,0), -get(m,2,1), -get(m,2,2),
-                                                get(m,1,0),  get(m,1,1),  get(m,1,2),]);
-    let matr_y = mult * Matrix3::from_vec(vec![ get(m,2,0),  get(m,2,1),  get(m,2,2),    // transposed matrix is displayed
-                                                       0.0,         0.0,         0.0,
-                                               -get(m,0,0), -get(m,0,1), -get(m,0,2),]);
-    let matr_z = mult * Matrix3::from_vec(vec![-get(m,1,0), -get(m,1,1), -get(m,1,2),    // transposed matrix is displayed
-                                                get(m,0,0),  get(m,0,1),  get(m,0,2),
-                                                       0.0,         0.0,         0.0,]);
-    // let mut ret = MatrixMN::<f64, U9, U3>::from_vec(vec![0.0; 27]);
-    // ret.index_mut((0..3, ..)).copy_from(&matr_x);
-    // ret.index_mut((3..6, ..)).copy_from(&matr_y);
-    // ret.index_mut((6..9, ..)).copy_from(&matr_z);
-    // ret
-    let mut ret_vec: Vec<f64> = vec![];
-    ret_vec.extend_from_slice(matr_x.data.as_slice());
-    ret_vec.extend_from_slice(matr_y.data.as_slice());
-    ret_vec.extend_from_slice(matr_z.data.as_slice());
-    MatrixMN::<f64, U9, U3>::from_vec(ret_vec)
+    let m = matr;
+    let top_part = mult * skew_trans(&Translation3::new(get(m,0,0), get(m,1,0), get(m,2,0)));
+    let mid_part = mult * skew_trans(&Translation3::new(get(m,0,1), get(m,1,1), get(m,2,1)));
+    let bot_part = mult * skew_trans(&Translation3::new(get(m,0,2), get(m,1,2), get(m,2,2)));
+    let mut ret = MatrixMN::<f64, U9, U3>::from_vec(vec![0.0; 27]);
+    ret.index_mut((0..3, ..)).copy_from(&top_part);
+    ret.index_mut((3..6, ..)).copy_from(&mid_part);
+    ret.index_mut((6..9, ..)).copy_from(&bot_part);
+    ret
 }
 
 // TODO more elegant solution if this works
 fn skew_matr_T_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> MatrixMN<f64, U9, U3> {
-    let m = &(2.0 * matr);
-    let matr_x = mult * Matrix3::from_vec(vec![        0.0,         0.0,         0.0,    // transposed matrix is displayed
-                                                get(m,2,0),  get(m,2,1),  get(m,2,2),
-                                               -get(m,1,0), -get(m,1,1), -get(m,1,2),]);
-    let matr_y = mult * Matrix3::from_vec(vec![-get(m,2,0), -get(m,2,1), -get(m,2,2),    // transposed matrix is displayed
-                                                       0.0,         0.0,         0.0,
-                                                get(m,0,0),  get(m,0,1),  get(m,0,2),]);
-    let matr_z = mult * Matrix3::from_vec(vec![ get(m,1,0),  get(m,1,1),  get(m,1,2),    // transposed matrix is displayed
-                                               -get(m,0,0), -get(m,0,1), -get(m,0,2),
-                                                       0.0,         0.0,         0.0,]);
-    // let mut ret = MatrixMN::<f64, U9, U3>::from_vec(vec![0.0; 27]);
-    // ret.index_mut((0..3, ..)).copy_from(&matr_x);
-    // ret.index_mut((3..6, ..)).copy_from(&matr_y);
-    // ret.index_mut((6..9, ..)).copy_from(&matr_z);
-    // ret
-    let mut ret_vec: Vec<f64> = vec![];
-    ret_vec.extend_from_slice(matr_x.data.as_slice());
-    ret_vec.extend_from_slice(matr_y.data.as_slice());
-    ret_vec.extend_from_slice(matr_z.data.as_slice());
-    MatrixMN::<f64, U9, U3>::from_vec(ret_vec)
+    let m = matr;
+    let top_part = mult * skew_trans(&Translation3::new(get(m,0,0), get(m,1,0), get(m,2,0))).transpose();
+    let mid_part = mult * skew_trans(&Translation3::new(get(m,0,1), get(m,1,1), get(m,2,1))).transpose();
+    let bot_part = mult * skew_trans(&Translation3::new(get(m,0,2), get(m,1,2), get(m,2,2))).transpose();
+    let mut ret = MatrixMN::<f64, U9, U3>::from_vec(vec![0.0; 27]);
+    ret.index_mut((0..3, ..)).copy_from(&top_part);
+    ret.index_mut((3..6, ..)).copy_from(&mid_part);
+    ret.index_mut((6..9, ..)).copy_from(&bot_part);
+    ret
 }
 
 fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
@@ -190,7 +168,7 @@ fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
 }
 
 fn get(m: &Matrix3<f64>, row: usize, col: usize) -> f64 {
-    m.data.as_slice()[row*3 + col]
+    m.data.as_slice()[row + col*3]
 }
 
 fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U12>>, var_row: &Box<dyn Variable>, var_col: &Box<dyn Variable>) {
@@ -271,7 +249,7 @@ mod tests {
                                                                a1,  a2,  a3,]);
         info!("Actual: {}", actual);
         info!("Expected: {}", expected);
-        relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-10);
+        relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-7);
     }
 
     #[test]
@@ -289,25 +267,25 @@ mod tests {
     }
 
     #[test]
-    fn test_skew_matr_T_and_mult_parts() {
+    fn test_skew_matr_and_mult_parts() {
         init();
         // TODO remove _f64.round() which was used to have a cleaner output for debugging
-        let actual = skew_matr_T_and_mult_parts(
+        let actual = skew_matr_and_mult_parts(
             // variable Rb of last factor in first iteration of mini_3d.g2o
-            &Matrix3::<f64>::from_vec(vec![  0.999284, -0.0244698, 6.95278e-310_f64.round(),    // transposed matrix is displayed
-                                            0.0150356,   0.956688,     0.290726,
-                                           -0.0347072,  -0.290084,     0.956372,]),
+            &Matrix3::<f64>::from_vec(vec![  0.999284, -0.0244698, 0.0288424,    // transposed matrix is displayed
+                                            0.0150356,   0.956688,  0.290726,
+                                           -0.0347072,  -0.290084,  0.956372,]),
             // variable Ra of last factor in first iteration of mini_3d.g2o
-            &Matrix3::<f64>::from_vec(vec![  0.999284, 0.0150348, 6.95266e-310_f64.round(),    // transposed matrix is displayed
-                                           -0.0244691,  0.956688, 6.95266e-310_f64.round(),
-                                            0.0288425,  0.290726, 6.95266e-310_f64.round(),]),
+            &Matrix3::<f64>::from_vec(vec![  0.999284, 0.0150348, -0.0347071,    // transposed matrix is displayed
+                                           -0.0244691,  0.956688,  -0.290084,
+                                            0.0288425,  0.290726,   0.956372,]),
         );
         let expected = MatrixMN::<f64, U9, U3>::from_vec(vec![ 5.23021e-08, 0.0694143, 0.0300711, -0.0694142,  2.85328e-07,   -1.99857, -0.0300695,    1.99857,  2.91287e-07,    // transposed matrix is displayed
                                                                3.41719e-07,  0.580168,   1.91338,  -0.580168,  4.58219e-07,  0.0489397,   -1.91338, -0.0489382, -1.44105e-07,
                                                               -1.52217e-06,  -1.91274,  0.581451,    1.91274, -1.52261e-06, -0.0576846,  -0.581452,  0.0576852, -3.31386e-08,]);
         info!("Actual: {}", actual);
         info!("Expected: {}", expected);
-        relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-5 + 1e-10);
+        relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-5);
     }
 
 }
