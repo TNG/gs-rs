@@ -1,0 +1,28 @@
+\section{Optimization Algorithm}
+
+\subsection{Background Literature}
+
+The optimization algorithm used by \textbf{gs-rs} is based on that which parts of \textbf{g2o} uses. This paper should suffice to understand the optimization's implementation in \textbf{gs-rs}. The following papers by the developers of \textbf{g2o} are recommended if a deeper understanding of the theory behind the algorithm is of interest.
+
+\begin{itemize}
+	\item \textit{g2o: A General Framework for Graph Optimization, Kümmerle~et~al.}~\cite{kummerle2011g2o}: This paper documents the derivation of the algorithm's structure.
+	\item \textit{A Tutorial on Graph-Based SLAM, Grisetti~et~al.}~\cite{grisetti2010tutorial}: This paper contains additional comments on the calculations in 2D and 3D. Here it is presented how the least squares optimization works on a manifold.
+\end{itemize}
+
+\subsection{Iteration Steps}
+
+Given a specific number of iterations $n$ and the initial guess $x_i^{(0)}$ for each variable, the optimizer algorithm will repeat the following steps $n$ times:
+
+\begin{enumerate}
+	\item Calculate $H$ and $b$ by looping through all factors and updating its variables' entries in $H$ and $b$.
+	\item Calculate $\Delta x$, the vector containing data about how much each current variable guess $x_i^{(k)}$ should be updated in this step, by solving the linear system
+		\begin{align}
+			H \Delta x = -b.
+		\end{align}
+	\item Update the guesses for each variable $x_i$ with
+		\begin{align}
+			x_i^{(k+1)} = x_i^{(k)} + \Delta x_i.
+		\end{align}
+\end{enumerate}
+
+How the parts of $H$ and $b$ are calculated depends on the exact factor type. In the following sections, the calculation is described for all 2D and 3D factors supported by \textbf{gs-rs}.

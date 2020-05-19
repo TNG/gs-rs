@@ -20,7 +20,7 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     let err = iso_ij * iso_i.inverse() * iso_j;
     let mut err_vec = err.translation.vector.data.to_vec();
     err_vec.extend_from_slice(&err.rotation.quaternion().coords.data.to_vec()[..3]);
-    let b_updates = (RowVector6::from_vec(err_vec) * &right_mult).transpose();
+    let b_updates = (RowVector6::from_vec(err_vec.clone()) * &right_mult).transpose(); // TODO remove .clone()
     update_b_subvector(b, &b_updates.index((..6, ..)), var_i);
     update_b_subvector(b, &b_updates.index((6.., ..)), var_j);
 
@@ -32,6 +32,9 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
         print!("To b:{}", &b_updates.index((6.., ..))); // INCORRECT
         print!("To A:{}", &H_updates.index((6.., 6..))); // possibly correct \fpu errors (only includes identity matrix and minimal numbers)
     }
+    println!("iso_i:{:?}", iso_ij * iso_i.inverse());
+    println!("iso_j:{:?}", iso_j);
+    println!("Odometry Error:{:?}\n", err_vec); // INCORRECT
 }
 
 fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isometry3<f64>) -> (MatrixMN<f64, U6, U12>, MatrixMN<f64, U12, U6>) {

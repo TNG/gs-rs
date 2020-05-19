@@ -1,8 +1,11 @@
 \documentclass[10pt, a4paper]{article}
 
+% TODO don't indent the first line of a paragraph (that isn't the first in its section) and leave a little space between the paragraphs instead
+% TODO is the CC BY-NC-SA 3.0 license okay for our purpose?
 \input{structure.tex}
 
-\title{gs-rs}
+% TODO is this document only about the optimization or about gs-rs in general?
+\title{How optimization is implemented in gs-rs}
 
 \author{
     \authorstyle{
@@ -10,7 +13,7 @@
         Daniel Pape\textsuperscript{1}
     }
     \newline\newline
-    \textsuperscript{1}\institution{TNG Technology Consulting GmbH, Unterf\"ohring, Germany}
+    \textsuperscript{1}\institution{TNG Technology Consulting GmbH, Unterföhring, Germany}
 }
 
 \date{\today}
@@ -18,8 +21,13 @@
 \begin{document}
     \maketitle
     \thispagestyle{firstpage}
-    \input{sections/abstract}
-    \input{sections/introduction}
-
+    \input{sections/abstract} % copied from slam4j
+    % TODO keep this theoretical introduction and only make small corrections?
+    % \input{sections/introduction} % copied from slam4j
+    \input{sections/algorithm} % might look similar to the introduction above and replace it
+    \input{sections/optimization2d}
+    \input{sections/optimization3d}
+    
+    \printbibliography
 
 \end{document}

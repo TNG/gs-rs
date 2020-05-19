@@ -5,7 +5,7 @@ use std::f32::consts::PI;
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &Box<dyn Variable>, var_j: &Box<dyn Variable>) {
     let (pos_i, rot_i) = get_pos_and_rot(&var_i.get_content());
-    let pos_j= get_pos(&var_j.get_content());
+    let pos_j = get_pos(&var_j.get_content());
     let pos_ij = get_pos(&factor.constraint);
     let (jacobi, jacobi_T) = calc_jacobians(&pos_i, rot_i, &pos_j);
     let right_mult = &factor.information_matrix.content * jacobi;

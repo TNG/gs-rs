@@ -1,0 +1,26 @@
+\section{Optimization in 2D}
+
+% TODO move to individual subsections to avoid too many complicated indices
+
+Given the current guess $x_i^{(k)}$ and, if it is a factor involving two variables, $x_j^{(k)}$, as well as the measurement $x_{ij}$, the Jacobian matrix $J_{ij}^{(k)}$ and error vector $e_{ij}^{(k)}$ can be computed. With these as well as the information matrix $\Omega_{ij}$ corresponding to $x_{ij}$, the parts $H_{factor\_ij}$ and $b_{factor\_ij}$ can be calculated as follows:
+
+% TODO insert formulas
+
+\begin{align}
+	E = mc^2
+\end{align}
+
+If the factor involves only one variable, the submatrix $H_{ii}$ and subvector $b_i$ are incremented by $H_{factor\_ij}$ and $b_{factor\_ij}$, respectively.
+
+If the factor involves two variables, the submatrix $H_ii$ will be incremented by the top-left submatrix of $H_{ij}$ and $H_j$ by the bottom-right submatrix of $H_{ij}$. The submatrices with bottom-left and top-right submatrices, respectively.
+
+The calculation path for $J_{ij}^{(k)}$ and $e_{ij}^{(k)}$ depends on the specific factor. The individual calculation paths are presented in the following sections.
+
+\subsection{Position2D}
+% TODO document optimization
+
+\subsection{Odometry2D}
+% TODO document optimization
+
+\subsection{Observation2D}
+% TODO document optimization

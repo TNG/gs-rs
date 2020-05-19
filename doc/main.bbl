@@ -1,0 +1,109 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.0 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\datalist[entry]{none/global//global/global}
+  \entry{kummerle2011g2o}{inproceedings}{}
+    \name{author}{5}{}{%
+      {{hash=KR}{%
+         family={Kümmerle},
+         familyi={K\bibinitperiod},
+         given={Rainer},
+         giveni={R\bibinitperiod},
+      }}%
+      {{hash=GG}{%
+         family={Grisetti},
+         familyi={G\bibinitperiod},
+         given={Giorgio},
+         giveni={G\bibinitperiod},
+      }}%
+      {{hash=SH}{%
+         family={Strasdat},
+         familyi={S\bibinitperiod},
+         given={Hauke},
+         giveni={H\bibinitperiod},
+      }}%
+      {{hash=KK}{%
+         family={Konolige},
+         familyi={K\bibinitperiod},
+         given={Kurt},
+         giveni={K\bibinitperiod},
+      }}%
+      {{hash=BW}{%
+         family={Burgard},
+         familyi={B\bibinitperiod},
+         given={Wolfram},
+         giveni={W\bibinitperiod},
+      }}%
+    }
+    \list{organization}{1}{%
+      {IEEE}%
+    }
+    \strng{namehash}{KR+1}
+    \strng{fullhash}{KRGGSHKKBW1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{booktitle}{2011 IEEE International Conference on Robotics and
+  Automation}
+    \field{pages}{3607\bibrangedash 3613}
+    \field{title}{g2o: A general framework for graph optimization}
+    \field{year}{2011}
+  \endentry
+
+  \entry{grisetti2010tutorial}{article}{}
+    \name{author}{4}{}{%
+      {{hash=GG}{%
+         family={Grisetti},
+         familyi={G\bibinitperiod},
+         given={Giorgio},
+         giveni={G\bibinitperiod},
+      }}%
+      {{hash=KR}{%
+         family={Kummerle},
+         familyi={K\bibinitperiod},
+         given={Rainer},
+         giveni={R\bibinitperiod},
+      }}%
+      {{hash=SC}{%
+         family={Stachniss},
+         familyi={S\bibinitperiod},
+         given={Cyrill},
+         giveni={C\bibinitperiod},
+      }}%
+      {{hash=BW}{%
+         family={Burgard},
+         familyi={B\bibinitperiod},
+         given={Wolfram},
+         giveni={W\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {IEEE}%
+    }
+    \strng{namehash}{GG+1}
+    \strng{fullhash}{GGKRSCBW1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{number}{4}
+    \field{pages}{31\bibrangedash 43}
+    \field{title}{A tutorial on graph-based SLAM}
+    \field{volume}{2}
+    \field{journaltitle}{IEEE Intelligent Transportation Systems Magazine}
+    \field{year}{2010}
+  \endentry
+\enddatalist
+\endinput
