@@ -12,12 +12,12 @@ The optimization algorithm used by \textbf{gs-rs} is based on that which parts o
 
 Given a specific number of iterations $n$ and the initial guess $x_i^{(0)}$ for each variable, the optimizer algorithm will repeat the following steps $n$ times:
 \begin{enumerate}
-	\item Calculate $H$ and $b$ by setting them to $\boldsymbol{0}$, then looping through all factors and updating their variables' entries in $H$ and $b$.
+	\item Calculate $H$ and $b$ by setting them to $\boldsymbol{0}$, then looping through all factors and updating their non-fixed variables' entries in $H$ and $b$.
 	\item Calculate $\Delta x$, the vector containing data about how much each current variable guess $x_i^{(k)}$ should be updated in this step, by solving the linear system
 		\begin{align}
 			H \Delta x = -b^T.
 		\end{align}
-	\item Update the guesses for each variable $x_i$ with
+	\item Update the guesses for each non-fixed variable $x_i$ with
 		\begin{align}
 			x_i^{(k+1)} = x_i^{(k)} + \Delta x_i.
 		\end{align}
