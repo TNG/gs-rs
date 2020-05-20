@@ -1,26 +1,131 @@
 \section{Optimization in 2D}
 
-% TODO move to individual subsections to avoid too many complicated indices
+% TODO comment on rotation matrices which currently follow German Wikipedia's notation: https://de.wikipedia.org/wiki/Drehmatrix
 
-Given the current guess $x_i^{(k)}$ and, if it is a factor involving two variables, $x_j^{(k)}$, as well as the measurement $x_{ij}$, the Jacobian matrix $J_{ij}^{(k)}$ and error vector $e_{ij}^{(k)}$ can be computed. With these as well as the information matrix $\Omega_{ij}$ corresponding to $x_{ij}$, the parts $H_{factor\_ij}$ and $b_{factor\_ij}$ can be calculated as follows:
+% TODO parts involving fixed variables do not get updated
 
-% TODO insert formulas
-
+In all cases the factor's increments on parts of $H$ and $b$, $H^{fac}$ and $b^{fac}$ respectively, will be computed as follows:
 \begin{align}
-	E = mc^2
+	H^{fac} = J^T * \Omega * J,
 \end{align}
+\begin{align}
+	b^{fac} = e^T * \Omega * J,
+\end{align}
+where $\Omega$, $J$ and $e$ are the factor's information matrix, Jacobian matrix and error vector, respectively. While $\Omega$ is a given constant of the factor, $J$ and $e$ have to be calculated for each factor in each iteration.
 
-If the factor involves only one variable, the submatrix $H_{ii}$ and subvector $b_i$ are incremented by $H_{factor\_ij}$ and $b_{factor\_ij}$, respectively.
+If the factor only involves the variable $x_i$, $H$ and $b$ are updated as follows:
+\begin{align}
+\label{H_inc}
+	H_{ii} = H_{ii} + H^{fac},
+\end{align}
+\begin{align}
+\label{b_inc}
+	b_i = b_i + b^{fac},
+\end{align}
+where the subscripts of $H$ and $b$ denote the row and column index of the submatrix or subvector assigned to the respective variable. If the factor involves two variables $x_i$ and $x_j$, $H^{fac}$ and $b^{fac}$ will have the structure
+\begin{align}
+H^{fac} =
+\begin{pmatrix}
+	\boldsymbol{H}^{fac}_{ii} & \boldsymbol{H}^{fac}_{ij}\\
+	\boldsymbol{H}^{fac}_{ji} & \boldsymbol{H}^{fac}_{jj}
+\end{pmatrix}
+\end{align}
+and
+\begin{align}
+b^{fac} =
+\begin{pmatrix}
+	\boldsymbol{b}^{fac}_{i} & \boldsymbol{b}^{fac}_{j}
+\end{pmatrix},
+\end{align}
+respectively, such that $H_{mn}$ will be incremented by $H^{fac}_{mn}$ and $b_n$ will be incremented by $b^{fac}_n$, analogously to equations (\ref{H_inc}) and (\ref{b_inc}).
 
-If the factor involves two variables, the submatrix $H_ii$ will be incremented by the top-left submatrix of $H_{ij}$ and $H_j$ by the bottom-right submatrix of $H_{ij}$. The submatrices with bottom-left and top-right submatrices, respectively.
-
-The calculation path for $J_{ij}^{(k)}$ and $e_{ij}^{(k)}$ depends on the specific factor. The individual calculation paths are presented in the following sections.
+In the following sections, the individual 2D factors' calculations of $J$ and $e$ are presented. The functions $pos(x)$ and $rot(x)$ will be used to refer to the 2D position vector and the rotation angle of a 2D pose $x$, respectively. Similarly, the functions $pos_x(x)$ and $pos_y(x)$ will be used to refer to the single value within the respective dimension.
 
 \subsection{Position2D}
-% TODO document optimization
+
+The \textit{Position2D} factor involves one \textit{VehicleVariable} $x_v$. The Jacobian matrix $J$ in this case is
+\begin{align}
+	J = R_z(-rot(x_v)).
+\end{align}
+Given the measurement $x_m$, the error vector
+\begin{align}
+	e = R_{-rot(x_m)} * (pos(x_v) - pos(x_m))
+\end{align}
+can be computed as well.
 
 \subsection{Odometry2D}
-% TODO document optimization
+The \textit{Position2D} factor involves two \textit{VehicleVariables} $x_i$ and $x_j$. Given the measurement $x_{ij}$, the Jacobian matrix $J$ is calculated as follows:
+\begin{align}
+	\Delta x_{ij} = x_j - x_i
+\end{align}
+\begin{align}
+	sin_i = sin(rot(x_i))
+\end{align}
+\begin{align}
+	cos_i = cos(rot(x_i))
+\end{align}
+\begin{align}
+	J_i = R_z(-rot(x_{ij})) *
+	\begin{pmatrix}
+		-cos_i & -sin_i & -sin_i*pos_x(\Delta x_{ij}) + cos_i*pos_y(\Delta x_{ij})\\
+		 sin_i & -cos_i & -cos_i*pos_x(\Delta x_{ij}) - sin_i*pos_y(\Delta x_{ij})\\
+		     0 &      0 &                                   -1
+	\end{pmatrix}
+\end{align}
+\begin{align}
+	J_j = R_z(-rot(x_{ij})) * R_z(-rot(x_i))
+\end{align}
+\begin{align}
+	J =
+	\begin{pmatrix}
+		\boldsymbol{J}_i & \boldsymbol{J}_j
+	\end{pmatrix}
+\end{align}
+The error vector $e$ is computed as follows:
+\begin{align}
+	e_{pos} = R_{-rot(x_{ij})} * (R_{-rot(x_i)} * pos(\Delta x_{ij}) - pos(x_{ij}))
+\end{align}
+\begin{align}
+	e_{rot} = rot(\Delta x_{ij}) - rot(x_{ij})
+\end{align}
+After normalizing $e_{rot}$ to $[-\pi, \pi)$ with $norm(e_{rot})$ the full error vector can be constructed with
+\begin{align}
+	e =
+	\begin{pmatrix}
+		\boldsymbol{e}_{pos}\\
+		norm(e_{rot})
+	\end{pmatrix}
+	.
+\end{align}
 
 \subsection{Observation2D}
-% TODO document optimization
+The \textit{Position2D} factor involves one \textit{VehicleVariable} $x_i$ and one \textit{LandmarkVariable} $x_j$. The measurement is denoted as $x_{ij}$, analogously to the previous section. Although $x_j$ and $x_{ij}$ are only positions rather than poses and therefore do not contain a rotation angle, the functions $pos(x)$, $pos_x(x)$ and $pos_y(x)$ will be used nevertheless to make the calculation path more understandable. Given the measurement $x_{ij}$, the Jacobian matrix $J$ is calculated as follows:
+\begin{align}
+	pos(\Delta x_{ij}) = pos(x_j) - pos(x_i)
+\end{align}
+\begin{align}
+	sin_i = sin(rot(x_i))
+\end{align}
+\begin{align}
+	cos_i = cos(rot(x_i))
+\end{align}
+\begin{align}
+	J_i =
+	\begin{pmatrix}
+		-cos_i & -sin_i & -sin_i*pos_x(\Delta x_{ij}) + cos_i*pos_y(\Delta x_{ij})\\
+		 sin_i & -cos_i & -cos_i*pos_x(\Delta x_{ij}) - sin_i*pos_y(\Delta x_{ij})
+	\end{pmatrix}
+\end{align}
+\begin{align}
+	J_j = R_{-rot(x_i)}
+\end{align}
+\begin{align}
+	J =
+	\begin{pmatrix}
+		\boldsymbol{J}_i & \boldsymbol{J}_j
+	\end{pmatrix}
+\end{align}
+The error vector $e$ is computed as follows:
+\begin{align}
+	e = R_{-rot(x_i)} * pos(\Delta x_{ij}) - pos(x_{ij})
+\end{align}

@@ -18,7 +18,7 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
 
     let err_pos = Rotation2::new(-rot_ij) * (Rotation2::new(-rot_i) * (pos_j - pos_i) - pos_ij);
     let mut err_rot = rot_j - rot_i - rot_ij;
-    if err_rot > PI {
+    if err_rot >= PI {
         err_rot -= 2.0 * PI;
     } else if err_rot < -PI {
         err_rot += 2.0 * PI;
@@ -42,9 +42,7 @@ fn calc_jacobians(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f64>, rot_ij
     let jacobian_i = R_ij_T * &Matrix3::from_vec(vec![         -cos_i,           sin_i,  0.0,    // transposed matrix is displayed
                                                                -sin_i,          -cos_i,  0.0,
                                                       last_column_top, last_column_mid, -1.0,]);
-    let jacobian_j = R_ij_T * &Matrix3::from_vec(vec![cos_i, -sin_i, 0.0,    // transposed matrix is displayed
-                                                      sin_i,  cos_i, 0.0,
-                                                        0.0,    0.0, 1.0,]);
+    let jacobian_j = R_ij_T * Rotation3::from_axis_angle(&Vector3::z_axis(), -rot_i).matrix();
     let mut jacobian = Matrix3x6::from_vec(vec![0.0; 18]);
     jacobian.index_mut((.., ..3)).copy_from(&jacobian_i);
     jacobian.index_mut((.., 3..)).copy_from(&jacobian_j);
