@@ -25,19 +25,14 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     update_b_subvector(b, &b_updates.index((6.., ..)), var_j);
 
     if !var_i.is_fixed() {
-        print!("From b:{}", &b_updates.index((..6, ..))); // INCORRECT
-        print!("From A:{}", &H_updates.index((..6, ..6))); // CORRECT \fpu errors
+        print!("From b:{}", &b_updates.index((..6, ..))); // bottom half INCORRECT
+        print!("From A:{}", &H_updates.index((..6, ..6))); // bottom right INCORRECT
     }
     if !var_j.is_fixed() {
-        print!("To b:{}", &b_updates.index((6.., ..))); // INCORRECT
-        print!("To A:{}", &H_updates.index((6.., 6..))); // CORRECT \fpu errors
+        print!("To b:{}", &b_updates.index((6.., ..))); // bottom half INCORRECT
+        print!("To A:{}", &H_updates.index((6.., 6..))); // bottom right INCORRECT
     }
-    // println!("iso_i:{:?}", iso_ij * iso_i.inverse());
-    // println!("iso_j:{:?}", iso_j);
-    print!("Inverse Measurement:\n{}\n", iso_ij.inverse()); // translation INCORRECT | rotation N/A
-    print!("From Estimate Inverse:\n{}\n", iso_i.inverse()); // translation CORRECT | rotation N/A
-    print!("To Estimate:\n{}\n", iso_j); // translation CORRECT | rotation N/A
-    println!("Odometry Error:{:?}\n", err_vec); // INCORRECT
+    println!("Odometry Error:{:?}\n", err_vec); // CORRECT
 }
 
 fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isometry3<f64>) -> (MatrixMN<f64, U6, U12>, MatrixMN<f64, U12, U6>) {
@@ -57,10 +52,10 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
     jacobian_i.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_T_and_mult_parts(&B_rot.matrix(), &A_rot.matrix())));
     jacobian_j.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
 
-    print!("Odometry Jacobian_i:{}", &jacobian_i); // CORRECT \fpu errors
-    print!("Odometry Jacobian_j:{}", &jacobian_j); // CORRECT \fpu errors
+    print!("Odometry Jacobian_i:{}", &jacobian_i); // bottom right INCORRECT
+    print!("Odometry Jacobian_j:{}", &jacobian_j); // bottom right INCORRECT
 
-    // TODO project jacobians through the manifold
+    // TODO project jacobians through the manifold?
     // jacobian_i *= calc_manifold(iso_i);
     // jacobian_j *= calc_manifold(iso_j);
 
@@ -125,6 +120,7 @@ fn skew_matr_T_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> Matri
     ret
 }
 
+// TODO remove function if unused after all
 fn calc_manifold(iso: &Isometry3<f64>) /*-> some kind of Matrix*/ {
     unimplemented!()
 }
