@@ -17,7 +17,7 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     update_H_submatrix(H, &H_updates.index((6.., ..6)), var_j, var_i);
     update_H_submatrix(H, &H_updates.index((6.., 6..)), var_j, var_j);
 
-    let err = iso_ij * iso_i.inverse() * iso_j;
+    let err = iso_ij.inverse() * iso_i.inverse() * iso_j;
     let mut err_vec = err.translation.vector.data.to_vec();
     err_vec.extend_from_slice(&err.rotation.quaternion().coords.data.to_vec()[..3]);
     let b_updates = (RowVector6::from_vec(err_vec.clone()) * &right_mult).transpose(); // TODO remove .clone()
@@ -26,14 +26,17 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
 
     if !var_i.is_fixed() {
         print!("From b:{}", &b_updates.index((..6, ..))); // INCORRECT
-        print!("From A:{}", &H_updates.index((..6, ..6))); // top left and bottom right INCORRECT
+        print!("From A:{}", &H_updates.index((..6, ..6))); // CORRECT \fpu errors
     }
     if !var_j.is_fixed() {
         print!("To b:{}", &b_updates.index((6.., ..))); // INCORRECT
-        print!("To A:{}", &H_updates.index((6.., 6..))); // possibly correct \fpu errors (only includes identity matrix and minimal numbers)
+        print!("To A:{}", &H_updates.index((6.., 6..))); // CORRECT \fpu errors
     }
-    println!("iso_i:{:?}", iso_ij * iso_i.inverse());
-    println!("iso_j:{:?}", iso_j);
+    // println!("iso_i:{:?}", iso_ij * iso_i.inverse());
+    // println!("iso_j:{:?}", iso_j);
+    print!("Inverse Measurement:\n{}\n", iso_ij.inverse()); // translation INCORRECT | rotation N/A
+    print!("From Estimate Inverse:\n{}\n", iso_i.inverse()); // translation CORRECT | rotation N/A
+    print!("To Estimate:\n{}\n", iso_j); // translation CORRECT | rotation N/A
     println!("Odometry Error:{:?}\n", err_vec); // INCORRECT
 }
 
