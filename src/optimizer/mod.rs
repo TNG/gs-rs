@@ -13,7 +13,8 @@ use crate::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::solver::Solver;
 use std::f64::consts::PI;
 use crate::factor_graph::variable::Variable;
-use crate::factor_graph::variable::VariableType::{Vehicle2D, Vehicle3D};
+use crate::factor_graph::variable::VariableType::*;
+use nalgebra::{Isometry3, Quaternion, Translation3, UnitQuaternion, Vector3};
 
 mod linear_system;
 
@@ -41,19 +42,45 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
     let old_content = var.get_content();
     let range = var.get_range().unwrap();
     let correction = &solution[range];
-    let mut updated_content: Vec<f64> = old_content.iter().zip(correction.iter())
-        .map(|(old, cor)| old + cor).collect();
-    if var.get_type() == Vehicle2D {
-        updated_content[2] %= (2.0 * PI);
-        if updated_content[2] > PI {
-            updated_content[2] -= 2.0 * PI;
-        } else if updated_content[2] < -PI {
-            updated_content[2] += 2.0 * PI;
+
+    let updated_content = match var.get_type() {
+        Landmark2D | Vehicle2D => {
+            let mut updated_content: Vec<f64> = old_content.iter().zip(correction.iter())
+                .map(|(old, cor)| old + cor).collect();
+            if var.get_type() == Vehicle2D {
+                updated_content[2] %= (2.0 * PI);
+                if updated_content[2] > PI {
+                    updated_content[2] -= 2.0 * PI;
+                } else if updated_content[2] < -PI {
+                    updated_content[2] += 2.0 * PI;
+                }
+            }
+            updated_content
+        },
+        Vehicle3D => {
+            let old_iso = get_isometry(&old_content);
+            let cor_iso = get_isometry_normalized(correction);
+            let new_iso = old_iso * cor_iso;
+            let mut updated_content = new_iso.translation.vector.data.to_vec();
+            updated_content.extend(&new_iso.rotation.quaternion().coords.data.to_vec());
+            updated_content
         }
-    } else if var.get_type() == Vehicle3D {
-        updated_content.push(old_content[6]); // TODO this is wrong, all seven entries can change
-    }
+    };
     var.set_content(updated_content);
+}
+
+fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
+    Isometry3::from_parts(
+        Translation3::new(pose[0], pose[1], pose[2]),
+        UnitQuaternion::from_quaternion(Quaternion::new(pose[6], pose[3], pose[4], pose[5])),
+    )
+}
+
+fn get_isometry_normalized(pose: &[f64]) -> Isometry3<f64> {
+    Isometry3::from_parts(
+        Translation3::new(pose[0], pose[1], pose[2]),
+        UnitQuaternion::new(Vector3::new(pose[3], pose[4], pose[5])), // TODO this most likely is not be the correct way to create a UnitQuaternion from the updated isometry
+    )
 }
 
 #[cfg(test)]
