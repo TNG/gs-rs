@@ -25,12 +25,12 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     update_b_subvector(b, &b_updates.index((6.., ..)), var_j);
 
     if !var_i.is_fixed() {
-        print!("From b:{}", &b_updates.index((..6, ..))); // bottom half INCORRECT
-        print!("From A:{}", &H_updates.index((..6, ..6))); // bottom right INCORRECT
+        print!("From b:{}", &b_updates.index((..6, ..))); // CORRECT (negative)
+        print!("From A:{}", &H_updates.index((..6, ..6))); // CORRECT
     }
     if !var_j.is_fixed() {
-        print!("To b:{}", &b_updates.index((6.., ..))); // bottom half INCORRECT
-        print!("To A:{}", &H_updates.index((6.., 6..))); // bottom right INCORRECT
+        print!("To b:{}", &b_updates.index((6.., ..))); // CORRECT (negative)
+        print!("To A:{}", &H_updates.index((6.., 6..))); // CORRECT
     }
     println!("Odometry Error:{:?}\n", err_vec); // CORRECT
 }
@@ -52,8 +52,9 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
     jacobian_i.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_T_and_mult_parts(&B_rot.matrix(), &A_rot.matrix())));
     jacobian_j.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
 
-    print!("Odometry Jacobian_i:{}", &jacobian_i); // bottom right INCORRECT
-    print!("Odometry Jacobian_j:{}", &jacobian_j); // bottom right INCORRECT
+    print!("ret:{}", &dq_dR); // CORRECT
+    print!("Odometry Jacobian_i:{}", &jacobian_i); // CORRECT
+    print!("Odometry Jacobian_j:{}", &jacobian_j); // CORRECT
 
     // TODO project jacobians through the manifold?
     // jacobian_i *= calc_manifold(iso_i);
@@ -69,12 +70,12 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
 fn calc_dq_dR(matr: &Matrix3<f64>) -> MatrixMN<f64, U3, U9> {
     let m = matr;
     let trace = get(m,0,0) + get(m,1,1) + get(m,2,2);
-    let sin = (trace + 1.0).sqrt() * 2.0;
+    let sin = (trace + 1.0).sqrt() * 0.5;
     let factor = -0.03125 / (sin*sin*sin);
     let a1 = (get(m,2,1) - get(m,1,2)) * factor;
     let a2 = (get(m,0,2) - get(m,2,0)) * factor;
     let a3 = (get(m,1,0) - get(m,0,1)) * factor;
-    let b = 1.0/sin;
+    let b = 0.25/sin;
     MatrixMN::<f64, U3, U9>::from_vec(vec![ a1,  a2,  a3,   // transposed matrix is displayed
                                            0.0, 0.0,   b,
                                            0.0,  -b, 0.0,
@@ -214,7 +215,7 @@ mod tests {
                                                                a1,  a2,  a3,]);
         info!("Actual: {}", actual);
         info!("Expected: {}", expected);
-        relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-7);
+        relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-10);
     }
 
     #[test]
