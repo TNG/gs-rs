@@ -7,14 +7,14 @@ use std::ops::Deref;
 
 use itertools::Itertools;
 
+use crate::factor_graph::variable::Variable;
+use crate::factor_graph::variable::VariableType::*;
 use crate::factor_graph::FactorGraph;
 use crate::optimizer::linear_system::calculate_H_b;
 use crate::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::solver::Solver;
+use nalgebra::{Isometry3, Quaternion, Rotation3, Translation3, UnitQuaternion, Vector3};
 use std::f64::consts::PI;
-use crate::factor_graph::variable::Variable;
-use crate::factor_graph::variable::VariableType::*;
-use nalgebra::{Isometry3, Quaternion, Translation3, UnitQuaternion, Vector3};
 
 mod linear_system;
 
@@ -30,7 +30,10 @@ fn update_once(factor_graph: &FactorGraph) {
     let (H, b) = calculate_H_b(&factor_graph);
     // TODO clumsy, since the solver transforms the arguments back to nalgebra matrices
     let sol = SparseCholeskySolver::solve(H, &(b * -1.0)).unwrap();
-    factor_graph.node_indices.iter()
+    print!("Solution: {:?}", sol);
+    factor_graph
+        .node_indices
+        .iter()
         .map(|i| factor_graph.get_var(*i))
         .for_each(|var| update_var(var, sol.as_slice()));
 }
@@ -45,8 +48,11 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
 
     let updated_content = match var.get_type() {
         Landmark2D | Vehicle2D => {
-            let mut updated_content: Vec<f64> = old_content.iter().zip(correction.iter())
-                .map(|(old, cor)| old + cor).collect();
+            let mut updated_content: Vec<f64> = old_content
+                .iter()
+                .zip(correction.iter())
+                .map(|(old, cor)| old + cor)
+                .collect();
             if var.get_type() == Vehicle2D {
                 updated_content[2] %= (2.0 * PI);
                 if updated_content[2] > PI {
@@ -56,7 +62,7 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
                 }
             }
             updated_content
-        },
+        }
         Vehicle3D => {
             let old_iso = get_isometry(&old_content);
             let cor_iso = get_isometry_normalized(correction);
@@ -77,9 +83,20 @@ fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
 }
 
 fn get_isometry_normalized(pose: &[f64]) -> Isometry3<f64> {
-    Isometry3::from_parts(
+    let quaternion = Quaternion::new(1.0, pose[3], pose[4], pose[5]);
+    dbg!(quaternion);
+    let unit_quaternion = UnitQuaternion::new_normalize(quaternion);
+
+    println!("Pose: {}, {}, {}", pose[3], pose[4], pose[5]);
+
+    let isometry = Isometry3::from_parts(
         Translation3::new(pose[0], pose[1], pose[2]),
-        UnitQuaternion::new(Vector3::new(pose[3], pose[4], pose[5])), // TODO this most likely is not be the correct way to create a UnitQuaternion from the updated isometry
+        unit_quaternion,
+    );
+
+    print!("{}", isometry.to_homogeneous());
+    dbg!(
+        isometry // TODO this most likely is not be the correct way to create a UnitQuaternion from the updated isometry
     )
 }
 
@@ -87,8 +104,8 @@ fn get_isometry_normalized(pose: &[f64]) -> Isometry3<f64> {
 mod tests {
     use crate::optimizer::optimize;
     use crate::parser::g2o::G2oParser;
-    use crate::parser::Parser;
     use crate::parser::model::FactorGraphModel;
+    use crate::parser::Parser;
 
     use log::LevelFilter;
     use std::time::SystemTime;
@@ -102,10 +119,22 @@ mod tests {
 
     fn test_valid_optimization(file_name: &str, iterations: usize) {
         init();
-        let test_factor_graph = G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat()).unwrap();
+        let test_factor_graph =
+            G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat())
+                .unwrap();
         optimize(&test_factor_graph, iterations);
         let test_model = FactorGraphModel::from(&test_factor_graph);
-        let expected_model = G2oParser::parse_file_to_model(&["data_files/optimizer_tests/", file_name, "_", &iterations.to_string(), ".g2o"].concat()).unwrap();
+        let expected_model = G2oParser::parse_file_to_model(
+            &[
+                "data_files/optimizer_tests/",
+                file_name,
+                "_",
+                &iterations.to_string(),
+                ".g2o",
+            ]
+            .concat(),
+        )
+        .unwrap();
         assert_eq!(test_model, expected_model);
     }
 
@@ -122,7 +151,7 @@ mod tests {
     #[test]
     fn test_only_odo2d_factors() {
         test_valid_optimization("odo2d_only", 1);
-   }
+    }
 
     #[test]
     fn test_pos2d_and_odo2d_factors() {
@@ -143,5 +172,4 @@ mod tests {
     fn test_multiple_iterations() {
         test_valid_optimization("full2d", 25);
     }
-
 }
