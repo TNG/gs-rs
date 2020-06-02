@@ -11,12 +11,12 @@ pub fn calc_dq_dR(matr: &Matrix3<f64>) -> MatrixMN<f64, U3, U9> {
     let a3 = (get(m,1,0) - get(m,0,1)) * factor;
     let b = 0.25/sin;
     MatrixMN::<f64, U3, U9>::from_vec(vec![ a1,  a2,  a3,   // transposed matrix is displayed
-                                            0.0, 0.0,   b,
-                                            0.0,  -b, 0.0,
-                                            0.0, 0.0,  -b,
+                                           0.0, 0.0,   b,
+                                           0.0,  -b, 0.0,
+                                           0.0, 0.0,  -b,
                                             a1,  a2,  a3,
-                                            b, 0.0, 0.0,
-                                            0.0,   b, 0.0,
+                                             b, 0.0, 0.0,
+                                           0.0,   b, 0.0,
                                             -b, 0.0, 0.0,
                                             a1,  a2,  a3,])
 }
@@ -26,8 +26,8 @@ pub fn skew_trans(trans: &Translation3<f64>) -> Matrix3<f64> {
     let data = t.data.as_slice();
     // to match g2o output, skew seems to need to return skew_T
     Matrix3::from_vec(vec![     0.0, -data[2],  data[1],   // transposed matrix is displayed
-                                data[2],      0.0, -data[0],
-                                -data[1],  data[0],      0.0,])
+                            data[2],      0.0, -data[0],
+                           -data[1],  data[0],      0.0,])
 }
 
 pub fn skew_matr_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> MatrixMN<f64, U9, U3> {
@@ -61,7 +61,7 @@ pub fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
     )
 }
 
-pub fn get(m: &Matrix3<f64>, row: usize, col: usize) -> f64 {
+fn get(m: &Matrix3<f64>, row: usize, col: usize) -> f64 {
     m.data.as_slice()[row + col*3]
 }
 
@@ -106,20 +106,20 @@ mod tests {
         init();
         // variable Re of last factor in first iteration of mini_3d.g2o
         let err_rot_matrix = Matrix3::from_vec(vec![         1.0,  -7.7835e-07, 5.74141e-08,    // transposed matrix is displayed
-                                                             7.99504e-07,          1.0, 1.14998e-07,
-                                                             -7.15592e-08, -1.46825e-07,         1.0,]);
+                                                     7.99504e-07,          1.0, 1.14998e-07,
+                                                    -7.15592e-08, -1.46825e-07,         1.0,]);
         let actual = calc_dq_dR(&err_rot_matrix);
         let a1 = -8.18195e-09;
         let a2 =  4.03041e-09;
         let a3 =  4.93079e-08;
         let b =          0.25;
         let expected = MatrixMN::<f64, U3, U9>::from_vec(vec![ a1,  a2,  a3,    // transposed matrix is displayed
-                                                               0.0, 0.0,   b,
-                                                               0.0,  -b, 0.0,
-                                                               0.0, 0.0,  -b,
+                                                              0.0, 0.0,   b,
+                                                              0.0,  -b, 0.0,
+                                                              0.0, 0.0,  -b,
                                                                a1,  a2,  a3,
-                                                               b, 0.0, 0.0,
-                                                               0.0,   b, 0.0,
+                                                                b, 0.0, 0.0,
+                                                              0.0,   b, 0.0,
                                                                -b, 0.0, 0.0,
                                                                a1,  a2,  a3,]);
         info!("Actual: {}", actual);
@@ -134,8 +134,8 @@ mod tests {
         let b_trans = Translation3::new(-0.0199389, 2.43871, -0.14102);
         let actual = skew_trans(&b_trans).transpose();
         let expected = Matrix3::from_vec(vec![      0.0,  -0.282041,   -4.87743,    // transposed matrix is displayed
-                                                    0.282041,        0.0, -0.0398779,
-                                                    4.87743,  0.0398779,        0.0,]);
+                                               0.282041,        0.0, -0.0398779,
+                                                4.87743,  0.0398779,        0.0,]);
         info!("Actual: {}", actual);
         info!("Expected: {}", expected);
         relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-5 + 1e-10);
@@ -147,19 +147,18 @@ mod tests {
         let actual = skew_matr_T_and_mult_parts(
             // variable Rb of last factor in first iteration of mini_3d.g2o
             &Matrix3::<f64>::from_vec(vec![  0.999284, -0.0244698, 0.0288424,    // transposed matrix is displayed
-                                             0.0150356,   0.956688,  0.290726,
-                                             -0.0347072,  -0.290084,  0.956372,]),
+                                            0.0150356,   0.956688,  0.290726,
+                                           -0.0347072,  -0.290084,  0.956372,]),
             // variable Ra of last factor in first iteration of mini_3d.g2o
             &Matrix3::<f64>::from_vec(vec![  0.999284, 0.0150348, -0.0347071,    // transposed matrix is displayed
-                                             -0.0244691,  0.956688,  -0.290084,
-                                             0.0288425,  0.290726,   0.956372,]),
+                                           -0.0244691,  0.956688,  -0.290084,
+                                            0.0288425,  0.290726,   0.956372,]),
         );
         let expected = MatrixMN::<f64, U9, U3>::from_vec(vec![ 5.23021e-08, 0.0694143, 0.0300711, -0.0694142,  2.85328e-07,   -1.99857, -0.0300695,    1.99857,  2.91287e-07,    // transposed matrix is displayed
                                                                3.41719e-07,  0.580168,   1.91338,  -0.580168,  4.58219e-07,  0.0489397,   -1.91338, -0.0489382, -1.44105e-07,
-                                                               -1.52217e-06,  -1.91274,  0.581451,    1.91274, -1.52261e-06, -0.0576846,  -0.581452,  0.0576852, -3.31386e-08,]);
+                                                              -1.52217e-06,  -1.91274,  0.581451,    1.91274, -1.52261e-06, -0.0576846,  -0.581452,  0.0576852, -3.31386e-08,]);
         info!("Actual: {}", actual);
         info!("Expected: {}", expected);
         relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-5);
     }
-
 }
