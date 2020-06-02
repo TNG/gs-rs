@@ -20,19 +20,9 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     let err = iso_ij.inverse() * iso_i.inverse() * iso_j;
     let mut err_vec = err.translation.vector.data.to_vec();
     err_vec.extend_from_slice(&err.rotation.quaternion().coords.data.to_vec()[..3]);
-    let b_updates = (RowVector6::from_vec(err_vec.clone()) * &right_mult).transpose(); // TODO remove .clone()
+    let b_updates = (RowVector6::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_updates.index((..6, ..)), var_i);
     update_b_subvector(b, &b_updates.index((6.., ..)), var_j);
-
-    if !var_i.is_fixed() {
-        print!("From b:{}", &b_updates.index((..6, ..))); // CORRECT (negative)
-        print!("From A:{}", &H_updates.index((..6, ..6))); // CORRECT
-    }
-    if !var_j.is_fixed() {
-        print!("To b:{}", &b_updates.index((6.., ..))); // CORRECT (negative)
-        print!("To A:{}", &H_updates.index((6.., 6..))); // CORRECT
-    }
-    println!("Odometry Error:{:?}\n", err_vec); // CORRECT
 }
 
 fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isometry3<f64>) -> (MatrixMN<f64, U6, U12>, MatrixMN<f64, U12, U6>) {
@@ -51,14 +41,6 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
     jacobian_i.index_mut((..3, 3..)).copy_from(&(A_rot.matrix() * skew_trans(&B_ij.translation).transpose()));
     jacobian_i.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_T_and_mult_parts(&B_rot.matrix(), &A_rot.matrix())));
     jacobian_j.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
-
-    print!("ret:{}", &dq_dR); // CORRECT
-    print!("Odometry Jacobian_i:{}", &jacobian_i); // CORRECT
-    print!("Odometry Jacobian_j:{}", &jacobian_j); // CORRECT
-
-    // TODO project jacobians through the manifold?
-    // jacobian_i *= calc_manifold(iso_i);
-    // jacobian_j *= calc_manifold(iso_j);
 
     let mut jacobian = MatrixMN::<f64, U6, U12>::from_vec(vec![0.0; 72]);
     jacobian.index_mut((.., ..6)).copy_from(&jacobian_i);
@@ -108,7 +90,6 @@ fn skew_matr_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> MatrixM
     ret
 }
 
-// TODO more elegant solution if this works
 fn skew_matr_T_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> MatrixMN<f64, U9, U3> {
     let m = matr;
     let top_part = mult * skew_trans(&Translation3::new(get(m,0,0), get(m,1,0), get(m,2,0))).transpose();
@@ -119,11 +100,6 @@ fn skew_matr_T_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> Matri
     ret.index_mut((3..6, ..)).copy_from(&mid_part);
     ret.index_mut((6..9, ..)).copy_from(&bot_part);
     ret
-}
-
-// TODO remove function if unused after all
-fn calc_manifold(iso: &Isometry3<f64>) /*-> some kind of Matrix*/ {
-    unimplemented!()
 }
 
 fn get_isometry(pose: &[f64]) -> Isometry3<f64> {

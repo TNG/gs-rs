@@ -30,10 +30,7 @@ fn update_once(factor_graph: &FactorGraph) {
     let (H, b) = calculate_H_b(&factor_graph);
     // TODO clumsy, since the solver transforms the arguments back to nalgebra matrices
     let sol = SparseCholeskySolver::solve(H, &(b * -1.0)).unwrap();
-    print!("Solution: {:?}", sol);
-    factor_graph
-        .node_indices
-        .iter()
+    factor_graph.node_indices.iter()
         .map(|i| factor_graph.get_var(*i))
         .for_each(|var| update_var(var, sol.as_slice()));
 }
@@ -48,11 +45,8 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
 
     let updated_content = match var.get_type() {
         Landmark2D | Vehicle2D => {
-            let mut updated_content: Vec<f64> = old_content
-                .iter()
-                .zip(correction.iter())
-                .map(|(old, cor)| old + cor)
-                .collect();
+            let mut updated_content: Vec<f64> = old_content.iter().zip(correction.iter())
+                .map(|(old, cor)| old + cor).collect();
             if var.get_type() == Vehicle2D {
                 updated_content[2] %= (2.0 * PI);
                 if updated_content[2] > PI {
@@ -84,19 +78,10 @@ fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
 
 fn get_isometry_normalized(pose: &[f64]) -> Isometry3<f64> {
     let quaternion = Quaternion::new(1.0, pose[3], pose[4], pose[5]);
-    dbg!(quaternion);
     let unit_quaternion = UnitQuaternion::new_normalize(quaternion);
-
-    println!("Pose: {}, {}, {}", pose[3], pose[4], pose[5]);
-
-    let isometry = Isometry3::from_parts(
+    Isometry3::from_parts(
         Translation3::new(pose[0], pose[1], pose[2]),
         unit_quaternion,
-    );
-
-    print!("{}", isometry.to_homogeneous());
-    dbg!(
-        isometry // TODO this most likely is not be the correct way to create a UnitQuaternion from the updated isometry
     )
 }
 
@@ -119,22 +104,10 @@ mod tests {
 
     fn test_valid_optimization(file_name: &str, iterations: usize) {
         init();
-        let test_factor_graph =
-            G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat())
-                .unwrap();
+        let test_factor_graph = G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat()).unwrap();
         optimize(&test_factor_graph, iterations);
         let test_model = FactorGraphModel::from(&test_factor_graph);
-        let expected_model = G2oParser::parse_file_to_model(
-            &[
-                "data_files/optimizer_tests/",
-                file_name,
-                "_",
-                &iterations.to_string(),
-                ".g2o",
-            ]
-            .concat(),
-        )
-        .unwrap();
+        let expected_model = G2oParser::parse_file_to_model(&["data_files/optimizer_tests/", file_name, "_", &iterations.to_string(), ".g2o"].concat()).unwrap();
         assert_eq!(test_model, expected_model);
     }
 
@@ -169,7 +142,10 @@ mod tests {
     }
 
     #[test]
-    fn test_multiple_iterations() {
+    fn test_multiple_iterations_2d() {
         test_valid_optimization("full2d", 25);
     }
+
+    // TODO test_only_odo3d_factors()
+
 }
