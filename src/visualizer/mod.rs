@@ -129,7 +129,7 @@ fn handle_factor_rotation(factor: &Factor, meas_object: &mut SceneNode, source: 
             UnitQuaternion::from_axis_angle(&Vector3::z_axis(), meas_rot)
         );
         meas_rot_object.prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
-    } else if factor.factor_type == Odometry3D {
+    } else if factor.factor_type == Position3D || factor.factor_type == Odometry3D {
         let factor_rot = get_rot_from_3d(&factor.constraint);
         let meas_rot = factor_rot * get_rot_from_3d(&source.get_content());
         let mut meas_rot_object = meas_object.add_capsule(0.04, 1.5);

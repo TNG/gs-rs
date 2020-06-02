@@ -94,7 +94,7 @@ impl G2oParser {
         Self::assert_tokens(expected_length, tokens.len(), line_number);
         Edge {
             edge_type: String::from(type_str),
-            vertices: match tokens[1] {
+            vertices: match tokens[0] {
                 "EDGE_SE3_PRIOR" => tokens[1..2].iter().
                     map(|s| Self::parse_val(s, line_number)).collect(),
                 _ => tokens[1..1+v_num].iter().
