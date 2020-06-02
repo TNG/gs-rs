@@ -6,7 +6,7 @@ use crate::visualizer::visualize;
 
 #[test]
 fn current_test() {
-    let factor_graph = G2oParser::parse_file("data_files/bad3d.g2o").unwrap();
-    optimize(&factor_graph, 1);
-    G2oParser::compose_file(&factor_graph, "data_files/bad3d_sol1.g2o");
+    // let factor_graph = G2oParser::parse_file("data_files/odo3d_only_0.g2o").unwrap();
+    // optimize(&factor_graph, 1);
+    // G2oParser::compose_file(&factor_graph, "data_files/odo3d_only_1.g2o");
 }

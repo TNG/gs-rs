@@ -146,6 +146,9 @@ mod tests {
         test_valid_optimization("full2d", 25);
     }
 
-    // TODO test_only_odo3d_factors()
+    #[test]
+    fn test_only_odo3d_factors() {
+        test_valid_optimization("odo3d_only", 1);
+    }
 
 }
