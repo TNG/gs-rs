@@ -16,6 +16,8 @@ pub enum FactorType {
     Position3D,
     /// Relative measurement between two poses in 3D.
     Odometry3D,
+    /// Relative measurement to an observed stationary variable in 3D.
+    Observation3D,
 }
 
 /// Structure representing a measurement.
@@ -30,6 +32,8 @@ pub struct Factor {
     /// Content for Observation2D: vec![position_x, position_y]
     ///
     /// Content for Position3D and Odometry3D: vec![position_x, position_y, position_z, rotation_quaternion_x, rotation_quaternion_y, rotation_quaternion_z, rotation_quaternion_w]
+    ///
+    /// Content for Observation3D: vec![position_x, position_y, position_z]
     pub constraint: Vec<f64>,
     /// The factor's wrapped information matrix, equalling the inverse of the factor's mean matrix.
     pub information_matrix: InformationMatrix,

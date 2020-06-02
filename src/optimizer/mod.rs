@@ -64,6 +64,7 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
             updated_content.extend(&new_iso.rotation.quaternion().coords.data.to_vec());
             updated_content
         }
+        Landmark3D => unimplemented!()
     };
     var.set_content(updated_content);
 }

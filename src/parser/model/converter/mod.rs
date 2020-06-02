@@ -2,7 +2,9 @@ use petgraph::csr::Csr;
 
 use crate::factor_graph::factor::{Factor, FactorType::*};
 use crate::factor_graph::variable::{
-    VariableType::*, landmark_variable_2d::LandmarkVariable2D, vehicle_variable_2d::VehicleVariable2D, vehicle_variable_3d::VehicleVariable3D,
+    VariableType::*,
+    vehicle_variable_2d::VehicleVariable2D, landmark_variable_2d::LandmarkVariable2D,
+    vehicle_variable_3d::VehicleVariable3D, landmark_variable_3d::LandmarkVariable3D
 };
 use crate::factor_graph::FactorGraph;
 use crate::parser::model::{Edge, FactorGraphModel, Vertex};
@@ -40,6 +42,7 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                     Vehicle2D => String::from("POSE2D_ANGLE"),
                     Landmark2D => String::from("LANDMARK2D_ANGLE"),
                     Vehicle3D => String::from("POSE3D_QUAT"),
+                    Landmark3D => String::from("LANDMARK3D_QUAT")
                 },
                 content: node.get_content(),
             });
@@ -56,6 +59,7 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                         Observation2D => String::from("OBSERVATION2D_ANGLE"),
                         Position3D => String::from("PRIOR3D_QUAT"),
                         Odometry3D => String::from("ODOMETRY3D_QUAT"),
+                        Observation3D => String::from("OBSERVATION3D_QUAT"),
                     },
                     vertices: edge_vertices,
                     restriction: factor.constraint.clone(),
@@ -77,6 +81,7 @@ fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
         "OBSERVATION2D_ANGLE" => (1, Observation2D),
         "PRIOR3D_QUAT" => (0, Position3D),
         "ODOMETRY3D_QUAT" => (1, Odometry3D),
+        "OBSERVATION3D_QUAT" => (1, Observation3D),
         other_type => panic!("Unsupported edge type in the model: {}", other_type),
     };
     factor_graph.csr.add_edge(
@@ -126,6 +131,17 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     vertex.content[6],
                     fixed,
                     add_var_to_matrix(&mut factor_graph.matrix_dim, 6, fixed),
+                ))),
+        ),
+        "LANDMARK3D_QUAT" =>factor_graph.node_indices.push(
+            factor_graph.csr
+                .add_node(Box::new(LandmarkVariable3D::new(
+                    vertex.id,
+                    vertex.content[0],
+                    vertex.content[1],
+                    vertex.content[2],
+                    fixed,
+                    add_var_to_matrix(&mut factor_graph.matrix_dim, 3, fixed),
                 ))),
         ),
         other_type => panic!("Unsupported vertex type in the model: {}", other_type),

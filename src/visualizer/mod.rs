@@ -89,7 +89,7 @@ fn handle_var_rotation(var: &Box<dyn Variable>, var_object: &mut SceneNode) {
 fn color_var_object(var: &Box<dyn Variable>, var_object: &mut SceneNode) {
     match var.get_type() {
         Vehicle2D | Vehicle3D => var_object.set_color(1.0, 0.0, 0.0),
-        Landmark2D => var_object.set_color(0.0, 1.0, 0.0),
+        Landmark2D | Landmark3D => var_object.set_color(0.0, 1.0, 0.0),
     };
 }
 
@@ -102,7 +102,7 @@ fn calc_meas_point(factor: &Factor, source: &Box<dyn Variable>) -> Point3<f32> {
             let local_point = Rotation3::new(Vector3::z() * source_rot) * factor_point;
             (get_var_point(source).coords + local_point.coords).into()
         },
-        Odometry3D => {
+        Odometry3D | Observation3D => {
             let source_rot = get_rot_from_3d(&source.get_content());
             let local_point = source_rot.to_rotation_matrix() * factor_point;
             (get_var_point(source).coords + local_point.coords).into()
@@ -157,7 +157,7 @@ fn get_factor_color(factor: &Factor) -> (f32, f32, f32) {
     match factor.factor_type {
         Position2D | Position3D => (1.0, 0.5, 0.5),
         Odometry2D | Odometry3D => (0.5, 0.5, 1.0),
-        Observation2D => (0.5, 1.0, 0.5),
+        Observation2D | Observation3D => (0.5, 1.0, 0.5),
     }
 }
 
@@ -168,7 +168,7 @@ fn get_var_point(var: &Box<dyn Variable>) -> Point3<f32> {
         var.get_content()[1] as f32,
         match var.get_type() {
             Vehicle2D | Landmark2D => 0.0 as f32,
-            Vehicle3D => var.get_content()[2] as f32,
+            Vehicle3D | Landmark3D => var.get_content()[2] as f32,
         },
     )
 }
@@ -179,7 +179,7 @@ fn get_factor_point(factor: &Factor) -> Point3<f32> {
         factor.constraint[1] as f32,
         match factor.factor_type {
             Position2D | Odometry2D | Observation2D => 0.0 as f32,
-            Position3D | Odometry3D => factor.constraint[2] as f32,
+            Position3D | Odometry3D | Observation3D => factor.constraint[2] as f32,
         },
     )
 }
