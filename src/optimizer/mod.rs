@@ -18,7 +18,6 @@ use std::f64::consts::PI;
 
 mod linear_system;
 
-// TODO document how the optimization works
 /// Optimizes a factor graph with the given number of iterations.
 pub fn optimize(graph: &FactorGraph, iterations: usize) {
     for _i in 0..iterations {
