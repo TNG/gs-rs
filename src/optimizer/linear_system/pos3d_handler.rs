@@ -18,13 +18,8 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     let err = iso_m.inverse() * iso_v;
     let mut err_vec = err.translation.vector.data.to_vec();
     err_vec.extend_from_slice(&err.rotation.quaternion().coords.data.to_vec()[..3]);
-    let b_update = (RowVector6::from_vec(err_vec.clone()/*TODO REMOVE .clone()*/) * &right_mult).transpose();
+    let b_update = (RowVector6::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_update, var);
-
-    println!("Prior Error:{:?}\n", err_vec); // CORRECT
-    print!("Prior Jacobian:{}", jacobi); // CORRECT
-    print!("Unary b:{}", b_update); // CORRECT
-    print!("Unary A:{}", H_update); // CORRECT
 }
 
 fn calc_jacobians(iso_v: &Isometry3<f64>, iso_m: &Isometry3<f64>) -> (Matrix6<f64>, Matrix6<f64>) {
