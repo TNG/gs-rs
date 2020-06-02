@@ -1,4 +1,4 @@
-use nalgebra::{DMatrix, DVector, Matrix3, Matrix6, Isometry3};
+use nalgebra::{DMatrix, DVector, Matrix3, Matrix6, Isometry3, RowVector6, Matrix, ArrayStorage, Vector, U1, U6};
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;
 use crate::optimizer::linear_system::iso3d_gradients::*;
@@ -12,11 +12,19 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     let (jacobi, jacobi_T) = calc_jacobians(&iso_v, &iso_m);
     let right_mult = &factor.information_matrix.content * jacobi;
 
-    print!("Prior Jacobian:{}", jacobi);
+    let H_update = jacobi_T * &right_mult;
+    update_H_submatrix(H, &H_update, var);
 
-    // let H_update = jacobi_T * &right_mult;
-    // update_H_submatrix(H, &H_update, var);
-    // update b
+    let err = iso_m.inverse() * iso_v;
+    let mut err_vec = err.translation.vector.data.to_vec();
+    err_vec.extend_from_slice(&err.rotation.quaternion().coords.data.to_vec()[..3]);
+    let b_update = (RowVector6::from_vec(err_vec.clone()/*TODO REMOVE .clone()*/) * &right_mult).transpose();
+    update_b_subvector(b, &b_update, var);
+
+    println!("Prior Error:{:?}\n", err_vec); // CORRECT
+    print!("Prior Jacobian:{}", jacobi); // CORRECT
+    print!("Unary b:{}", b_update); // CORRECT
+    print!("Unary A:{}", H_update); // CORRECT
 }
 
 fn calc_jacobians(iso_v: &Isometry3<f64>, iso_m: &Isometry3<f64>) -> (Matrix6<f64>, Matrix6<f64>) {
@@ -29,4 +37,16 @@ fn calc_jacobians(iso_v: &Isometry3<f64>, iso_m: &Isometry3<f64>) -> (Matrix6<f6
     jacobian.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
 
     (jacobian, jacobian.transpose())
+}
+
+fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, U6, U6, ArrayStorage<f64,U6,U6>>, var: &Box<dyn Variable>) {
+    let range = var.get_range().unwrap();
+    let updated_submatrix = &(H.index((range.clone(), range.clone(). clone())) + added_matrix);
+    H.index_mut((range.clone(), range)).copy_from(updated_submatrix);
+}
+
+fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, U6, ArrayStorage<f64,U6,U1>>, var: &Box<dyn Variable>) {
+    let range = var.get_range().unwrap();
+    let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);
+    b.index_mut((range, ..)).copy_from(updated_subvector);
 }
