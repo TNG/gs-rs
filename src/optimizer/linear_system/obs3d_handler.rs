@@ -19,17 +19,9 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
 
     let err_pos = local_j.vector - pos_ij;
     let err_vec = err_pos.data.to_vec();
-    let b_updates = (RowVector3::from_vec(err_vec.clone()/*TODO REMOVE*/) * &right_mult).transpose();
+    let b_updates = (RowVector3::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_updates.index((..6, ..)), var_i);
     update_b_subvector(b, &b_updates.index((6.., ..)), var_j);
-
-    println!("Observation Error: {:?}", err_vec);
-    print!("Observation Jacobian_i:{}", jacobi.index((..,..6)));
-    print!("Observation Jacobian_j:{}", jacobi.index((..,6..)));
-    print!("From b:{}", b_updates.index((..6,..)));
-    print!("From A:{}", H_updates.index((..6,..6)));
-    print!("To b:{}", b_updates.index((6..,..)));
-    print!("To A:{}", H_updates.index((6..,6..)));
 }
 
 fn calc_jacobians(iso_i: &Isometry3<f64>, local_j: &Translation3<f64>) -> (MatrixMN<f64, U3, U9>, MatrixMN<f64, U9, U3>) {

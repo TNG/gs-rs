@@ -159,4 +159,9 @@ mod tests {
         test_valid_optimization("odo3d_only", 1);
     }
 
+    #[test]
+    fn test_mainly_obs3d_factors() {
+        test_valid_optimization("obs3d_mainly", 1);
+    }
+
 }
