@@ -8,14 +8,17 @@ use std::collections::BTreeSet;
 ///
 /// More information on the G2O file format: https://github.com/RainerKuemmerle/g2o/wiki/File-Format
 ///
-/// Currently supported G2O vertices: VERTEX_SE2, VERTEX_XY, VERTEX_SE3:QUAT, VERTEX_TRACKXYZ
+/// Currently supported G2O vertices:
+/// VERTEX_SE2, VERTEX_XY, VERTEX_SE3:QUAT, VERTEX_TRACKXYZ
 ///
-/// Currently supported G2O edges: EDGE_PRIOR_SE2, EDGE_SE2, EDGE_SE2_XY, EDGE_SE3_PRIOR (*), EDGE_SE3:QUAT, EDGE_SE3_TRACKXYZ
+/// Currently supported G2O edges:
+/// EDGE_PRIOR_SE2, EDGE_SE2, EDGE_SE2_XY, EDGE_SE3_PRIOR (*), EDGE_SE3:QUAT, EDGE_SE3_TRACKXYZ (*)
 ///
-/// (*) When using this edge, the 2nd vertex parameter is expected to be the vertex with ID 0 as follows:
+/// (*) When using one of these edges, the 2nd (EDGE_SE3_PRIOR) or 3rd (EDGE_SE3_TRACKXYZ)
+/// vertex/offset parameter is expected to be the offset with ID 0 as follows:
 /// "PARAMS_SE3OFFSET 0 0 0 0 0 0 0 1".
 /// Anything else will result in undefined and most likely undesired behavior.
-/// The vertex "PARAMS_SE3OFFSET" is not supported in any other scenario.
+/// The offset "PARAMS_SE3OFFSET" is not supported in any other scenario.
 ///
 /// Note: Currently panics instead of returning an Err() when parsing an invalid file.
 pub struct G2oParser;
@@ -36,7 +39,7 @@ impl Parser for G2oParser {
 
     fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
         let mut str_vec: Vec<String> = vec![];
-        if(model.edges.iter().any(|e| e.edge_type == "PRIOR3D_QUAT")) {
+        if(model.edges.iter().any(|e| e.edge_type == "PRIOR3D_QUAT" || e.edge_type == "OBSERVATION3D_QUAT")) {
             str_vec.push(String::from("PARAMS_SE3OFFSET 0 0 0 0 0 0 0 1"));
         }
         str_vec.extend::<Vec<String>>(model.vertices.iter().map(|v| Self::vertex_to_string(v, &model.fixed_vertices)).collect());
@@ -89,7 +92,7 @@ impl G2oParser {
             "EDGE_SE2_XY" => ("OBSERVATION2D_ANGLE", 2, 2, Self::get_index_mapping_vec_and_upper_t_len(2)),
             "EDGE_SE3_PRIOR" => ("PRIOR3D_QUAT", 2, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
             "EDGE_SE3:QUAT" => ("ODOMETRY3D_QUAT", 2, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
-            "EDGE_SE3_TRACKXYZ" => ("OBSERVATION3D_QUAT", 2, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
+            "EDGE_SE3_TRACKXYZ" => ("OBSERVATION3D_QUAT", 3, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
         let expected_length = 1 + v_num + c_len + upper_t_len;
@@ -97,7 +100,7 @@ impl G2oParser {
         Edge {
             edge_type: String::from(type_str),
             vertices: match tokens[0] {
-                "EDGE_SE3_PRIOR" => tokens[1..2].iter().
+                "EDGE_SE3_PRIOR" | "EDGE_SE3_TRACKXYZ" => tokens[1..v_num].iter().
                     map(|s| Self::parse_val(s, line_number)).collect(),
                 _ => tokens[1..1+v_num].iter().
                     map(|s| Self::parse_val(s, line_number)).collect(),
@@ -175,8 +178,8 @@ impl G2oParser {
             other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
         }
         Self::append_usize_slice_to_string_vec(&mut tokens, e.vertices.as_slice());
-        if e.edge_type == "PRIOR3D_QUAT" {
-            Self::append_usize_slice_to_string_vec(&mut tokens, &[0]); // the 2nd vertex index of PRIOR3D_QUAT should always be 0
+        if e.edge_type == "PRIOR3D_QUAT" || e.edge_type == "OBSERVATION3D_QUAT" {
+            Self::append_usize_slice_to_string_vec(&mut tokens, &[0]); // the last vertex/offset index should be 0 for these edges
         }
         Self::append_f64_slice_to_string_vec(&mut tokens, &e.restriction);
         let upper_triangle = match e.edge_type.as_str() {
