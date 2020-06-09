@@ -1,5 +1,7 @@
 use nalgebra::{Matrix3, MatrixMN, Translation3, Isometry3, UnitQuaternion, Quaternion, U3, U9};
 
+// TODO only import actually used functions in all use statements
+
 // code copied from g2o for the case [ sin >= 0 && trace > 0 ]
 pub fn calc_dq_dR(matr: &Matrix3<f64>) -> MatrixMN<f64, U3, U9> {
     let m = matr;

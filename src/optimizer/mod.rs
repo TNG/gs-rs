@@ -43,7 +43,7 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
     let correction = &solution[range];
 
     let updated_content = match var.get_type() {
-        Landmark2D | Vehicle2D => {
+        Landmark2D | Vehicle2D | Landmark3D => {
             let mut updated_content: Vec<f64> = old_content.iter().zip(correction.iter())
                 .map(|(old, cor)| old + cor).collect();
             if var.get_type() == Vehicle2D {
@@ -64,7 +64,6 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
             updated_content.extend(&new_iso.rotation.quaternion().coords.data.to_vec());
             updated_content
         }
-        Landmark3D => unimplemented!()
     };
     var.set_content(updated_content);
 }
