@@ -1,40 +1,4 @@
 \section{Optimization in 2D}
-
-In all cases the factor's increments on parts of $H$ and $b$, $H^{fac}$ and $b^{fac}$ respectively, will be computed as follows:
-\begin{align}
-	H^{fac} = J^T * \Omega * J,
-\end{align}
-\begin{align}
-	b^{fac} = e^T * \Omega * J,
-\end{align}
-where $\Omega$, $J$ and $e$ are the factor's information matrix, Jacobian matrix and error vector, respectively. While $\Omega$ is a given constant of the factor, $J$ and $e$ have to be calculated for each factor in each iteration.
-
-If the factor only involves the variable $x_i$, $H$ and $b$ are updated as follows:
-\begin{align}
-\label{H_inc}
-	H_{ii} = H_{ii} + H^{fac},
-\end{align}
-\begin{align}
-\label{b_inc}
-	b_i = b_i + b^{fac},
-\end{align}
-where the subscripts of $H$ and $b$ denote the row and column index of the submatrix or subvector assigned to the respective variable. If the factor involves two variables $x_i$ and $x_j$, $H^{fac}$ and $b^{fac}$ will have the structure
-\begin{align}
-H^{fac} =
-\begin{pmatrix}
-	\boldsymbol{H}^{fac}_{ii} & \boldsymbol{H}^{fac}_{ij}\\
-	\boldsymbol{H}^{fac}_{ji} & \boldsymbol{H}^{fac}_{jj}
-\end{pmatrix}
-\end{align}
-and
-\begin{align}
-b^{fac} =
-\begin{pmatrix}
-	\boldsymbol{b}^{fac}_{i} & \boldsymbol{b}^{fac}_{j}
-\end{pmatrix},
-\end{align}
-respectively, such that $H_{mn}$ will be incremented by $H^{fac}_{mn}$ and $b_n$ will be incremented by $b^{fac}_n$, analogously to equations (\ref{H_inc}) and (\ref{b_inc}). Fixed variables are excluded from $H$ and $b$ and therefore do not have any submatrices or subvectors which would need to be updated. In this case, these parts of $H^{fac}$ and $b^{fac}$ are simply ignored.
-
 In the following sections, the individual 2D factors' calculations of $J$ and $e$ are presented. The functions $pos(x)$ and $rot(x)$ will be used to refer to the 2D position vector and the rotation angle of a 2D pose $x$, respectively. Similarly, the functions $pos_x(x)$ and $pos_y(x)$ will be used to refer to the single value within the respective dimension.
 
 Furthermore, the rotation matrices are denoted such that
@@ -56,8 +20,9 @@ equals the rotation matrix with the angle $\alpha$ in 2D, and
 \end{align}
 equals the rotation matrix with the angle $\alpha$ in 3D.
 
-\subsection{Position2D}
 
+
+\subsection{Position2D}
 The \textit{Position2D} factor involves one \textit{VehicleVariable} $x_v$. The Jacobian matrix $J$ in this case is
 \begin{align}
 	J = R_z(-rot(x_v)).
@@ -67,6 +32,8 @@ Given the measurement $x_m$, the error vector
 	e = R_{-rot(x_m)} * (pos(x_v) - pos(x_m))
 \end{align}
 can be computed as well.
+
+
 
 \subsection{Odometry2D}
 The \textit{Position2D} factor involves two \textit{VehicleVariables} $x_i$ and $x_j$. Given the measurement $x_{ij}$, the Jacobian matrix $J$ is calculated as follows:
@@ -112,6 +79,8 @@ After normalizing $e_{rot}$ to $[-\pi, \pi)$ with $norm(e_{rot})$ the full error
 	\end{pmatrix}
 	.
 \end{align}
+
+
 
 \subsection{Observation2D}
 The \textit{Position2D} factor involves one \textit{VehicleVariable} $x_i$ and one \textit{LandmarkVariable} $x_j$. The measurement is denoted as $x_{ij}$, analogously to the previous section. Although $x_j$ and $x_{ij}$ are only positions rather than poses and therefore do not contain a rotation angle, the functions $pos(x)$, $pos_x(x)$ and $pos_y(x)$ will be used nevertheless to make the calculation path more understandable. Given the measurement $x_{ij}$, the Jacobian matrix $J$ is calculated as follows:
