@@ -146,9 +146,9 @@ fn color_meas_object(factor: &Factor, meas_object: &mut SceneNode) {
 fn add_factor_lines(visual_factor_graph: &mut VisualFactorGraph, factor: &Factor, meas_point: Point3<f32>, source_point: Point3<f32>, target_point: Point3<f32>) {
     let (r, g, b) = get_factor_color(factor);
     visual_factor_graph.lines.push([meas_point, source_point, Point3::new(r, g, b)]);
-    if factor.factor_type == Observation2D {
+    if factor.factor_type == Observation2D || factor.factor_type == Observation3D {
         visual_factor_graph.lines.push([meas_point, target_point, Point3::new(r, g, b)]);
-    } else if factor.factor_type == Odometry2D {
+    } else if factor.factor_type == Odometry2D || factor.factor_type == Odometry3D {
         visual_factor_graph.lines.push([source_point, target_point, Point3::new(1.0, 1.0, 1.0)]);
     }
 }
