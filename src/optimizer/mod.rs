@@ -15,6 +15,7 @@ use crate::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::solver::Solver;
 use nalgebra::{Isometry3, Quaternion, Rotation3, Translation3, UnitQuaternion, Vector3};
 use std::f64::consts::PI;
+use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, get_isometry_normalized};
 
 mod linear_system;
 
@@ -66,22 +67,6 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
         }
     };
     var.set_content(updated_content);
-}
-
-fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
-    Isometry3::from_parts(
-        Translation3::new(pose[0], pose[1], pose[2]),
-        UnitQuaternion::from_quaternion(Quaternion::new(pose[6], pose[3], pose[4], pose[5])),
-    )
-}
-
-fn get_isometry_normalized(pose: &[f64]) -> Isometry3<f64> {
-    let quaternion = Quaternion::new(1.0, pose[3], pose[4], pose[5]);
-    let unit_quaternion = UnitQuaternion::new_normalize(quaternion);
-    Isometry3::from_parts(
-        Translation3::new(pose[0], pose[1], pose[2]),
-        unit_quaternion,
-    )
 }
 
 #[cfg(test)]

@@ -1,7 +1,5 @@
 use nalgebra::{Matrix3, MatrixMN, Translation3, Isometry3, UnitQuaternion, Quaternion, U3, U9};
 
-// TODO only import actually used functions in all use statements
-
 // code copied from g2o for the case [ sin >= 0 && trace > 0 ]
 pub fn calc_dq_dR(matr: &Matrix3<f64>) -> MatrixMN<f64, U3, U9> {
     let m = matr;
@@ -60,6 +58,15 @@ pub fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
     Isometry3::from_parts(
         Translation3::new(pose[0], pose[1], pose[2]),
         UnitQuaternion::from_quaternion(Quaternion::new(pose[6], pose[3], pose[4], pose[5])),
+    )
+}
+
+pub fn get_isometry_normalized(pose: &[f64]) -> Isometry3<f64> {
+    let quaternion = Quaternion::new(1.0, pose[3], pose[4], pose[5]);
+    let unit_quaternion = UnitQuaternion::new_normalize(quaternion);
+    Isometry3::from_parts(
+        Translation3::new(pose[0], pose[1], pose[2]),
+        unit_quaternion,
     )
 }
 

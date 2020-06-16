@@ -1,7 +1,7 @@
 use nalgebra::{DMatrix, DVector, Matrix3, Matrix6, Isometry3, RowVector6, Matrix, ArrayStorage, Vector, U1, U6};
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;
-use crate::optimizer::linear_system::iso3d_gradients::*;
+use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, calc_dq_dR, skew_matr_and_mult_parts};
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var: &Box<dyn Variable>) {
     if var.is_fixed() {

@@ -1,9 +1,7 @@
 use nalgebra::{DMatrix, DVector, MatrixMN, Isometry3, U6, U12, Matrix3, Matrix6, Matrix, Dynamic, SliceStorage, U1, RowVector6, Vector};
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;
-use std::f64::consts::PI;
-use std::char::DecodeUtf16;
-use crate::optimizer::linear_system::iso3d_gradients::*;
+use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, calc_dq_dR, skew_trans, skew_matr_and_mult_parts, skew_matr_T_and_mult_parts};
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &Box<dyn Variable>, var_j: &Box<dyn Variable>) {
     let iso_i = get_isometry(&var_i.get_content());
