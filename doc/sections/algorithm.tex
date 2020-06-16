@@ -4,6 +4,7 @@ In the following sections, the optimization algorithm will be introduced. Firstl
 
 
 \subsection{Iteration Steps}
+\label{iter_steps}
 Given a specific number of iterations $n$ and the initial guess $x_i^{(0)}$ for each variable, the optimizer algorithm will repeat the following steps $n$ times:
 \begin{enumerate}
 	\item Calculate $H$ and $b$ by setting them to $\boldsymbol{0}$, then looping through all factors and updating their non-fixed variables' entries in $H$ and $b$.
@@ -16,7 +17,7 @@ Given a specific number of iterations $n$ and the initial guess $x_i^{(0)}$ for 
 			x_i^{(k+1)} = x_i^{(k)} + \Delta x_i.
 		\end{align}
 		In the case of 2D variables with a rotation, normalize the rotation to $[-\pi, \pi)$.
-		In the case of 3D variables with a rotation, normalize the rotation of $\Delta x_i$. As explained in section \ref{optimization_3d}, the quaternion data will only include the imaginary part. Therefore, set the scalar part to $1$ before normalizing. The $+$ operator then resembles the concatenation of two isometries.
+		In the case of 3D variables with a rotation, normalize the rotation of $\Delta x_i$. As explained in section~\ref{optimization_3d}, the quaternion data will only include the imaginary part. Therefore, set the scalar part to $1$ before normalizing. The $+$~operator then resembles the concatenation of two isometries, analogously as the $*$~operator in section~\ref{optimization_3d}.
 \end{enumerate}
 
 

@@ -1,4 +1,5 @@
 \section{Optimization in 2D}
+\label{optimization_2d}
 In the following sections, the individual 2D factors' calculations of $J$ and $e$ are presented. The functions $pos(x)$ and $rot(x)$ will be used to refer to the 2D position vector and the rotation angle of a 2D pose $x$, respectively. Similarly, the functions $pos_x(x)$ and $pos_y(x)$ will be used to refer to the single value within the respective dimension.
 
 Furthermore, the rotation matrices are denoted such that
@@ -36,7 +37,7 @@ can be computed as well.
 
 
 \subsection{Odometry2D}
-The \textit{Position2D} factor involves two \textit{VehicleVariables} $x_i$ and $x_j$. Given the measurement $x_{ij}$, the Jacobian matrix $J$ is calculated as follows:
+The \textit{Odometry2D} factor involves two \textit{VehicleVariables} $x_i$ and $x_j$. Given the measurement $x_{ij}$, the Jacobian matrix $J$ is calculated as follows:
 \begin{align}
 	\Delta x_{ij} = x_j - x_i
 \end{align}
@@ -60,7 +61,7 @@ The \textit{Position2D} factor involves two \textit{VehicleVariables} $x_i$ and 
 \begin{align}
 	J =
 	\begin{pmatrix}
-		\boldsymbol{J}_i & \boldsymbol{J}_j
+		\boldsymbol{J_i} & \boldsymbol{J_j}
 	\end{pmatrix}
 \end{align}
 The error vector $e$ is computed as follows:
@@ -74,7 +75,7 @@ After normalizing $e_{rot}$ to $[-\pi, \pi)$ with $norm(e_{rot})$ the full error
 \begin{align}
 	e =
 	\begin{pmatrix}
-		\boldsymbol{e}_{pos}\\
+		\boldsymbol{e_{pos}}\\
 		norm(e_{rot})
 	\end{pmatrix}
 	.
@@ -83,7 +84,7 @@ After normalizing $e_{rot}$ to $[-\pi, \pi)$ with $norm(e_{rot})$ the full error
 
 
 \subsection{Observation2D}
-The \textit{Position2D} factor involves one \textit{VehicleVariable} $x_i$ and one \textit{LandmarkVariable} $x_j$. The measurement is denoted as $x_{ij}$, analogously to the previous section. Although $x_j$ and $x_{ij}$ are only positions rather than poses and therefore do not contain a rotation angle, the functions $pos(x)$, $pos_x(x)$ and $pos_y(x)$ will be used nevertheless to make the calculation path more understandable. Given the measurement $x_{ij}$, the Jacobian matrix $J$ is calculated as follows:
+The \textit{Observation2D} factor involves one \textit{VehicleVariable} $x_i$ and one \textit{LandmarkVariable} $x_j$. The measurement is denoted as $x_{ij}$, analogously to the previous section. Although $x_j$ and $x_{ij}$ are only positions rather than poses and therefore do not contain a rotation angle, the functions $pos(x)$, $pos_x(x)$ and $pos_y(x)$ will be used nevertheless to make the calculation path more understandable. Given the measurement $x_{ij}$, the Jacobian matrix $J$ is calculated as follows:
 \begin{align}
 	pos(\Delta x_{ij}) = pos(x_j) - pos(x_i)
 \end{align}
@@ -106,7 +107,7 @@ The \textit{Position2D} factor involves one \textit{VehicleVariable} $x_i$ and o
 \begin{align}
 	J =
 	\begin{pmatrix}
-		\boldsymbol{J}_i & \boldsymbol{J}_j
+		\boldsymbol{J_i} & \boldsymbol{J_j}
 	\end{pmatrix}
 \end{align}
 The error vector $e$ is computed as follows:
