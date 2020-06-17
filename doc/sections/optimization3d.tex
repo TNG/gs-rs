@@ -4,7 +4,6 @@ In 3D, rotations are often represented as quaternions. To reduce these to a mini
 
 In the following sections, the individual 3D factors' calculations of $J$ and $e$ are presented. Similarly as in section~\ref{optimization_2d}, the functions $pos(x)$ and $rot_Q(x)$ will be used to refer to the 3D position vector and the rotation quaternion of a 3D pose or isometry $x$. When referring to the rotation as a 3D rotation matrix, the function $rot_{RM}(x)$ will be used instead. When using $x$ in calculations, it will refer to the pose's 3D isometry containing both the position vector as translation as well as the rotation quaternion. The binary operator $*$ will be used to concatenate these isometries. The inverse of an isometry will be denoted as $x^{-1}$.
 
-% TODO similarities in all 3D factors (skew, ...(?))
 Some functions will be used to calculate gradients of a 3D isometry $x$, such as $\frac{dq}{dR}(x)$, which is computed as follows using the trace function $tr(M)$ of 3x3 matrices:
 \begin{align}
 	s = \frac{1}{2}\sqrt{tr(rot_{RM}(x)) + 1}
@@ -45,7 +44,6 @@ where $x_x$, $x_y$ and $x_z$ are the first, second and third vector components, 
 
 
 \subsection{Position3D}
-% TODO document optimization
 The \textit{Position3D} factor involves one \textit{VehicleVariable} $x_v$. Given the measurement $x_m$, the Jacobian matrix $J$ is calculated as follows:
 \begin{align}
 	E = x_m^{-1} * x_v
