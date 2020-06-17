@@ -10,18 +10,14 @@ pub struct SparseCholeskySolver;
 
 impl Solver for SparseCholeskySolver {
     fn solve(H: DMatrix<f64>, b: &DVector<f64>) -> Result<Vec<f64>, String> {
-        // TODO pass matrix as lower triangular or sparse already
-        // if H.transpose() != H {
-        //             return Err(String::from("H is not symmetric"));
-        // }
+        // TODO @Daniel (your TODO): pass matrix as sparse already
         let sparse = CsCholesky::new(&CsMatrix::from(H));
         match sparse.l() {
             None => Err(String::from("H is not positive-definite")),
-            Some(l) => Ok(l
-                .tr_solve_lower_triangular(&l.solve_lower_triangular(&b).unwrap())
-                .unwrap()
-                .data
-                .into()),
+            Some(l) => Ok(
+                l.tr_solve_lower_triangular(&l.solve_lower_triangular(&b).unwrap())
+                .unwrap().data.into()
+            ),
         }
     }
 }

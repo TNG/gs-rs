@@ -14,12 +14,6 @@ struct VisualFactorGraph {
     lines: Vec<[Point3<f32>; 3]>,
 }
 
-// TODO does not work multiple times in a single execution of the program
-// Things tried so far:
-// - Google -> nobody seems to have mentioned this problem before
-// - make window static -> causes problems as it has to be mutable and can not be moved
-// Possible solutions:
-// - do not tackle this problem, but instead support being able to visualize several factor graphs and jump between them
 /// Displays the visualization of the given factor graph in a new window.
 /// Does not work multiple times in a single execution of the program.
 pub fn visualize(factor_graph: &FactorGraph) {

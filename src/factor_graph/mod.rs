@@ -21,7 +21,7 @@ pub struct FactorGraph<'a> {
     /// The indices at which the factor graph's nodes can be found in get_var_at_csr_index(/*node_index*/).
     pub node_indices: Vec<NodeIndex<usize>>,
     /// Map from custom IDs as stated in the parsed file to internal CSR indices.
-    pub custom_to_csr_id_map: HashMap<usize, NodeIndex<usize>>, // TODO combine with node_indices for less redundancy
+    pub custom_to_csr_id_map: HashMap<usize, NodeIndex<usize>>,
     /// The number of nodes which are dynamic, i.e. the number of fixed nodes subtracted of the total number of nodes.
     pub matrix_dim: usize,
 }

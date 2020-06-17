@@ -7,7 +7,6 @@ use nalgebra::DMatrix;
 pub enum FactorType {
     /// Vehicle pose measurement in 2D.
     Position2D,
-    // TODO add PositionPrior2D
     /// Relative measurement between two poses in 2D.
     Odometry2D,
     /// Relative measurement to an observed stationary variable in 2D.
