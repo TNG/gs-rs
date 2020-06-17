@@ -2,7 +2,7 @@
 
 #![allow(non_snake_case)]
 
-use crate::solver::Solver;
+use crate::optimizer::solver::Solver;
 use nalgebra::{DMatrix, DVector, LU};
 
 /// Implements the solver using the LU (lower-upper) decomposition.
@@ -24,8 +24,8 @@ mod test {
     use log::LevelFilter;
     use nalgebra::{DMatrix, DVector};
 
-    use crate::solver::lu::LUSolver;
-    use crate::solver::Solver;
+    use crate::optimizer::solver::lu::LUSolver;
+    use crate::optimizer::solver::Solver;
 
     fn init() {
         let _ = env_logger::builder()

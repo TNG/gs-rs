@@ -13,7 +13,6 @@ mod demo;
 pub mod factor_graph;
 pub mod optimizer;
 pub mod parser;
-pub mod solver;
 pub mod visualizer;
 
 // TODO @Daniel: can the interface fn and/or tests be removed?

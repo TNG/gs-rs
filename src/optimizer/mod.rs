@@ -11,13 +11,14 @@ use crate::factor_graph::variable::Variable;
 use crate::factor_graph::variable::VariableType::*;
 use crate::factor_graph::FactorGraph;
 use crate::optimizer::linear_system::calculate_H_b;
-use crate::solver::sparse_cholesky::SparseCholeskySolver;
-use crate::solver::Solver;
+use crate::optimizer::solver::sparse_cholesky::SparseCholeskySolver;
+use crate::optimizer::solver::Solver;
 use nalgebra::{Isometry3, Quaternion, Rotation3, Translation3, UnitQuaternion, Vector3};
 use std::f64::consts::PI;
 use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, get_isometry_normalized};
 
 mod linear_system;
+mod solver;
 
 /// Optimizes a factor graph with the given number of iterations.
 pub fn optimize(graph: &FactorGraph, iterations: usize) {
