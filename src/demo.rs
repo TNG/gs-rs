@@ -4,8 +4,6 @@ use crate::parser::json::JsonParser;
 use crate::parser::Parser;
 use crate::visualizer::visualize;
 
-// TODO @Samuel: filter data_files
-
 // TODO @Samuel: remove all compiler warnings
 
 #[test]
