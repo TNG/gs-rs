@@ -213,20 +213,20 @@ mod test {
     }
 
     #[test]
-    #[ignore]
+    #[ignore] // don't open a window every time all tests are run
     fn test_visualize_2d() {
         init();
 
-        let factor_graph = JsonParser::parse_file("data_files/full_2d_visualization.json").unwrap();
+        let factor_graph = JsonParser::parse_file("data_files/full_demos/full_2d.json").unwrap();
         visualize(&factor_graph);
     }
 
     #[test]
-    #[ignore]
+    #[ignore] // don't open a window every time all tests are run
     fn test_visualize_3d() {
         init();
 
-        let factor_graph = G2oParser::parse_file("data_files/mini_3d.g2o").unwrap();
+        let factor_graph = G2oParser::parse_file("data_files/full_demos/full_crazy_3d.g2o").unwrap();
         visualize(&factor_graph);
     }
 }

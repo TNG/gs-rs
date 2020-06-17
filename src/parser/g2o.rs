@@ -218,7 +218,6 @@ mod tests {
     use super::*;
     use log::LevelFilter;
     use std::fs;
-    use crate::parser::json::JsonParser;
 
     fn init() {
         let _ = env_logger::builder()
@@ -228,26 +227,55 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_minimal_file() {
+    fn test_parse_valid_file_to_model() {
         init();
 
-        let factor_graph =
-            match G2oParser::parse_file("data_files/minimal_size_and_types.g2o") {
+        let parsed_model =
+            match G2oParser::parse_file_to_model("data_files/full_demos/tiny_vehicle_only_2d.g2o") {
                 Ok(x) => x,
                 Err(str) => panic!(str),
             };
-        dbg!("{:?}", &factor_graph);
-        G2oParser::compose_file(&factor_graph, "data_files/minimal_size_and_types_copy.g2o");
-    }
+        dbg!("{:?}", &parsed_model);
 
-    #[test]
-    #[ignore] // deprecated input file
-    fn test_dumb_compose_model_to_string() {
-        init();
-
-        let model = JsonParser::parse_file_to_model("data_files/dumb.json").unwrap();
-        // dbg!(&model);
-        let g2o_string = G2oParser::compose_model_to_string(model).unwrap();
-        info!("\n{}", &g2o_string);
+        let vertices = vec![
+            Vertex {
+                id: 0,
+                vertex_type: String::from("Vehicle2D"),
+                content: vec![0.0, 1.0, 0.0],
+            },
+            Vertex {
+                id: 1,
+                vertex_type: String::from("Vehicle2D"),
+                content: vec![1.0, 0.0, 0.0],
+            },
+        ];
+        let edges = vec![
+            Edge {
+                edge_type: String::from("Position2D"),
+                vertices: vec![0],
+                restriction: vec![0.0, 1.0, 0.0],
+                information_matrix: vec![10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
+            },
+            Edge {
+                edge_type: String::from("Odometry2D"),
+                vertices: vec![0, 1],
+                restriction: vec![0.5, -0.5, 0.0],
+                information_matrix: vec![1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001],
+            },
+            Edge {
+                edge_type: String::from("Position2D"),
+                vertices: vec![1],
+                restriction: vec![1.0, 0.0, 0.0],
+                information_matrix: vec![10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
+            },
+        ];
+        let mut fixed_vertices = BTreeSet::new();
+        fixed_vertices.insert(0);
+        let expected_model = FactorGraphModel {
+            vertices,
+            edges,
+            fixed_vertices,
+        };
+        assert_eq!(parsed_model, expected_model);
     }
 }

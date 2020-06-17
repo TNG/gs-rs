@@ -9,6 +9,7 @@ use nalgebra::{Cholesky, DMatrix, DVector};
 pub struct CholeskySolver;
 
 impl Solver for CholeskySolver {
+    /// Assumes that H is symmetric. Might return wrong result if this is not the case.
     fn solve(H: DMatrix<f64>, b: &DVector<f64>) -> Result<Vec<f64>, String> {
         match Cholesky::new(H) {
             None => Err(String::from("H is not positive-definite")),
@@ -36,32 +37,9 @@ mod test {
     fn solver_positive_definite_test() {
         init();
         #[allow(non_snake_case)]
-        let positive_definite_H = vec![
-            2.0, -1.0, 0.0, // transposed H is displayed
-            -1.0, 2.0, -1.0, 0.0, -1.0, 2.0,
-        ];
-        let b = vec![6.0, 6.0, 6.0];
-        let solve_output = CholeskySolver::solve(
-            DMatrix::<f64>::from_vec(3, 3, positive_definite_H),
-            &DVector::from_vec(b),
-        );
-        let x = match solve_output {
-            Ok(sol) => sol,
-            Err(str) => panic!(str),
-        };
-        assert!(relative_eq!(x[0], 9.0, epsilon = 1e-10));
-        assert!(relative_eq!(x[1], 12.0, epsilon = 1e-10));
-        assert!(relative_eq!(x[2], 9.0, epsilon = 1e-10));
-    }
-
-    #[test]
-    fn solver_positive_definite_array_test() {
-        init();
-        #[allow(non_snake_case)]
-        let positive_definite_H = vec![
-            2.0, -1.0, 0.0, // transposed H is displayed
-            -1.0, 2.0, -1.0, 0.0, -1.0, 2.0,
-        ];
+        let positive_definite_H = vec![ 2.0, -1.0,  0.0, // transposed H is displayed
+                                       -1.0,  2.0, -1.0,
+                                        0.0, -1.0,  2.0,];
         let b = vec![6.0, 6.0, 6.0];
         let solve_output = CholeskySolver::solve(
             DMatrix::<f64>::from_vec(3, 3, positive_definite_H),
@@ -81,10 +59,9 @@ mod test {
     fn solver_not_positive_definite_test() {
         init();
         #[allow(non_snake_case)]
-        let not_positive_definite_H = vec![
-            1.0, 2.0, 4.0, // transposed H is displayed
-            2.0, 3.0, 5.0, 4.0, 5.0, 6.0,
-        ];
+        let not_positive_definite_H = vec![ 1.0, 2.0, 4.0,   // transposed H is displayed
+                                            2.0, 3.0, 5.0,
+                                            4.0, 5.0, 6.0,];
         let b = vec![6.0, 6.0, 6.0];
         let solve_output = CholeskySolver::solve(
             DMatrix::<f64>::from_vec(3, 3, not_positive_definite_H.clone()),
@@ -101,15 +78,14 @@ mod test {
     }
 
     #[test]
-    #[ignore]
+    #[ignore] // currently no check if symmetric
     #[should_panic]
     fn solver_not_symmetric_test() {
         init();
         #[allow(non_snake_case)]
-        let not_symmetric_H = vec![
-            2.0, -1.0, 2.0, // transposed H is displayed
-            -1.0, 2.0, -1.0, 0.0, -1.0, 2.0,
-        ];
+        let not_symmetric_H = vec![ 2.0, -1.0,  2.0,   // transposed H is displayed
+                                   -1.0,  2.0, -1.0,
+                                    0.0, -1.0,  2.0,];
         let b = vec![6.0, 6.0, 6.0];
         let solve_output = CholeskySolver::solve(
             DMatrix::<f64>::from_vec(3, 3, not_symmetric_H.clone()),
@@ -130,10 +106,9 @@ mod test {
     fn solver_incompatible_dimension_test() {
         init();
         #[allow(non_snake_case)]
-        let positive_definite_H = vec![
-            2.0, -1.0, 0.0, // transposed H is displayed
-            -1.0, 2.0, -1.0, 0.0, -1.0, 2.0,
-        ];
+        let positive_definite_H = vec![ 2.0, -1.0,  0.0,   // transposed H is displayed
+                                       -1.0,  2.0, -1.0,
+                                        0.0, -1.0,  2.0,];
         let b = vec![6.0, 6.0, 6.0, 6.0];
         let solve_output = CholeskySolver::solve(
             DMatrix::<f64>::from_vec(3, 3, positive_definite_H.clone()),

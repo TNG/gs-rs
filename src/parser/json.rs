@@ -46,7 +46,7 @@ mod tests {
         init();
 
         let parsed_model =
-            match JsonParser::parse_file_to_model("data_files/tiny_vehicle_only_2d.json") {
+            match JsonParser::parse_file_to_model("data_files/full_demos/tiny_vehicle_only_2d.json") {
                 Ok(x) => x,
                 Err(str) => panic!(str),
             };

@@ -14,6 +14,7 @@ pub struct FactorGraphModel {
     /// All edges in the factor graph.
     pub edges: Vec<Edge>,
     /// The IDs of all fixed vertices, i.e. vertices which will not be changed during optimization.
+    #[serde(rename = "fixedVertices")]
     pub fixed_vertices: BTreeSet<usize>,
 }
 
