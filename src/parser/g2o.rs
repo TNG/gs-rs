@@ -38,7 +38,7 @@ impl Parser for G2oParser {
 
     fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
         let mut str_vec: Vec<String> = vec![];
-        if(model.edges.iter().any(|e| e.edge_type == "PRIOR3D_QUAT" || e.edge_type == "OBSERVATION3D_QUAT")) {
+        if(model.edges.iter().any(|e| e.edge_type == "Position3D" || e.edge_type == "Observation3D")) {
             str_vec.push(String::from("PARAMS_SE3OFFSET 0 0 0 0 0 0 0 1"));
         }
         str_vec.extend::<Vec<String>>(model.vertices.iter().map(|v| Self::vertex_to_string(v, &model.fixed_vertices)).collect());
@@ -68,10 +68,10 @@ impl G2oParser {
 
     fn parse_vertex(tokens: &[&str], line_number: usize) -> Vertex {
         let (type_str, c_len) = match tokens[0] {
-            "VERTEX_SE2" => ("POSE2D_ANGLE", 3),
-            "VERTEX_XY" => ("LANDMARK2D_ANGLE", 2),
-            "VERTEX_SE3:QUAT" => ("POSE3D_QUAT", 7),
-            "VERTEX_TRACKXYZ" => ("LANDMARK3D_QUAT", 3),
+            "VERTEX_SE2" => ("Vehicle2D", 3),
+            "VERTEX_XY" => ("Landmark2D", 2),
+            "VERTEX_SE3:QUAT" => ("Vehicle3D", 7),
+            "VERTEX_TRACKXYZ" => ("Landmark3D", 3),
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
         let expected_length = 2 + c_len;
@@ -86,12 +86,12 @@ impl G2oParser {
 
     fn parse_edge(tokens: &[&str], line_number: usize) -> Edge {
         let (type_str, v_num, c_len, (index_mapping, upper_t_len)) = match tokens[0] {
-            "EDGE_PRIOR_SE2" => ("PRIOR2D_ANGLE", 1, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
-            "EDGE_SE2" => ("ODOMETRY2D_ANGLE", 2, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
-            "EDGE_SE2_XY" => ("OBSERVATION2D_ANGLE", 2, 2, Self::get_index_mapping_vec_and_upper_t_len(2)),
-            "EDGE_SE3_PRIOR" => ("PRIOR3D_QUAT", 2, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
-            "EDGE_SE3:QUAT" => ("ODOMETRY3D_QUAT", 2, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
-            "EDGE_SE3_TRACKXYZ" => ("OBSERVATION3D_QUAT", 3, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
+            "EDGE_PRIOR_SE2" => ("Position2D", 1, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
+            "EDGE_SE2" => ("Odometry2D", 2, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
+            "EDGE_SE2_XY" => ("Observation2D", 2, 2, Self::get_index_mapping_vec_and_upper_t_len(2)),
+            "EDGE_SE3_PRIOR" => ("Position3D", 2, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
+            "EDGE_SE3:QUAT" => ("Odometry3D", 2, 7, Self::get_index_mapping_vec_and_upper_t_len(6)),
+            "EDGE_SE3_TRACKXYZ" => ("Observation3D", 3, 3, Self::get_index_mapping_vec_and_upper_t_len(3)),
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
         let expected_length = 1 + v_num + c_len + upper_t_len;
@@ -149,10 +149,10 @@ impl G2oParser {
     fn vertex_to_string(v: &Vertex, fixed_vertices: &BTreeSet<usize>) -> String {
         let mut tokens: Vec<String> = vec![];
         match v.vertex_type.as_str() {
-            "POSE2D_ANGLE" => tokens.push(String::from("VERTEX_SE2")),
-            "LANDMARK2D_ANGLE" => tokens.push(String::from("VERTEX_XY")),
-            "POSE3D_QUAT" => tokens.push(String::from("VERTEX_SE3:QUAT")),
-            "LANDMARK3D_QUAT" => tokens.push(String::from("VERTEX_TRACKXYZ")),
+            "Vehicle2D" => tokens.push(String::from("VERTEX_SE2")),
+            "Landmark2D" => tokens.push(String::from("VERTEX_XY")),
+            "Vehicle3D" => tokens.push(String::from("VERTEX_SE3:QUAT")),
+            "Landmark3D" => tokens.push(String::from("VERTEX_TRACKXYZ")),
             other_type => panic!(format!("Vertex type unsupported to be composed to G2O format: {}", other_type)),
         }
         tokens.push(v.id.to_string());
@@ -167,23 +167,23 @@ impl G2oParser {
     fn edge_to_string(e: &Edge) -> String {
         let mut tokens: Vec<String> = vec![];
         match e.edge_type.as_str() {
-            "PRIOR2D_ANGLE" => tokens.push(String::from("EDGE_PRIOR_SE2")),
-            "ODOMETRY2D_ANGLE" => tokens.push(String::from("EDGE_SE2")),
-            "OBSERVATION2D_ANGLE" => tokens.push(String::from("EDGE_SE2_XY")),
-            "PRIOR3D_QUAT" => tokens.push(String::from("EDGE_SE3_PRIOR")),
-            "ODOMETRY3D_QUAT" => tokens.push(String::from("EDGE_SE3:QUAT")),
-            "OBSERVATION3D_QUAT" => tokens.push(String::from("EDGE_SE3_TRACKXYZ")),
+            "Position2D" => tokens.push(String::from("EDGE_PRIOR_SE2")),
+            "Odometry2D" => tokens.push(String::from("EDGE_SE2")),
+            "Observation2D" => tokens.push(String::from("EDGE_SE2_XY")),
+            "Position3D" => tokens.push(String::from("EDGE_SE3_PRIOR")),
+            "Odometry3D" => tokens.push(String::from("EDGE_SE3:QUAT")),
+            "Observation3D" => tokens.push(String::from("EDGE_SE3_TRACKXYZ")),
             other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
         }
         Self::append_usize_slice_to_string_vec(&mut tokens, e.vertices.as_slice());
-        if e.edge_type == "PRIOR3D_QUAT" || e.edge_type == "OBSERVATION3D_QUAT" {
+        if e.edge_type == "Position3D" || e.edge_type == "Observation3D" {
             Self::append_usize_slice_to_string_vec(&mut tokens, &[0]); // the last vertex/offset index should be 0 for these edges
         }
         Self::append_f64_slice_to_string_vec(&mut tokens, &e.restriction);
         let upper_triangle = match e.edge_type.as_str() {
-            "PRIOR2D_ANGLE" | "ODOMETRY2D_ANGLE" | "OBSERVATION3D_QUAT" => Self::get_upper_triangle_indices(3),
-            "OBSERVATION2D_ANGLE" => Self::get_upper_triangle_indices(2),
-            "PRIOR3D_QUAT" | "ODOMETRY3D_QUAT" => Self::get_upper_triangle_indices(6),
+            "Position2D" | "Odometry2D" | "Observation3D" => Self::get_upper_triangle_indices(3),
+            "Observation2D" => Self::get_upper_triangle_indices(2),
+            "Position3D" | "Odometry3D" => Self::get_upper_triangle_indices(6),
             other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
         };
         Self::append_f64_slice_elements_to_string_vec(&mut tokens, &e.information_matrix, &upper_triangle);

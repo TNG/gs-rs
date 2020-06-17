@@ -41,7 +41,6 @@ mod tests {
             .try_init();
     }
 
-    // TODO @Samuel: change test once type names changed
     #[test]
     fn test_parse_valid_file_to_model() {
         init();
@@ -56,30 +55,30 @@ mod tests {
         let vertices = vec![
             Vertex {
                 id: 0,
-                vertex_type: String::from("POSE2D_ANGLE"),
+                vertex_type: String::from("Vehicle2D"),
                 content: vec![0.0, 1.0, 0.0],
             },
             Vertex {
                 id: 1,
-                vertex_type: String::from("POSE2D_ANGLE"),
+                vertex_type: String::from("Vehicle2D"),
                 content: vec![1.0, 0.0, 0.0],
             },
         ];
         let edges = vec![
             Edge {
-                edge_type: String::from("PRIOR2D_ANGLE"),
+                edge_type: String::from("Position2D"),
                 vertices: vec![0],
                 restriction: vec![0.0, 1.0, 0.0],
                 information_matrix: vec![10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
             },
             Edge {
-                edge_type: String::from("PRIOR2D_ANGLE"),
+                edge_type: String::from("Position2D"),
                 vertices: vec![1],
                 restriction: vec![1.0, 0.0, 0.0],
                 information_matrix: vec![10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
             },
             Edge {
-                edge_type: String::from("ODOMETRY2D_ANGLE"),
+                edge_type: String::from("Odometry2D"),
                 vertices: vec![0, 1],
                 restriction: vec![0.5, -0.5, 0.0],
                 information_matrix: vec![1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001],

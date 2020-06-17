@@ -39,10 +39,10 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
             model.vertices.push(Vertex {
                 id: node.get_id(),
                 vertex_type: match node.get_type() {
-                    Vehicle2D => String::from("POSE2D_ANGLE"),
-                    Landmark2D => String::from("LANDMARK2D_ANGLE"),
-                    Vehicle3D => String::from("POSE3D_QUAT"),
-                    Landmark3D => String::from("LANDMARK3D_QUAT")
+                    Vehicle2D => String::from("Vehicle2D"),
+                    Landmark2D => String::from("Landmark2D"),
+                    Vehicle3D => String::from("Vehicle3D"),
+                    Landmark3D => String::from("Landmark3D")
                 },
                 content: node.get_content(),
             });
@@ -54,12 +54,12 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                 }
                 model.edges.push(Edge {
                     edge_type: match factor.factor_type {
-                        Position2D => String::from("PRIOR2D_ANGLE"),
-                        Odometry2D => String::from("ODOMETRY2D_ANGLE"),
-                        Observation2D => String::from("OBSERVATION2D_ANGLE"),
-                        Position3D => String::from("PRIOR3D_QUAT"),
-                        Odometry3D => String::from("ODOMETRY3D_QUAT"),
-                        Observation3D => String::from("OBSERVATION3D_QUAT"),
+                        Position2D => String::from("Position2D"),
+                        Odometry2D => String::from("Odometry2D"),
+                        Observation2D => String::from("Observation2D"),
+                        Position3D => String::from("Position3D"),
+                        Odometry3D => String::from("Odometry3D"),
+                        Observation3D => String::from("Observation3D"),
                     },
                     vertices: edge_vertices,
                     restriction: factor.constraint.clone(),
@@ -76,12 +76,12 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
 
 fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
     let (target_index, factor_type) = match edge.edge_type.as_str() {
-        "PRIOR2D_ANGLE" => (0, Position2D),
-        "ODOMETRY2D_ANGLE" => (1, Odometry2D),
-        "OBSERVATION2D_ANGLE" => (1, Observation2D),
-        "PRIOR3D_QUAT" => (0, Position3D),
-        "ODOMETRY3D_QUAT" => (1, Odometry3D),
-        "OBSERVATION3D_QUAT" => (1, Observation3D),
+        "Position2D" => (0, Position2D),
+        "Odometry2D" => (1, Odometry2D),
+        "Observation2D" => (1, Observation2D),
+        "Position3D" => (0, Position3D),
+        "Odometry3D" => (1, Odometry3D),
+        "Observation3D" => (1, Observation3D),
         other_type => panic!("Unsupported edge type in the model: {}", other_type),
     };
     factor_graph.csr.add_edge(
@@ -97,7 +97,7 @@ fn add_edge(factor_graph: &mut FactorGraph, edge: &Edge) {
 
 fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
     match vertex.vertex_type.as_str() {
-        "POSE2D_ANGLE" => factor_graph.node_indices.push(
+        "Vehicle2D" => factor_graph.node_indices.push(
             factor_graph.csr
                 .add_node(Box::new(VehicleVariable2D::new(
                     vertex.id,
@@ -108,7 +108,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     add_var_to_matrix(&mut factor_graph.matrix_dim, 3, fixed),
                 ))),
         ),
-        "LANDMARK2D_ANGLE" => factor_graph.node_indices.push(
+        "Landmark2D" => factor_graph.node_indices.push(
             factor_graph.csr
                 .add_node(Box::new(LandmarkVariable2D::new(
                     vertex.id,
@@ -118,7 +118,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     add_var_to_matrix(&mut factor_graph.matrix_dim, 2, fixed),
                 ))),
         ),
-        "POSE3D_QUAT" => factor_graph.node_indices.push(
+        "Vehicle3D" => factor_graph.node_indices.push(
             factor_graph.csr
                 .add_node(Box::new(VehicleVariable3D::new(
                     vertex.id,
@@ -133,7 +133,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     add_var_to_matrix(&mut factor_graph.matrix_dim, 6, fixed),
                 ))),
         ),
-        "LANDMARK3D_QUAT" =>factor_graph.node_indices.push(
+        "Landmark3D" =>factor_graph.node_indices.push(
             factor_graph.csr
                 .add_node(Box::new(LandmarkVariable3D::new(
                     vertex.id,

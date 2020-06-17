@@ -2,7 +2,7 @@
   "vertices": [
     {
       "id": 0,
-      "type": "POSE2D_ANGLE",
+      "type": "Vehicle2D",
       "position": [
         0.0,
         0.0
@@ -13,7 +13,7 @@
     },
     {
       "id": 1,
-      "type": "POSE2D_ANGLE",
+      "type": "Vehicle2D",
       "position": [
         0.04166666666666667,
         0.9583333333333334
@@ -24,7 +24,7 @@
     },
     {
       "id": 2,
-      "type": "POSE2D_ANGLE",
+      "type": "Vehicle2D",
       "position": [
         0.9583333333333334,
         0.041666666666666664
@@ -36,7 +36,7 @@
   ],
   "edges": [
     {
-      "type": "ODOMETRY2D_ANGLE",
+      "type": "Odometry2D",
       "vertices": [
         0,
         1
@@ -59,7 +59,7 @@
       ]
     },
     {
-      "type": "ODOMETRY2D_ANGLE",
+      "type": "Odometry2D",
       "vertices": [
         0,
         2
@@ -82,7 +82,7 @@
       ]
     },
     {
-      "type": "ODOMETRY2D_ANGLE",
+      "type": "Odometry2D",
       "vertices": [
         1,
         2

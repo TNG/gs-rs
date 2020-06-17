@@ -1,7 +1,5 @@
 //! Structures and functions for an intermediate step when converting between factor graphs and serialized files.
 
-// TODO @Samuel: rename vertex/edge types
-
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::collections::BTreeSet;
@@ -24,38 +22,54 @@ pub struct FactorGraphModel {
 pub struct Vertex {
     /// The vertex's ID. Should be unique within the factor graph.
     pub id: usize,
-    /// The vertex's type. Supported types: "POSE2D_ANGLE", "LANDMARK2D_ANGLE"
+    /// The vertex's type. Supported types: "Vehicle2D", "Landmark2D"
     #[serde(rename = "type")]
     pub vertex_type: String,
     /// The vertex's content. The structure depends on the vertex's type:
     ///
-    /// Content for "POSE2D_ANGLE": vec![position_x, position_y, rotation]
+    /// Content for "Vehicle2D": vec![position_x, position_y, rotation]
     ///
-    /// Content for "LANDMARK2D_ANGLE": vec![position_x, position_y]
+    /// Content for "Landmark2D": vec![position_x, position_y]
+    ///
+    /// Content for "Vehicle3D": vec![position_x, position_y, position_z, quaternion_x, quaternion_y, quaternion_z, quaternion_w]
+    ///
+    /// Content for "Landmark3D": vec![position_x, position_y, position_z]
     pub content: Vec<f64>,
 }
 
 /// Structure containing a factor graph model's edge, representing a factor.
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Edge {
-    /// The edge's type. Supported types: "PRIOR2D_ANGLE", "ODOMETRY2D_ANGLE", "OBSERVATION2D_ANGLE"
+    /// The edge's type. Supported types: "Position2D", "Odometry2D", "Observation2D"
     #[serde(rename = "type")]
     pub edge_type: String,
     /// The IDs of this edge's vertices. The structure depends on the edge's type:
     ///
-    /// Content for "PRIOR2D_ANGLE": vec![pose2d_angle_vertex]
+    /// Content for "Position2D": vec![Vehicle2D_vertex]
     ///
-    /// Content for "ODOMETRY2D_ANGLE": vec![pose2d_angle_vertex, pose2d_angle_vertex]
+    /// Content for "Odometry2D": vec![Vehicle2D_vertex, Vehicle2D_vertex]
     ///
-    /// Content for "OBSERVATION2D_ANGLE": vec![pose2d_angle_vertex, landmark2d_angle_vertex]
+    /// Content for "Observation2D": vec![Vehicle2D_vertex, Landmark2D_vertex]
+    ///
+    /// Content for "Position3D": vec![Vehicle3D_vertex]
+    ///
+    /// Content for "Odometry3D": vec![Vehicle3D_vertex, Vehicle3D_vertex]
+    ///
+    /// Content for "Observation3D": vec![Vehicle3D_vertex, Landmark3D_vertex]
     pub vertices: Vec<usize>,
     /// The edge's restriction, representing a measurement. The structure depends on the edge's type:
     ///
-    /// Content for "PRIOR2D_ANGLE": vec![measured_position_x, measured_position_y, measured_rotation]
+    /// Content for "Position2D": vec![position_x, position_y, rotation]
     ///
-    /// Content for "ODOMETRY2D_ANGLE": vec![measured_delta_position_x, measured_delta_position_y, measured_delta_rotation]
+    /// Content for "Odometry2D": vec![delta_position_x, delta_position_y, delta_rotation]
     ///
-    /// Content for "OBSERVATION2D_ANGLE": vec![measured_delta_position_x, measured_delta_position_y]
+    /// Content for "Observation2D": vec![delta_position_x, delta_position_y]
+    ///
+    /// Content for "Position3D": vec![position_x, position_y, position_z, quaternion_x, quaternion_y, quaternion_z, quaternion_w]
+    ///
+    /// Content for "Odometry3D": vec![delta_position_x, delta_position_y, delta_position_z, quaternion_x, quaternion_y, quaternion_z, quaternion_w]
+    ///
+    /// Content for "Observation3D": vec![delta_position_x, delta_position_y, delta_position_z]
     pub restriction: Vec<f64>,
     /// The edge's entire information matrix. It is expected to be symmetric, hence having identical row- and column-major representations.
     #[serde(rename = "informationMatrix")]
