@@ -11,8 +11,8 @@ use crate::visualizer::visualize;
 #[test]
 fn current_test() {
     // TODO @Samuel: delete this file if not used anymore
-    let factor_graph = JsonParser::parse_file("data_files/bad3d.json").unwrap();
-    optimize(&factor_graph, 1);
-    G2oParser::compose_file(&factor_graph, "data_files/bad3d.g2o");
+    // let factor_graph = JsonParser::parse_file("data_files/bad3d.json").unwrap();
+    // optimize(&factor_graph, 1);
+    // G2oParser::compose_file(&factor_graph, "data_files/bad3d.g2o");
 
 }

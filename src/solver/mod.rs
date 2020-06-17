@@ -2,6 +2,8 @@
 
 // TODO @Samuel: move as submodule of optimizer(/linear_system)
 
+// TODO @Daniel: keep all solvers even though only sparse_cholesky is used?
+
 #![allow(non_snake_case)]
 
 use nalgebra::{DMatrix, DVector};

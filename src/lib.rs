@@ -16,6 +16,8 @@ pub mod parser;
 pub mod solver;
 pub mod visualizer;
 
+// TODO @Daniel: can the interface fn and/or tests be removed?
+
 pub fn interface() {
     info!("Hello, I'm gs-rs. I will find your path for you.");
 }
