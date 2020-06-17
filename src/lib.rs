@@ -8,8 +8,7 @@ extern crate kiss3d;
 extern crate nalgebra;
 extern crate petgraph;
 
-// TODO @Samuel: remove once file (i.e., the mod) is deleted
-mod demo;
+// TODO @Samuel: remove all compiler warnings
 pub mod factor_graph;
 pub mod optimizer;
 pub mod parser;
