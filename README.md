@@ -16,10 +16,7 @@ use gs_rs::visualizer::visualize;
 fn main() {
 
     // parse file at "file_path.json" to internal factor graph representation
-    let factor_graph = match JsonParser::parse_file("file_path.json") {
-        Ok(factor_graph) => factor_graph,
-        Err(str) => panic!(str),
-    };
+    let factor_graph = JsonParser::parse_file("file_path.json").unwrap();
 
     // optimize the factor graph's variables with 5 iterations
     optimize(&factor_graph, 5);

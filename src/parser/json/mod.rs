@@ -11,7 +11,7 @@ pub struct JsonParser;
 impl Parser for JsonParser {
     fn parse_string_to_model(s: &str) -> Result<FactorGraphModel, String> {
         match serde_json::from_str::<FactorGraphModel>(s) {
-            Ok(model) => Ok(model), // TODO verify_model(model) which checks that no invalid types or wrongly sized vectors are used
+            Ok(model) => Ok(model),
             Err(e) => Err(format!("Parsing to FactorGraphModel unsuccessful: {}", e)),
         }
     }
@@ -41,6 +41,7 @@ mod tests {
             .try_init();
     }
 
+    // TODO @Samuel: change test once type names changed
     #[test]
     fn test_parse_valid_file_to_model() {
         init();
@@ -125,6 +126,4 @@ mod tests {
             parsed_model
         );
     }
-
-    // TODO Should compose_model_to_string() be tested with unit tests?
 }

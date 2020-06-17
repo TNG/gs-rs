@@ -1,6 +1,6 @@
 //! Solvers for systems of linear equations (linear systems).
 
-// TODO move as submodule of optimizer(/linear_system)?
+// TODO @Samuel: move as submodule of optimizer(/linear_system)
 
 #![allow(non_snake_case)]
 

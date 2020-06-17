@@ -158,7 +158,6 @@ impl G2oParser {
         tokens.push(v.id.to_string());
         Self::append_f64_slice_to_string_vec(&mut tokens, &v.content);
         let mut vertex_string = tokens.join(" ");
-        // TODO see if compatible with original g2o, otherwise print set of fixed vertices in one line
         if fixed_vertices.contains(&v.id) {
             vertex_string.push_str(&format!("\nFIX {}", v.id));
         }
@@ -251,6 +250,4 @@ mod tests {
         let g2o_string = G2oParser::compose_model_to_string(model).unwrap();
         info!("\n{}", &g2o_string);
     }
-
-    // TODO Should compose_model_to_string() be tested with unit tests?
 }

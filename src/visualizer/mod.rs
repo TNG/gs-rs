@@ -19,7 +19,8 @@ struct VisualFactorGraph {
 pub fn visualize(factor_graph: &FactorGraph) {
     let mut window = Window::new("gs-rs");
     let visual_factor_graph = add_factor_graph_to_window(&mut window, &factor_graph);
-    let mut cam = ArcBall::new(Point3::new(0.0, 0.0, 50.0), Point3::new(0.0, 0.0, 0.0)); // TODO dynamic initial position
+    // TODO @Samuel: dynamic initial camera position
+    let mut cam = ArcBall::new(Point3::new(0.0, 0.0, 50.0), Point3::new(0.0, 0.0, 0.0));
     while window.render_with_camera(&mut cam) {
         visual_factor_graph.lines.iter()
             .for_each(|line| window.draw_line(&line[0], &line[1], &line[2]));

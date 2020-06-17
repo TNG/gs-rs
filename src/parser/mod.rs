@@ -8,7 +8,7 @@ pub mod g2o;
 pub mod json;
 pub mod model;
 
-// TODO struct DynamicParser: uses Parser corresponding to file type
+// TODO @Samuel: struct DynamicParser: uses Parser corresponding to file type
 
 // Trait to be used by all parsers with the basic file parsing and composition functionality.
 pub trait Parser {
@@ -46,4 +46,6 @@ pub trait Parser {
 
     /// Tries to compose a string containing the factor graph model's serialization.
     fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String>;
+
+    // TODO @Daniel: Should compose_model_to_string() be tested with unit tests in the parsers?
 }

@@ -1,6 +1,6 @@
 //! Structures and functions for an intermediate step when converting between factor graphs and serialized files.
 
-// TODO rename vertex/edge types
+// TODO @Samuel: rename vertex/edge types
 
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
