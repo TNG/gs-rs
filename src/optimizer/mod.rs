@@ -2,18 +2,12 @@
 
 #![allow(non_snake_case)]
 
-use std::borrow::BorrowMut;
-use std::ops::Deref;
-
-use itertools::Itertools;
-
 use crate::factor_graph::variable::Variable;
 use crate::factor_graph::variable::VariableType::*;
 use crate::factor_graph::FactorGraph;
 use crate::optimizer::linear_system::calculate_H_b;
 use crate::optimizer::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::optimizer::solver::Solver;
-use nalgebra::{Isometry3, Quaternion, Rotation3, Translation3, UnitQuaternion, Vector3};
 use std::f64::consts::PI;
 use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, get_isometry_normalized};
 
@@ -49,7 +43,7 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
             let mut updated_content: Vec<f64> = old_content.iter().zip(correction.iter())
                 .map(|(old, cor)| old + cor).collect();
             if var.get_type() == Vehicle2D {
-                updated_content[2] %= (2.0 * PI);
+                updated_content[2] %= 2.0 * PI;
                 if updated_content[2] > PI {
                     updated_content[2] -= 2.0 * PI;
                 } else if updated_content[2] < -PI {
@@ -78,7 +72,6 @@ mod tests {
     use crate::parser::Parser;
 
     use log::LevelFilter;
-    use std::time::SystemTime;
 
     fn init() {
         let _ = env_logger::builder()

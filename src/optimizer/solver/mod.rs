@@ -1,6 +1,6 @@
 //! Solvers for systems of linear equations (linear systems).
 
-// TODO @Daniel: keep all solvers even though only sparse_cholesky is used?
+// TODO @Daniel: keep all solvers even though only sparse_cholesky is used? If yes, take care of dead_code compiler warnings
 
 #![allow(non_snake_case)]
 

@@ -1,14 +1,14 @@
+// TODO @Daniel: add #[cfg(test)] in this line if the interface fn doesn't call info! anymore
 #[macro_use]
 extern crate log;
-#[macro_use]
 extern crate itertools;
+#[cfg(test)]
 #[macro_use]
 extern crate approx;
 extern crate kiss3d;
 extern crate nalgebra;
 extern crate petgraph;
 
-// TODO @Samuel: remove all compiler warnings
 pub mod factor_graph;
 pub mod optimizer;
 pub mod parser;

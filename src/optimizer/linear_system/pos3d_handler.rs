@@ -1,3 +1,5 @@
+#![allow(non_snake_case)]
+
 use nalgebra::{DMatrix, DVector, Matrix3, Matrix6, Isometry3, RowVector6, Matrix, ArrayStorage, Vector, U1, U6};
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;

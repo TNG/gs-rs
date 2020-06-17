@@ -38,7 +38,7 @@ impl Parser for G2oParser {
 
     fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
         let mut str_vec: Vec<String> = vec![];
-        if(model.edges.iter().any(|e| e.edge_type == "Position3D" || e.edge_type == "Observation3D")) {
+        if model.edges.iter().any(|e| e.edge_type == "Position3D" || e.edge_type == "Observation3D") {
             str_vec.push(String::from("PARAMS_SE3OFFSET 0 0 0 0 0 0 0 1"));
         }
         str_vec.extend::<Vec<String>>(model.vertices.iter().map(|v| Self::vertex_to_string(v, &model.fixed_vertices)).collect());
@@ -142,7 +142,7 @@ impl G2oParser {
     fn parse_val<T: std::str::FromStr>(s: &str, line_number: usize) -> T {
         match s.parse() {
             Ok(val) => val,
-            Err(str) => panic!("Could not parse the following value to the correct data type in line {}: {}", line_number, s),
+            Err(_str) => panic!("Could not parse the following value to the correct data type in line {}: {}", line_number, s),
         }
     }
 
@@ -217,7 +217,6 @@ impl G2oParser {
 mod tests {
     use super::*;
     use log::LevelFilter;
-    use std::fs;
 
     fn init() {
         let _ = env_logger::builder()

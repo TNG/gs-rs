@@ -79,7 +79,6 @@ mod tests {
     use super::*;
 
     use log::LevelFilter;
-    use std::time::SystemTime;
 
     fn init() {
         let _ = env_logger::builder()
