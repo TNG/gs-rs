@@ -1,0 +1,119 @@
+{
+  "vertices": [
+    {
+      "id": 0,
+      "type": "Vehicle2D",
+      "content": [
+        1.0,
+        0.0,
+        1.57
+      ]
+    },
+    {
+      "id": 1,
+      "type": "Vehicle2D",
+      "content": [
+        0.0,
+        1.0,
+        3.14
+      ]
+    },
+    {
+      "id": 2,
+      "type": "Landmark2D",
+      "content": [
+        1.5,
+        2.0
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "type": "Position2D",
+      "vertices": [
+        0
+      ],
+      "restriction": [
+        0.90,
+        0.40,
+        1.58
+      ],
+      "informationMatrix": [
+        10.0,
+        0.0,
+        0.0,
+        0.0,
+        10.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "type": "Position2D",
+      "vertices": [
+        1
+      ],
+      "restriction": [
+        0.00,
+        1.00,
+        3.13
+      ],
+      "informationMatrix": [
+        10.0,
+        0.0,
+        0.0,
+        0.0,
+        10.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "type": "Odometry2D",
+      "vertices": [
+        0,
+        1
+      ],
+      "restriction": [
+        1.0,
+        1.5,
+        1.57
+      ],
+      "informationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "type": "Observation2D",
+      "vertices": [
+        0,
+        2
+      ],
+      "restriction": [
+        0.0,
+        -1.0
+      ],
+      "informationMatrix": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  ],
+  "fixedVertices": [
+    0
+  ]
+}
