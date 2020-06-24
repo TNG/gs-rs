@@ -4,3 +4,14 @@ Copyright 2020 Samuel Valenzuela <samuel.valenzuela@tngtech.com> // TODO Soll ic
 
 This product includes software developed at
 TNG Technology Consulting GmbH (https://www.tngtech.com/).
+
+// TODO Rust sowie die verwendeten Crates haben alle eine MIT, BSD und/oder Apache 2.0 Lizenz. Mir ist trotzdem sehr unklar, wie die Lizenzpflichten erfüllt werden sollen
+//
+// === INFOS AUS CONFLUENCE ===
+//
+// Für viele Lizenzen (e.g. MIT, BSD und Apache 2.0) reicht es in vielen Fällen
+//
+//     den dazugehörigen Lizenztext wiederzugeben,
+//     Attributionen zu leisten und Copyrights wiederzugeben.
+//
+// Dazu fügt man beispielsweise die gesammelte Information, getrennt von unseren eigenen Statements, der NOTICE Datei hinzu.
