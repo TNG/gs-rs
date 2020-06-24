@@ -1,0 +1,28 @@
+// TODO delete this file once headers is inserted everywhere necessary
+
+// TODO In welchen Dateien soll der folgende Dateiheader (sobald er fertig ist) eingefügt werden? Nur in .rs Dateien?
+
+
+=== FILE HEADER TO COPY PASTE EVERYWHERE NECESSARY ===
+// Copyright 2020 Samuel Valenzuela <samuel.valenzuela@tngtech.com> // TODO Soll ich diese Email-Adresse angeben, obwohl mein Werkstudentenvertrag in einigen Monaten voraussichtlich abläuft?
+// // TODO Daniel Pape?
+//
+// SPDX-License-Identifier: Apache-2.0
+=== FILE HEADER TO COPY PASTE EVERYWHERE NECESSARY ===
+
+// TODO Soll auch Folgendes im Dateiheader vorkommen?
+
+// Copyright [yyyy] [name of copyright owner]
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
