@@ -1,21 +1,3 @@
-<!-- TODO decide on contribution guidelines
-
-Possible questions could be answered:
-
-Sind Contributions erwünscht?
-Wie funktionieren Contributions?
-Wie erstellt man Issues?
-Wie trägt man zum Wiki bei?
-Was ist beim Code Styling zu beachten?
-Wo und Wie gehören Copyright Statmentents in den Code?
-
-Examples:
-https://github.com/rails/rails/blob/master/CONTRIBUTING.md
-https://github.com/opengovernment/opengovernment/blob/master/CONTRIBUTING.md
-
-The following contribution guidelines were adapted from the TNG config-builder
--->
-
 # Contributing
 
 Contributions are very welcome!
@@ -78,7 +60,7 @@ by running **`git commit --amend -s`**.
 If you've pushed your changes to Github already
 you'll need to force push your branch after this with **`git push -f`**.
 
-#### Alternative Sign-Off Methods in rare cases <!-- TODO Confluence: Der letzte [also dieser] Abschnitt des DCOs dient dazu, Contributors nicht abzuschrecken, falls diese ihre persönlichen Daten nicht veröffentlichen wollen. Dieser Abschnitt ist sehr optional und kann auch weg gelassen werden. Falls dieser Weg gegangen werden soll, liegt die Verantwortung beim Maintainer, dass die Copyright Situation und Identität des Contributors geklärt ist. Dies kann beispielsweise durch einen CLA (Contributor License Agreement, rechtlich kompliziertes Konstrukt) oder durch persönlichen Kontakt geschehen. Solltet ihr einen CLA ausarbeiten wollen, wendet euch an das OSS-Team.-->
+#### Alternative Sign-Off Methods in rare cases 
  
 If it is really no option for you to disclose your real name and email address, there might be a chance that you can get your contribution accepted. In this case please contact the maintainers directly and verify the adherence to the DCO of the contribution manually. This might include quite some legal overhead for both parties.
 

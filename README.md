@@ -28,8 +28,9 @@ fn main() {
 
 ## License
 
-Copyright 2020 Samuel Valenzuela <!-- TODO or TNG Technology Consulting GmbH? Or something else? -->
- 
+Copyright 2020 Samuel Valenzuela, TNG Technology Consulting GmbH 
+Copyright 2020 Daniel Pape, TNG Technology Consulting GmbH
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
