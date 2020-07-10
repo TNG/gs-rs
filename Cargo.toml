@@ -2,18 +2,24 @@
 name = "gs-rs"
 version = "0.1.0"
 authors = [
-    "Samuel Valezuela <samuel.valenzuela@tngtech.com>", 
-    "Tobias Ramming <tobias.ramming@tngtech.com>",
+    "Samuel Valezuela <samuel.valenzuela@tngtech.com>",
     "Daniel Pape <daniel.pape@tngtech.com>"
 ]
 edition = "2018"
+readme="README.md"
 
+documentation="???"
+repository="???"
+description="Implementation of a basic monocular SLAM (Simultaneous Localization and Mapping) Algorithm in pure Rust."
+categories=['science', 'robotics']
+keywords=['slam', 'robotics', 'math']
+license="Apache-2.0"
 
 [dependencies]
-log = "0.4.8"
 nalgebra = {version = "0.20.0", features = ["sparse"]}
-approx = "0.3.2"
 serde = { version = "1.0.104", features = ["derive"] }
+log = "0.4.8"
+approx = "0.3.2"
 serde_json = "1.0.48"
 petgraph = "0.5.0"
 kiss3d = "0.23.0"
@@ -22,9 +28,6 @@ itertools = "0.9.0"
 [dev-dependencies]
 env_logger = "0.7.1"
 criterion = "0.3.1"
-
-[profile.release]
-debug = true
 
 [[bench]]
 name = "my_benchmark"
