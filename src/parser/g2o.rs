@@ -229,11 +229,7 @@ mod tests {
     fn test_parse_valid_file_to_model() {
         init();
 
-        let parsed_model =
-            match G2oParser::parse_file_to_model("data_files/full_demos/tiny_vehicle_only_2d.g2o") {
-                Ok(x) => x,
-                Err(str) => panic!(str),
-            };
+        let parsed_model = G2oParser::parse_file_to_model("data_files/full_demos/tiny_vehicle_only_2d.g2o").unwrap();
         dbg!("{:?}", &parsed_model);
 
         let vertices = vec![
@@ -277,4 +273,6 @@ mod tests {
         };
         assert_eq!(parsed_model, expected_model);
     }
+
+    // TODO @Samuel: test file composition
 }

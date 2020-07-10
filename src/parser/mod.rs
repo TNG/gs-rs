@@ -44,6 +44,4 @@ pub trait Parser {
 
     /// Tries to compose a string containing the factor graph model's serialization.
     fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String>;
-
-    // TODO @Daniel: Should compose_model_to_string() (and parsing of other types which are only parsed in optimizer tests, but not parser tests) be tested with unit tests in the parsers?
 }

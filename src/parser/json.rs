@@ -42,11 +42,7 @@ mod tests {
     fn test_parse_valid_file_to_model() {
         init();
 
-        let parsed_model =
-            match JsonParser::parse_file_to_model("data_files/full_demos/tiny_vehicle_only_2d.json") {
-                Ok(x) => x,
-                Err(str) => panic!(str),
-            };
+        let parsed_model = JsonParser::parse_file_to_model("data_files/full_demos/tiny_vehicle_only_2d.json").unwrap();
         dbg!("{:?}", &parsed_model);
 
         let vertices = vec![
@@ -96,15 +92,8 @@ mod tests {
     fn test_parse_invalid_file() {
         init();
 
-        let parsed_model: FactorGraphModel =
-            match JsonParser::parse_file_to_model("data_files/invalid_vertex.json") {
-                Ok(x) => x,
-                Err(str) => panic!(str),
-            };
-        info!(
-            "TEST FAILED! The invalid file was able to be parsed: {:?}",
-            parsed_model
-        );
+        let parsed_model: FactorGraphModel = JsonParser::parse_file_to_model("data_files/invalid_vertex.json").unwrap();
+        info!("TEST FAILED! The invalid file was able to be parsed: {:?}", parsed_model);
     }
 
     #[test]
@@ -112,14 +101,9 @@ mod tests {
     fn test_parse_missing_file() {
         init();
 
-        let parsed_model: FactorGraphModel =
-            match JsonParser::parse_file_to_model("data_files/missing_file.json") {
-                Ok(x) => x,
-                Err(str) => panic!(str),
-            };
-        info!(
-            "TEST FAILED! The missing file was able to be parsed: {:?}",
-            parsed_model
-        );
+        let parsed_model: FactorGraphModel = JsonParser::parse_file_to_model("data_files/missing_file.json").unwrap();
+        info!("TEST FAILED! The missing file was able to be parsed: {:?}", parsed_model);
     }
+
+    // TODO @Samuel: test file composition
 }
