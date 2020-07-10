@@ -6,10 +6,10 @@ use crate::factor_graph::variable::Variable;
 use crate::factor_graph::variable::VariableType::*;
 use crate::factor_graph::FactorGraph;
 use crate::optimizer::linear_system::calculate_H_b;
+use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, get_isometry_normalized};
 use crate::optimizer::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::optimizer::solver::Solver;
 use std::f64::consts::PI;
-use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, get_isometry_normalized};
 
 mod linear_system;
 mod solver;
@@ -25,7 +25,9 @@ fn update_once(factor_graph: &FactorGraph) {
     let (H, b) = calculate_H_b(&factor_graph);
     // TODO @Daniel (TODO created by you): clumsy, since the solver transforms the arguments back to nalgebra matrices
     let sol = SparseCholeskySolver::solve(H, &(b * -1.0)).unwrap();
-    factor_graph.node_indices.iter()
+    factor_graph
+        .node_indices
+        .iter()
         .map(|i| factor_graph.get_var(*i))
         .for_each(|var| update_var(var, sol.as_slice()));
 }
@@ -40,8 +42,11 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
 
     let updated_content = match var.get_type() {
         Landmark2D | Vehicle2D | Landmark3D => {
-            let mut updated_content: Vec<f64> = old_content.iter().zip(correction.iter())
-                .map(|(old, cor)| old + cor).collect();
+            let mut updated_content: Vec<f64> = old_content
+                .iter()
+                .zip(correction.iter())
+                .map(|(old, cor)| old + cor)
+                .collect();
             if var.get_type() == Vehicle2D {
                 updated_content[2] %= 2.0 * PI;
                 if updated_content[2] > PI {
@@ -82,10 +87,22 @@ mod tests {
 
     fn test_valid_optimization(file_name: &str, iterations: usize) {
         init();
-        let test_factor_graph = G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat()).unwrap();
+        let test_factor_graph =
+            G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat())
+                .unwrap();
         optimize(&test_factor_graph, iterations);
         let test_model = FactorGraphModel::from(&test_factor_graph);
-        let expected_model = G2oParser::parse_file_to_model(&["data_files/optimizer_tests/", file_name, "_", &iterations.to_string(), ".g2o"].concat()).unwrap();
+        let expected_model = G2oParser::parse_file_to_model(
+            &[
+                "data_files/optimizer_tests/",
+                file_name,
+                "_",
+                &iterations.to_string(),
+                ".g2o",
+            ]
+            .concat(),
+        )
+        .unwrap();
         assert_eq!(test_model, expected_model);
     }
 
@@ -124,10 +141,6 @@ mod tests {
         test_valid_optimization("full2d", 25);
     }
 
-    // NOTE: output for 3D rotation corrections seem to differ from g2o after only one iteration.
-    //       gs-rs is closer to the optimized value then.
-
-    // TODO @Daniel: format gs-rs output with a maximum number of decimal digits like g2o? (would fix problem of floating point rounding making results not equal in pos3d_only test)
     #[test]
     #[ignore] // floating point rounding makes results not equal
     fn test_only_pos3d_factors() {
@@ -143,5 +156,4 @@ mod tests {
     fn test_mainly_obs3d_factors() {
         test_valid_optimization("obs3d_mainly", 1);
     }
-
 }
