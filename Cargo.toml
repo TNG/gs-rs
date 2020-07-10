@@ -10,7 +10,7 @@ readme="README.md"
 
 documentation="???"
 repository="???"
-description="Implemenatation of a basic monocular SLAM (Simultaneous Localization and Mapping) Algorithm in pure Rust."
+description="Implementation of a basic monocular SLAM (Simultaneous Localization and Mapping) Algorithm in pure Rust."
 categories=['science', 'robotics']
 keywords=['slam', 'robotics', 'math']
 license="Apache-2.0"
