@@ -1,7 +1,6 @@
 use gs_rs::parser::g2o::G2oParser;
 use gs_rs::parser::json::JsonParser;
 use gs_rs::parser::Parser;
-use gs_rs::optimizer::optimize;
 
 fn main() {
     // parse file in one format

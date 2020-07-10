@@ -127,9 +127,8 @@ mod tests {
     // NOTE: output for 3D rotation corrections seem to differ from g2o after only one iteration.
     //       gs-rs is closer to the optimized value then.
 
-    // TODO @Samuel: format g2o output with a maximum number of decimal digits like g2o
     #[test]
-    #[ignore] // TODO remove once fixed
+    #[ignore] // floating point rounding makes results not equal
     fn test_only_pos3d_factors() {
         test_valid_optimization("pos3d_only", 1);
     }

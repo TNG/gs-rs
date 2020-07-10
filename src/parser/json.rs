@@ -30,6 +30,7 @@ mod tests {
     use crate::parser::model::{Edge, Vertex};
     use log::LevelFilter;
     use std::collections::BTreeSet;
+    use std::fs;
 
     fn init() {
         let _ = env_logger::builder()
@@ -105,5 +106,49 @@ mod tests {
         info!("TEST FAILED! The missing file was able to be parsed: {:?}", parsed_model);
     }
 
-    // TODO @Samuel: test file composition
+    #[test]
+    fn test_compose_model_to_string() {
+        let vertices = vec![
+            Vertex {
+                id: 0,
+                vertex_type: String::from("Vehicle2D"),
+                content: vec![0.0, 1.0, 0.0],
+            },
+            Vertex {
+                id: 1,
+                vertex_type: String::from("Vehicle2D"),
+                content: vec![1.0, 0.0, 0.0],
+            },
+        ];
+        let edges = vec![
+            Edge {
+                edge_type: String::from("Position2D"),
+                vertices: vec![0],
+                restriction: vec![0.0, 1.0, 0.0],
+                information_matrix: vec![10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
+            },
+            Edge {
+                edge_type: String::from("Position2D"),
+                vertices: vec![1],
+                restriction: vec![1.0, 0.0, 0.0],
+                information_matrix: vec![10.0, 0.0, 0.0, 0.0, 10.0, 0.0, 0.0, 0.0, 0.000_001],
+            },
+            Edge {
+                edge_type: String::from("Odometry2D"),
+                vertices: vec![0, 1],
+                restriction: vec![0.5, -0.5, 0.0],
+                information_matrix: vec![1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.000_001],
+            },
+        ];
+        let mut fixed_vertices = BTreeSet::new();
+        fixed_vertices.insert(0);
+        let model = FactorGraphModel {
+            vertices,
+            edges,
+            fixed_vertices,
+        };
+        let composed_string = JsonParser::compose_model_to_string(model).unwrap() + "\n";
+        let expected_string = fs::read_to_string("data_files/full_demos/tiny_vehicle_only_2d.json").unwrap();
+        assert_eq!(&composed_string, &expected_string);
+    }
 }
