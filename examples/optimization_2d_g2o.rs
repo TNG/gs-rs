@@ -10,5 +10,5 @@ fn main() {
     optimize(&factor_graph, 10);
 
     // compose g2o file containing optimized 2D variables and unchanged odometries
-    let factor_graph = G2oParser::compose_file(&factor_graph, "examples/io_files/MIT_2D_optimized.g2o").unwrap();
+    G2oParser::compose_file(&factor_graph, "examples/io_files/MIT_2D_optimized.g2o").unwrap();
 }

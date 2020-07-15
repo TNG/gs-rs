@@ -10,5 +10,5 @@ fn main() {
     optimize(&factor_graph, 10);
 
     // compose json file containing optimized 3D variables and unchanged odometries
-    let factor_graph = JsonParser::compose_file(&factor_graph, "examples/io_files/Sphere_3D_optimized.json").unwrap();
+    JsonParser::compose_file(&factor_graph, "examples/io_files/Sphere_3D_optimized.json").unwrap();
 }

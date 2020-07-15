@@ -7,5 +7,5 @@ fn main() {
     let factor_graph = G2oParser::parse_file("examples/io_files/MIT_2D.g2o").unwrap();
 
     // compose file in another format
-    let factor_graph = JsonParser::compose_file(&factor_graph, "examples/io_files/MIT_2D.json").unwrap();
+    JsonParser::compose_file(&factor_graph, "examples/io_files/MIT_2D.json").unwrap();
 }

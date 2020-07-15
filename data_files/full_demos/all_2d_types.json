@@ -29,50 +29,6 @@
   ],
   "edges": [
     {
-      "type": "Position2D",
-      "vertices": [
-        0
-      ],
-      "restriction": [
-        0.90,
-        0.40,
-        1.58
-      ],
-      "informationMatrix": [
-        10.0,
-        0.0,
-        0.0,
-        0.0,
-        10.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0
-      ]
-    },
-    {
-      "type": "Position2D",
-      "vertices": [
-        1
-      ],
-      "restriction": [
-        0.00,
-        1.00,
-        3.13
-      ],
-      "informationMatrix": [
-        10.0,
-        0.0,
-        0.0,
-        0.0,
-        10.0,
-        0.0,
-        0.0,
-        0.0,
-        1.0
-      ]
-    },
-    {
       "type": "Odometry2D",
       "vertices": [
         0,
@@ -107,6 +63,28 @@
       ],
       "informationMatrix": [
         1.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "type": "Position2D",
+      "vertices": [
+        1
+      ],
+      "restriction": [
+        0.0,
+        1.0,
+        3.13
+      ],
+      "informationMatrix": [
+        10.0,
+        0.0,
+        0.0,
+        0.0,
+        10.0,
+        0.0,
         0.0,
         0.0,
         1.0
