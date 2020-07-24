@@ -51,3 +51,28 @@ So bei mir in MIT_2D_optimized.g2o nach dem Testlauf. Da die Werte bei mir stabi
 
 ## Code
 Dafür sind wir doch hier, oder? Ich lasse die Kommentare direkt im code, damit man hier nicht so viel suchen muss kommen die als Kommentare in den code
+
+### 'Variable' 
+Der Variable Trait hat mich zugegebenermaßen lange beschäftigt, und sich nicht wirklich richtig angefühlt. Deswegen will ich hier meinen Gedankengang darlegen und nicht mit einem Vorschlag herausplatzen:
+Mein Aufhänger war der kleine Satz "Should not change." für die ID und den Typ. Mein erster Ansatz war eine [Associated Constant](https://doc.rust-lang.org/edition-guide/rust-2018/trait-system/associated-constants.html) für das Enum 
+
+    pub trait Variable<'a>: fmt::Debug {
+    /// The variable's type.
+    const variable_type: VariableType;
+    ...
+
+Aber leider habe ich hier relativ schnell mit [E0038](https://doc.rust-lang.org/error-index.html#E0038) Bekanntschaft gemacht. Kurz gesagt macht das const mit dem verwendeten dynamischen dispatch ```dyn Variable<'a>``` Probleme, wieder was gelernt.
+Daraufhin hab ich mich ein wenig mehr mit dem Variable Trait auseinandergesetzt, zuerst weil ich wissen wollte ob in einem Programmlauf mehr als ein Typ vorkommen kann (ja), danach weil ich von den Gettern und Settern verwirrt war, die findet man selten in Rust-Code. Auf der Suche nach Usages bin ich bei der update_var Funktion vorbeigekommen.
+Hier ist sehr viel Logik und Wissen über die einzelnen Arten vor Variable verteilt: 
+Vehicle3D hat immer einen Vektor der Länge 6 als Content, Landmark2d Länge 2 und die restlichen Länge 3. Für jemanden der neu in die Codebase kommt ist das eine mentale Hürde. Außerdem mag ich keine Wetten annehmen ob die ganzen Boundchecks wegoptimiert werden können (nebensächlich, solange die Perf stimmt. Premature Optimization und so).
+
+Ein weiteres Problem ist die Dualität von is_fixed und get_range: die Doku sagt:
+
+    /// Whether the variable is fixed or not. Fixed variables' poses are not subject to change.
+    /// The variable's index range in H and b. **Fixed variables do not have such a range.**
+
+Niemand garantiert mir über die API, dass diese Invarianz gehalten werden muss. (Auch nicht der Konstruktor, dazu muss man in ```add_var_to_matrix``` schauen)
+
+Das schöne ist, dass wir hier zwei Fliegen mit einer Klappe schlagen können:
+Was wir hier nutzen können ist ein unglaubliche Stärke von Rust: Enums sind Union-Types, d.h. sie können unterschiedliche Datenarten halten.
+
