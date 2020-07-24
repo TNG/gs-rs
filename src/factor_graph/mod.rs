@@ -1,8 +1,6 @@
 //! The internal representation of a factor graph.
 // I have never seen a '//!' in rust, is this some special syntax?
 
-use crate::factor_graph::factor::Factor;
-use crate::factor_graph::variable::Variable;
 use petgraph::csr::{Csr, NodeIndex};
 use petgraph::Directed;
 use std::ops::Index;
@@ -10,6 +8,16 @@ use std::collections::HashMap;
 
 pub mod factor;
 pub mod variable;
+
+// I would not construct the path through the crate root to increase modularity and readability (when someone does not know the crate too well one might get confused)
+// (path from crate root should not matter, when one needs something from a sibling crate I would at least question the design)
+// fashion one: use self::
+use self::factor::Factor;
+// fashion two: no self, works only in 2018 editon
+use variable::Variable;
+// personal taste: I would not use self but pack the relative use statements under the mod section
+
+// reference: https://doc.rust-lang.org/reference/items/use-declarations.html
 
 /// A CSR (compressed sparse row) representation of a factor graph.
 pub type FactorGraphCsr<'a> = Csr<Box<dyn Variable<'a>>, Factor, Directed, usize>;
