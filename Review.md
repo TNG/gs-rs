@@ -42,5 +42,12 @@ Und: extrem viel stdout text, dass ich die Testfehler nicht sehe.
 Drei warnings in den Standardsettings über unused imports/structs ist imho gar kein Stress!
 Selbst wenn ich die pedantic settings auswähle kommt nicht mehr, nice!
 
+## .gitignore
+Ich würde generierte files wie io_files/*.g2o sowie die temporären latex files ausschließen, sorgt nur für unnötige diffs wie
+
+    VERTEX_SE2 1 2.0393450000001385 0.00300599999444171 0.014452000002199882
+    VERTEX_SE2 1 2.0393449999618376 0.003005999986110184 0.014451999982256387
+So bei mir in MIT_2D_optimized.g2o nach dem Testlauf. Da die Werte bei mir stabil sind tippe ich nicht auf zufälligen Startwert von nem Optimierer sondern auf OS + cpu Instruktionsset? Vielleicht schlagen deswegen meine Tests fehl. Ich schau mal rein.
+
 ## Code
 Dafür sind wir doch hier, oder? Ich lasse die Kommentare direkt im code, damit man hier nicht so viel suchen muss kommen die als Kommentare in den code
