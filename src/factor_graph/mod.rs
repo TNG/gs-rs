@@ -1,4 +1,5 @@
 //! The internal representation of a factor graph.
+// I have never seen a '//!' in rust, is this some special syntax?
 
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::Variable;
