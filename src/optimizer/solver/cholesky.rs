@@ -21,7 +21,9 @@ impl Solver for CholeskySolver {
 #[cfg(test)]
 mod test {
     use log::LevelFilter;
-
+    use log::info;
+    use approx::relative_eq;
+    
     use crate::optimizer::solver::cholesky::CholeskySolver;
     use crate::optimizer::solver::Solver;
     use nalgebra::{DMatrix, DVector};

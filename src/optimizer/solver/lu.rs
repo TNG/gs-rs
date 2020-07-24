@@ -23,7 +23,8 @@ impl Solver for LUSolver {
 mod test {
     use log::LevelFilter;
     use nalgebra::{DMatrix, DVector};
-
+    use log::info;
+    use approx::relative_eq;
     use crate::optimizer::solver::lu::LUSolver;
     use crate::optimizer::solver::Solver;
 

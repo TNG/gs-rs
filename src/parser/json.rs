@@ -29,6 +29,7 @@ mod tests {
     use super::*;
     use crate::parser::model::{Edge, Vertex};
     use log::LevelFilter;
+    use log::info;
     use std::collections::BTreeSet;
     use std::fs;
 

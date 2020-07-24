@@ -54,6 +54,7 @@ impl Variable<'_> for VehicleVariable3D {
 mod tests {
     use super::*;
     use log::LevelFilter;
+    use log::info;
 
     fn init() {
         let _ = env_logger::builder()

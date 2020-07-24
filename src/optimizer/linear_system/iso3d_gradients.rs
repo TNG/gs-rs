@@ -79,6 +79,8 @@ mod tests {
     use super::*;
 
     use log::LevelFilter;
+    use log::info;
+    use approx::relative_eq;
 
     fn init() {
         let _ = env_logger::builder()

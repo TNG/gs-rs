@@ -26,7 +26,10 @@ impl Solver for SparseCholeskySolver {
 #[cfg(test)]
 mod test {
     use log::LevelFilter;
+    use log::info;
+    use approx::relative_eq;
     use nalgebra::{DMatrix, DVector};
+
 
     use crate::optimizer::solver::sparse_cholesky::SparseCholeskySolver;
     use crate::optimizer::solver::Solver;
