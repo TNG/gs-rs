@@ -15,6 +15,8 @@ pub mod optimizer;
 pub mod parser;
 pub mod visualizer;
 
+// Already in the Readme, I would not include this here. Or is this the intended way of calling this library?
+// Also: There is an optimize function in optimizer::optimize, this may lead to confusion.
 /// Example for the usage of the library
 pub fn optimize(in_file: &str, out_file: &str, iterations: usize) {
     let factor_graph = G2oParser::parse_file(in_file).unwrap();
