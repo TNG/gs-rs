@@ -2,7 +2,7 @@
 
 use nalgebra::{DMatrix, DVector, Matrix3, MatrixMN, U1, U3, U9, Translation3, Isometry3, RowVector3, Matrix, Dynamic, Vector, SliceStorage, Vector3};
 use crate::factor_graph::factor::Factor;
-use crate::factor_graph::variable::Variable;
+use crate::factor_graph::variable::{FixedType, Variable};
 use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, skew_trans};
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &Box<dyn Variable>, var_j: &Box<dyn Variable>) {
@@ -36,22 +36,18 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, local_j: &Translation3<f64>) -> (Matri
 }
 
 fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U9>>, var_row: &Box<dyn Variable>, var_col: &Box<dyn Variable>) {
-    if var_row.is_fixed() || var_col.is_fixed() {
-        return;
+    if let (FixedType::NonFixed(row_range), FixedType::NonFixed(col_range)) = (var_row.get_fixed_type(), var_col.get_fixed_type()){
+        let updated_submatrix = &(H.index((row_range.to_owned(), col_range.to_owned())) + added_matrix);
+        H.index_mut((row_range.to_owned(), col_range.to_owned())).copy_from(updated_submatrix);
     }
-    let row_range = var_row.get_range().unwrap();
-    let col_range = var_col.get_range().unwrap();
-    let updated_submatrix = &(H.index((row_range.clone(), col_range.clone())) + added_matrix);
-    H.index_mut((row_range, col_range)).copy_from(updated_submatrix);
 }
 
 fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64,Dynamic,U1,U1,U9>>, var: &Box<dyn Variable>) {
-    if var.is_fixed() {
-        return;
+    if let FixedType::NonFixed(range) = var.get_fixed_type() {
+        let range = range.to_owned();
+        let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);
+        b.index_mut((range, ..)).copy_from(updated_subvector);
     }
-    let range = var.get_range().unwrap();
-    let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);
-    b.index_mut((range, ..)).copy_from(updated_subvector);
 }
 
 fn get_trans(data: &[f64]) -> Translation3<f64> {

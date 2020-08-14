@@ -51,3 +51,6 @@ So bei mir in MIT_2D_optimized.g2o nach dem Testlauf. Da die Werte bei mir stabi
 
 ## Code
 Dafür sind wir doch hier, oder? Ich lasse die Kommentare direkt im code, damit man hier nicht so viel suchen muss kommen die als Kommentare in den code
+
+### Fixed & Range
+Ich finde es nicht schön, wenn Felder nicht unabhängig voneinander sind, hat fixed und range ja schon selbst behauptet. Wenn optional nicht aussagekräftig genug ist (woher soll ich wissen, dass es fixed ist wenn keine Range da ist?) sind kleine Enums immer schön :)

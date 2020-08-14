@@ -22,6 +22,12 @@ pub enum VariableType {
     Landmark3D,
 }
 
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum FixedType {
+    Fixed,
+    NonFixed(Range<usize>)
+}
 /// Trait with expected functions that all variables should implement.
 pub trait Variable<'a>: fmt::Debug {
     /// The variable's ID. Should not change.
@@ -38,10 +44,8 @@ pub trait Variable<'a>: fmt::Debug {
     ///
     /// Content for 3D landmark variables: vec![position_x, position_y, position_z]
     fn get_content(&self) -> Vec<f64>;
-    /// Whether the variable is fixed or not. Fixed variables' poses are not subject to change.
-    fn is_fixed(&self) -> bool;
-    /// The variable's index range in H and b. Fixed variables do not have such a range.
-    fn get_range(&self) -> Option<Range<usize>>;
+    /// Whether the variable is fixed or not. Fixed variables' poses are not subject to change whereas non fixed variables allow for an index range in H and b
+    fn get_fixed_type(&self) -> &FixedType;
     /// Sets a new variable pose.
     fn set_content(&self, update: Vec<f64>);
 }
