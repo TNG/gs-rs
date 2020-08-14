@@ -45,7 +45,7 @@ pub struct VehicleVariable3D {
 #[derive(Debug)]
 pub struct LandmarkVariable3D {
     pub id: usize,
-    pub pose: Rc<RefCell<[f64; 3]>>,
+    pub position: Rc<RefCell<[f64; 3]>>,
     pub fixed_type: FixedType,
 }
 
@@ -100,7 +100,7 @@ impl LandmarkVariable3D {
     pub fn new(id: usize, x: f64, y: f64, z: f64, fixed_type: FixedType) -> Self {
         LandmarkVariable3D {
             id,
-            pose: Rc::new(RefCell::new([x, y, z])),
+            position: Rc::new(RefCell::new([x, y, z])),
             fixed_type,
         }
     }

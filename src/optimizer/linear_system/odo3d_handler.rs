@@ -2,12 +2,12 @@
 
 use nalgebra::{DMatrix, DVector, MatrixMN, Isometry3, U6, U12, Matrix3, Matrix6, Matrix, Dynamic, SliceStorage, U1, RowVector6, Vector};
 use crate::factor_graph::factor::Factor;
-use crate::factor_graph::variable::{FixedType, Variable};
+use crate::factor_graph::variable::{FixedType, VehicleVariable3D};
 use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, calc_dq_dR, skew_trans, skew_matr_and_mult_parts, skew_matr_T_and_mult_parts};
 
-pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &Box<dyn Variable>, var_j: &Box<dyn Variable>) {
-    let iso_i = get_isometry(&var_i.get_content());
-    let iso_j = get_isometry(&var_j.get_content());
+pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &VehicleVariable3D, var_j: &VehicleVariable3D) {
+    let iso_i = get_isometry(&var_i.pose);
+    let iso_j = get_isometry(&var_j.pose);
     let iso_ij = get_isometry(&factor.constraint);
     let (jacobi, jacobi_T) = calc_jacobians(&iso_i, &iso_j, &iso_ij);
     let right_mult = &factor.information_matrix.content * jacobi;
@@ -49,16 +49,16 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
     (jacobian, jacobian.transpose())
 }
 
-fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U12>>, var_row: &Box<dyn Variable>, var_col: &Box<dyn Variable>) {
-    if let (FixedType::NonFixed(row_range), FixedType::NonFixed(col_range)) = (var_row.get_fixed_type(), var_col.get_fixed_type()){
+fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U12>>, var_row: &VehicleVariable3D, var_col: &VehicleVariable3D) {
+    if let (FixedType::NonFixed(row_range), FixedType::NonFixed(col_range)) = (var_row.fixed_type, var_col.fixed_type){
         let (row_range, col_range) = (row_range.to_owned(), col_range.to_owned());
         let updated_submatrix = &(H.index((row_range.clone(), col_range.clone())) + added_matrix);
         H.index_mut((row_range, col_range)).copy_from(updated_submatrix);
     }
 }
 
-fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64,Dynamic,U1,U1,U12>>, var: &Box<dyn Variable>) {
-    if let FixedType::NonFixed(range) = var.get_fixed_type() {
+fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64,Dynamic,U1,U1,U12>>, var: &VehicleVariable3D) {
+    if let FixedType::NonFixed(range) = var.fixed_type {
         let range = range.to_owned();
 
         let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);

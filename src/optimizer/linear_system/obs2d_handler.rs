@@ -2,9 +2,9 @@
 
 use nalgebra::{DMatrix, DVector, Vector2, Matrix2x5, Matrix5x2, Matrix, Dynamic, U1, U5, SliceStorage, Vector, RowVector2, Rotation2};
 use crate::factor_graph::factor::Factor;
-use crate::factor_graph::variable::{FixedType, Variable};
+use crate::factor_graph::variable::{FixedType, Variable, VehicleVariable2D};
 
-pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &Box<dyn Variable>, var_j: &Box<dyn Variable>) {
+pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &VehicleVariable2D, var_j: &Box<dyn Variable>) {
     let (pos_i, rot_i) = get_pos_and_rot(&var_i.get_content());
     let pos_j = get_pos(&var_j.get_content());
     let pos_ij = get_pos(&factor.constraint);

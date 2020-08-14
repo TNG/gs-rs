@@ -6,8 +6,8 @@ use kiss3d::window::Window;
 use kiss3d::camera::ArcBall;
 use petgraph::visit::EdgeRef;
 use crate::factor_graph::FactorGraph;
-use crate::factor_graph::factor::{Factor, FactorType::*};
-use crate::factor_graph::variable::{Variable, VariableType::*};
+use crate::factor_graph::{variable::{VehicleVariable2D, Variable, LandmarkVariable2D, LandmarkVariable3D, VehicleVariable3D}, factor::{Factor, FactorType::*}};
+
 
 struct VisualFactorGraph {
     scene_node: SceneNode,
@@ -46,14 +46,14 @@ fn add_factor_graph_to_window(window: &mut Window, factor_graph: &FactorGraph) -
     visual_factor_graph
 }
 
-fn add_var(visual_factor_graph: &mut VisualFactorGraph, var: &Box<dyn Variable>) {
+fn add_var(visual_factor_graph: &mut VisualFactorGraph, var: &Variable) {
     let var_point = get_var_point(var);
     let mut var_object = add_var_core(visual_factor_graph, &var_point);
     handle_var_rotation(var, &mut var_object);
     color_var_object(var, &mut var_object);
 }
 
-fn add_factor(visual_factor_graph: &mut VisualFactorGraph, factor: &Factor, source: &Box<dyn Variable>, target: &Box<dyn Variable>) {
+fn add_factor(visual_factor_graph: &mut VisualFactorGraph, factor: &Factor, source: &Variable, target: &Variable) {
     let meas_point = calc_meas_point(factor, source);
     let mut meas_object = add_factor_core(visual_factor_graph, &meas_point);
     handle_factor_rotation(factor, &mut meas_object, source);
@@ -67,7 +67,7 @@ fn add_var_core(visual_factor_graph: &mut VisualFactorGraph, var_point: &Point3<
     var_object
 }
 
-fn handle_var_rotation(var: &Box<dyn Variable>, var_object: &mut SceneNode) {
+fn handle_var_rotation(var: &Variable, var_object: &mut SceneNode) {
     if var.get_type() != Vehicle2D && var.get_type() != Vehicle3D {
         return;
     }
@@ -84,19 +84,19 @@ fn handle_var_rotation(var: &Box<dyn Variable>, var_object: &mut SceneNode) {
     rot_object.prepend_to_local_translation(&Translation3::new(0.0, 0.20, 0.0));
 }
 
-fn color_var_object(var: &Box<dyn Variable>, var_object: &mut SceneNode) {
-    match var.get_type() {
-        Vehicle2D | Vehicle3D => var_object.set_color(1.0, 0.0, 0.0),
-        Landmark2D | Landmark3D => var_object.set_color(0.0, 1.0, 0.0),
+fn color_var_object(var: &Variable, var_object: &mut SceneNode) {
+    match var {
+        Variable::VehicleVariable2D(_) | Variable::VehicleVariable3D(_) => var_object.set_color(1.0, 0.0, 0.0),
+        Variable::LandmarkVariable2D(_) | Variable::LandmarkVariable3D(_) => var_object.set_color(0.0, 1.0, 0.0),
     };
 }
 
-fn calc_meas_point(factor: &Factor, source: &Box<dyn Variable>) -> Point3<f32> {
+fn calc_meas_point(factor: &Factor, source: &Variable) -> Point3<f32> {
     let factor_point = get_factor_point(factor);
     match factor.factor_type {
         Position2D | Position3D => factor_point,
         Odometry2D | Observation2D => {
-            let source_rot = get_rot_from_2d(&source.get_content());
+            let source_rot = get_rot_from_2d(&source.);
             let local_point = Rotation3::new(Vector3::z() * source_rot) * factor_point;
             (get_var_point(source).coords + local_point.coords).into()
         },
@@ -114,7 +114,7 @@ fn add_factor_core(visual_factor_graph: &mut VisualFactorGraph, meas_point: &Poi
     meas_object
 }
 
-fn handle_factor_rotation(factor: &Factor, meas_object: &mut SceneNode, source: &Box<dyn Variable>) {
+fn handle_factor_rotation(factor: &Factor, meas_object: &mut SceneNode, source: &Variable) {
     if factor.factor_type == Position2D || factor.factor_type == Odometry2D {
         let factor_rot = get_rot_from_2d(&factor.constraint);
         let meas_rot = match factor.factor_type {
@@ -160,15 +160,15 @@ fn get_factor_color(factor: &Factor) -> (f32, f32, f32) {
 }
 
 
-fn get_var_point(var: &Box<dyn Variable>) -> Point3<f32> {
-    Point3::new(
-        var.get_content()[0] as f32,
-        var.get_content()[1] as f32,
-        match var.get_type() {
-            Vehicle2D | Landmark2D => 0.0 as f32,
-            Vehicle3D | Landmark3D => var.get_content()[2] as f32,
-        },
-    )
+fn get_var_point(var: &Variable) -> Point3<f32> {
+    let (x,y,z) = match var {
+        Variable::Vehicle2D(VehicleVariable2D{pose, ..}) => (pose[0], pose[1], 0),
+        Variable::Landmark2D(LandmarkVariable2D{position, ..}) => (position[0], position[1], 0),
+        Variable::Vehicle3D(VehicleVariable3D{pose, ..}) => (pose[0], pose[1], pose[2]),
+        Variable::Landmark3D(LandmarkVariable3D{position, ..}) => (position[0], position[1], position[2]),
+    };
+
+    Point3::new(x,y,z)
 }
 
 fn get_factor_point(factor: &Factor) -> Point3<f32> {

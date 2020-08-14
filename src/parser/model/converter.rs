@@ -1,12 +1,8 @@
 use petgraph::csr::Csr;
 
 use crate::factor_graph::factor::{Factor, FactorType::*};
-use crate::factor_graph::variable::{
-    VariableType::*,
-    vehicle_variable_2d::VehicleVariable2D, landmark_variable_2d::LandmarkVariable2D,
-    vehicle_variable_3d::VehicleVariable3D, landmark_variable_3d::LandmarkVariable3D, FixedType
-};
-use crate::factor_graph::FactorGraph;
+
+use crate::factor_graph::{variable::{VehicleVariable2D, FixedType, LandmarkVariable2D, VehicleVariable3D, LandmarkVariable3D}, FactorGraph};
 use crate::parser::model::{Edge, FactorGraphModel, Vertex};
 use std::ops::{Index};
 use petgraph::visit::EdgeRef;

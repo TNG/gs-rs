@@ -2,7 +2,7 @@
 
 use nalgebra::{DMatrix, DVector, Matrix3, Matrix, U3, ArrayStorage, U1, Vector2, Vector, Vector3, Rotation3, RowVector3, Rotation2};
 use crate::factor_graph::factor::Factor;
-use crate::factor_graph::variable::{FixedType, Variable};
+use crate::factor_graph::variable::{FixedType, VehicleVariable2D};
 use std::{ops::Range, f64::consts::PI};
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var: &VehicleVariable2D) {
@@ -12,7 +12,7 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
         return;
     };
 
-    let (pos_v, rot_v) = get_pos_and_rot(&var.get_content());
+    let (pos_v, rot_v) = get_pos_and_rot(&var.pose);
     let (pos_m, rot_m) = get_pos_and_rot(&factor.constraint);
     let (jacobi, jacobi_T) = calc_jacobians(rot_m);
     let right_mult = &factor.information_matrix.content * jacobi;

@@ -30,7 +30,7 @@ fn update_once(factor_graph: &FactorGraph) {
         .for_each(|var| update_var(var, sol.as_slice()));
 }
 
-fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
+fn update_var(var: &Variable, solution: &[f64]) {
     let range = if let FixedType::NonFixed(range) = var.get_fixed_type() {
         range.to_owned()
     } else {
@@ -67,7 +67,7 @@ fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
 
 #[cfg(test)]
 mod tests {
-    use crate::optimizer::optimize;
+    use super::*;
     use crate::parser::g2o::G2oParser;
     use crate::parser::model::FactorGraphModel;
     use crate::parser::Parser;
