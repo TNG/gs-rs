@@ -4,11 +4,11 @@ use crate::factor_graph::factor::{Factor, FactorType::*};
 use crate::factor_graph::variable::{
     VariableType::*,
     vehicle_variable_2d::VehicleVariable2D, landmark_variable_2d::LandmarkVariable2D,
-    vehicle_variable_3d::VehicleVariable3D, landmark_variable_3d::LandmarkVariable3D
+    vehicle_variable_3d::VehicleVariable3D, landmark_variable_3d::LandmarkVariable3D, FixedType
 };
 use crate::factor_graph::FactorGraph;
 use crate::parser::model::{Edge, FactorGraphModel, Vertex};
-use std::ops::{Index, Range};
+use std::ops::{Index};
 use petgraph::visit::EdgeRef;
 use std::collections::{BTreeSet, HashMap};
 
@@ -66,7 +66,7 @@ impl From<&FactorGraph<'_>> for FactorGraphModel {
                     information_matrix: factor.information_matrix.content.as_slice().to_owned(),
                 });
             }
-            if node.is_fixed() {
+            if node.get_fixed_type() == &FixedType::Fixed {
                 model.fixed_vertices.insert(node.get_id());
             }
         }
@@ -104,7 +104,6 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     vertex.content[0],
                     vertex.content[1],
                     vertex.content[2],
-                    fixed,
                     add_var_to_matrix(&mut factor_graph.matrix_dim, 3, fixed),
                 ))),
         ),
@@ -114,7 +113,6 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     vertex.id,
                     vertex.content[0],
                     vertex.content[1],
-                    fixed,
                     add_var_to_matrix(&mut factor_graph.matrix_dim, 2, fixed),
                 ))),
         ),
@@ -129,7 +127,6 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     vertex.content[4],
                     vertex.content[5],
                     vertex.content[6],
-                    fixed,
                     add_var_to_matrix(&mut factor_graph.matrix_dim, 6, fixed),
                 ))),
         ),
@@ -140,7 +137,6 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
                     vertex.content[0],
                     vertex.content[1],
                     vertex.content[2],
-                    fixed,
                     add_var_to_matrix(&mut factor_graph.matrix_dim, 3, fixed),
                 ))),
         ),
@@ -149,11 +145,11 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
     factor_graph.custom_to_csr_id_map.insert(vertex.id, *factor_graph.node_indices.last().unwrap());
 }
 
-fn add_var_to_matrix(dim: &mut usize, added_dim: usize, fixed: bool) -> Option<Range<usize>> {
+fn add_var_to_matrix(dim: &mut usize, added_dim: usize, fixed: bool) -> FixedType {
     if fixed {
-        None
+        FixedType::Fixed
     } else {
         *dim += added_dim;
-        Some(*dim-added_dim..*dim)
+        FixedType::NonFixed(*dim-added_dim..*dim)
     }
 }

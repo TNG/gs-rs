@@ -52,6 +52,9 @@ So bei mir in MIT_2D_optimized.g2o nach dem Testlauf. Da die Werte bei mir stabi
 ## Code
 Dafür sind wir doch hier, oder? Ich lasse die Kommentare direkt im code, damit man hier nicht so viel suchen muss kommen die als Kommentare in den code
 
+### Fixed & Range
+Ich finde es nicht schön, wenn Felder nicht unabhängig voneinander sind, hat fixed und range ja schon selbst behauptet. Wenn optional nicht aussagekräftig genug ist (woher soll ich wissen, dass es fixed ist wenn keine Range da ist?) sind kleine Enums immer schön :)
+
 ### 'Variable' 
 Der Variable Trait hat mich zugegebenermaßen lange beschäftigt, und sich nicht wirklich richtig angefühlt. Deswegen will ich hier meinen Gedankengang darlegen und nicht mit einem Vorschlag herausplatzen:
 Mein Aufhänger war der kleine Satz "Should not change." für die ID und den Typ. Mein erster Ansatz war eine [Associated Constant](https://doc.rust-lang.org/edition-guide/rust-2018/trait-system/associated-constants.html) für das Enum 
@@ -75,4 +78,3 @@ Niemand garantiert mir über die API, dass diese Invarianz gehalten werden muss.
 
 Das schöne ist, dass wir hier zwei Fliegen mit einer Klappe schlagen können:
 Was wir hier nutzen können ist ein unglaubliche Stärke von Rust: Enums sind Union-Types, d.h. sie können unterschiedliche Datenarten halten.
-

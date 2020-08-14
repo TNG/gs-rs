@@ -61,46 +61,48 @@ pub enum Variable {
     /// Landmark position in 3D.
     Landmark3D(LandmarkVariable3D),
 }
-
 impl VehicleVariable2D {
     /// Returns a new variable from a 2D pose, a given ID and whether the variable is fixed.
-    pub fn new(id: usize, x: f64, y: f64, phi: f64, fixed: bool, optional_range: Option<Range<usize>>) -> Self {
+    pub fn new(id: usize, x: f64, y: f64, phi: f64, fixed_type: FixedType) -> Self {
         VehicleVariable2D {
             id,
             pose: Rc::new(RefCell::new([x, y, phi])),
-            fixed_type: if fixed { FixedType::Fixed } else { FixedType::NonFixed(optional_range.unwrap()) }
+            fixed_type,
+
         }
     }
 }
+
 impl LandmarkVariable2D {
     /// Returns a new variable from a 2D position, a given ID and whether the variable is fixed.
-    pub fn new(id: usize, x: f64, y: f64, fixed: bool, optional_range: Option<Range<usize>>) -> Self {
+    pub fn new(id: usize, x: f64, y: f64, fixed_type: FixedType) -> Self {
         LandmarkVariable2D {
             id,
             position: Rc::new(RefCell::new([x, y])),
-            fixed_type: if fixed { FixedType::Fixed } else { FixedType::NonFixed(optional_range.unwrap()) }
+            fixed_type,
         }
     }
 }
 
 impl VehicleVariable3D {
     /// Returns a new variable from a 3D pose, a given ID and whether the variable is fixed.
-    pub fn new(id: usize, x: f64, y: f64, z: f64, rot_x: f64, rot_y: f64, rot_z: f64, rot_w: f64, fixed: bool, optional_range: Option<Range<usize>>) -> Self {
+    pub fn new(id: usize, x: f64, y: f64, z: f64, rot_x: f64, rot_y: f64, rot_z: f64, rot_w: f64, fixed_type: FixedType) -> Self {
         VehicleVariable3D {
             id,
             pose: Rc::new(RefCell::new([x, y, z, rot_x, rot_y, rot_z, rot_w])),
-            fixed_type: if fixed { FixedType::Fixed } else { FixedType::NonFixed(optional_range.unwrap()) }
+            fixed_type,
         }
     }
 }
 
 impl LandmarkVariable3D {
     /// Returns a new variable from a 3D position, a given ID and whether the variable is fixed.
-    pub fn new(id: usize, x: f64, y: f64, z: f64, fixed: bool, optional_range: Option<Range<usize>>) -> Self {
+    pub fn new(id: usize, x: f64, y: f64, z: f64, fixed_type: FixedType) -> Self {
         LandmarkVariable3D {
             id,
             pose: Rc::new(RefCell::new([x, y, z])),
-            fixed_type: if fixed { FixedType::Fixed } else { FixedType::NonFixed(optional_range.unwrap()) }
+            fixed_type,
         }
     }
 }
+

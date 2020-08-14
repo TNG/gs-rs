@@ -3,7 +3,7 @@
 #![allow(non_snake_case)]
 
 use crate::factor_graph::variable::Variable;
-use crate::factor_graph::variable::VariableType::*;
+use crate::factor_graph::variable::{FixedType, VariableType::*};
 use crate::factor_graph::FactorGraph;
 use crate::optimizer::linear_system::calculate_H_b;
 use crate::optimizer::solver::sparse_cholesky::SparseCholeskySolver;
@@ -31,11 +31,12 @@ fn update_once(factor_graph: &FactorGraph) {
 }
 
 fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
-    if var.is_fixed() {
+    let range = if let FixedType::NonFixed(range) = var.get_fixed_type() {
+        range.to_owned()
+    } else {
         return;
-    }
+    };
     let old_content = var.get_content();
-    let range = var.get_range().unwrap();
     let correction = &solution[range];
 
     let updated_content = match var.get_type() {
