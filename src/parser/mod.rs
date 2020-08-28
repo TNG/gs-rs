@@ -11,7 +11,7 @@ pub mod model;
 // Trait to be used by all parsers with the basic file parsing and composition functionality.
 pub trait Parser {
     /// Tries to parse a file at the given path to the internal factor graph representation.
-    fn parse_file<'a>(file_path: &str) -> Result<FactorGraph<'a>, String> {
+    fn parse_file<'a>(file_path: &str) -> Result<FactorGraph, String> {
         match Self::parse_file_to_model(file_path) {
             Ok(model) => Ok(model.into()),
             Err(s) => Err(s),
@@ -38,8 +38,7 @@ pub trait Parser {
     /// Tries to compose a file at the given path containing the factor graph model's serialization.
     fn compose_model_to_file(model: FactorGraphModel, file_path: &str) -> Result<(), String> {
         let s = Self::compose_model_to_string(model)?;
-        fs::write(file_path, s)
-            .or_else(|_| Err(format!("File could not be written to: {}", file_path)))
+        fs::write(file_path, s).or_else(|_| Err(format!("File could not be written to: {}", file_path)))
     }
 
     /// Tries to compose a string containing the factor graph model's serialization.

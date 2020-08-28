@@ -1,6 +1,6 @@
+use gs_rs::optimizer::optimize;
 use gs_rs::parser::json::JsonParser;
 use gs_rs::parser::Parser;
-use gs_rs::optimizer::optimize;
 
 fn main() {
     // parse json file containing 3D variables and odometries to internal factor graph representation

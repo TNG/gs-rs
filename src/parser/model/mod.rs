@@ -1,8 +1,8 @@
 //! Structures and functions for an intermediate step when converting between factor graphs and serialized files.
 
 use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
 use std::collections::BTreeSet;
+use std::fmt::Debug;
 
 mod converter;
 
@@ -18,6 +18,7 @@ pub struct FactorGraphModel {
     pub fixed_vertices: BTreeSet<usize>,
 }
 
+// ToDo: directly use Variable as Vertex?
 /// Structure containing a factor graph model's vertex, representing a variable.
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Vertex {

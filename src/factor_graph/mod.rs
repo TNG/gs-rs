@@ -1,23 +1,24 @@
 //! The internal representation of a factor graph.
 
-use crate::factor_graph::factor::Factor;
-use crate::factor_graph::variable::Variable;
 use petgraph::csr::{Csr, NodeIndex};
 use petgraph::Directed;
-use std::ops::Index;
 use std::collections::HashMap;
+use std::ops::Index;
 
 pub mod factor;
 pub mod variable;
 
+use factor::Factor;
+use variable::Variable;
+
 /// A CSR (compressed sparse row) representation of a factor graph.
-pub type FactorGraphCsr<'a> = Csr<Box<dyn Variable<'a>>, Factor, Directed, usize>;
+pub type FactorGraphCsr<'a> = Csr<Variable, Factor, Directed, usize>;
 
 /// Structure representing the factor graph internally.
 #[derive(Debug)]
-pub struct FactorGraph<'a> {
+pub struct FactorGraph {
     /// The factor graph's CSR (compressed sparse row) representation.
-    pub csr: FactorGraphCsr<'a>,
+    pub csr: Csr<Variable, Factor, Directed, usize>,
     /// The indices at which the factor graph's nodes can be found in get_var(/*node_index*/).
     pub node_indices: Vec<NodeIndex<usize>>,
     /// Map from custom IDs as stated in the parsed file to internal CSR indices.
@@ -26,9 +27,9 @@ pub struct FactorGraph<'a> {
     pub matrix_dim: usize,
 }
 
-impl<'a> FactorGraph<'a> {
+impl FactorGraph {
     /// Returns the variable at the corresponding internal CSR index.
-    pub fn get_var(&self, csr_index: usize) -> &Box<dyn Variable<'a>> {
+    pub fn get_var(&self, csr_index: usize) -> &Variable {
         self.csr.index(csr_index)
     }
 }

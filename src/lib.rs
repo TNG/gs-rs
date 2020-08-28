@@ -1,13 +1,3 @@
-#[cfg(test)]
-#[macro_use]
-extern crate approx;
-extern crate itertools;
-extern crate kiss3d;
-#[macro_use]
-extern crate log;
-extern crate nalgebra;
-extern crate petgraph;
-
 use crate::parser::g2o::G2oParser;
 use crate::parser::Parser;
 

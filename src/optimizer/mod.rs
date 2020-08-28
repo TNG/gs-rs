@@ -2,14 +2,13 @@
 
 #![allow(non_snake_case)]
 
-use crate::factor_graph::variable::Variable;
-use crate::factor_graph::variable::VariableType::*;
+use crate::factor_graph::variable::{FixedType, Variable};
 use crate::factor_graph::FactorGraph;
 use crate::optimizer::linear_system::calculate_H_b;
+use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, get_isometry_normalized};
 use crate::optimizer::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::optimizer::solver::Solver;
 use std::f64::consts::PI;
-use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, get_isometry_normalized};
 
 mod linear_system;
 mod solver;
@@ -25,48 +24,66 @@ fn update_once(factor_graph: &FactorGraph) {
     let (H, b) = calculate_H_b(&factor_graph);
     // TODO @Daniel (TODO created by you): clumsy, since the solver transforms the arguments back to nalgebra matrices
     let sol = SparseCholeskySolver::solve(H, &(b * -1.0)).unwrap();
-    factor_graph.node_indices.iter()
+    factor_graph
+        .node_indices
+        .iter()
         .map(|i| factor_graph.get_var(*i))
         .for_each(|var| update_var(var, sol.as_slice()));
 }
 
-fn update_var(var: &Box<dyn Variable>, solution: &[f64]) {
-    if var.is_fixed() {
+fn update_var(var: &Variable, solution: &[f64]) {
+    let correction = if let FixedType::NonFixed(range) = var.get_fixed_type() {
+        &solution[range.to_owned()]
+    } else {
         return;
-    }
-    let old_content = var.get_content();
-    let range = var.get_range().unwrap();
-    let correction = &solution[range];
+    };
 
-    let updated_content = match var.get_type() {
-        Landmark2D | Vehicle2D | Landmark3D => {
-            let mut updated_content: Vec<f64> = old_content.iter().zip(correction.iter())
-                .map(|(old, cor)| old + cor).collect();
-            if var.get_type() == Vehicle2D {
-                updated_content[2] %= 2.0 * PI;
-                if updated_content[2] > PI {
-                    updated_content[2] -= 2.0 * PI;
-                } else if updated_content[2] < -PI {
-                    updated_content[2] += 2.0 * PI;
-                }
+    let updated_content = match var {
+        Variable::Vehicle2D(var) => {
+            let mut updated_content: Vec<f64> = var
+                .pose
+                .borrow()
+                .iter()
+                .zip(correction.iter())
+                .map(|(old, cor)| old + cor)
+                .collect();
+            updated_content[2] %= 2.0 * PI;
+            if updated_content[2] > PI {
+                updated_content[2] -= 2.0 * PI;
+            } else if updated_content[2] < -PI {
+                updated_content[2] += 2.0 * PI;
             }
             updated_content
         }
-        Vehicle3D => {
-            let old_iso = get_isometry(&old_content);
+        Variable::Landmark2D(var) => var
+            .position
+            .borrow()
+            .iter()
+            .zip(correction.iter())
+            .map(|(old, cor)| old + cor)
+            .collect(),
+        Variable::Vehicle3D(var) => {
+            let old_iso = get_isometry(&*var.pose.borrow());
             let cor_iso = get_isometry_normalized(correction);
             let new_iso = old_iso * cor_iso;
             let mut updated_content = new_iso.translation.vector.data.to_vec();
             updated_content.extend(&new_iso.rotation.quaternion().coords.data.to_vec());
             updated_content
         }
+        Variable::Landmark3D(var) => var
+            .position
+            .borrow()
+            .iter()
+            .zip(correction.iter())
+            .map(|(old, cor)| old + cor)
+            .collect(),
     };
     var.set_content(updated_content);
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::optimizer::optimize;
+    use super::*;
     use crate::parser::g2o::G2oParser;
     use crate::parser::model::FactorGraphModel;
     use crate::parser::Parser;
@@ -82,10 +99,21 @@ mod tests {
 
     fn test_valid_optimization(file_name: &str, iterations: usize) {
         init();
-        let test_factor_graph = G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat()).unwrap();
+        let test_factor_graph =
+            G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat()).unwrap();
         optimize(&test_factor_graph, iterations);
         let test_model = FactorGraphModel::from(&test_factor_graph);
-        let expected_model = G2oParser::parse_file_to_model(&["data_files/optimizer_tests/", file_name, "_", &iterations.to_string(), ".g2o"].concat()).unwrap();
+        let expected_model = G2oParser::parse_file_to_model(
+            &[
+                "data_files/optimizer_tests/",
+                file_name,
+                "_",
+                &iterations.to_string(),
+                ".g2o",
+            ]
+            .concat(),
+        )
+        .unwrap();
         assert_eq!(test_model, expected_model);
     }
 
@@ -142,5 +170,4 @@ mod tests {
     fn test_mainly_obs3d_factors() {
         test_valid_optimization("obs3d_mainly", 1);
     }
-
 }
