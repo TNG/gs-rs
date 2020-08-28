@@ -54,6 +54,10 @@ The datasets used in `data_files/` and `examples/` have been described by Carlon
 The original datasets as well as more examples can be found online.
 Attribution and details may also be found in the [data sets section](data_files/README.md).
 
+## Note
+We, the contributers are fully aware of the fact that we cannot prohibit military usage of open source software. 
+But we want to state very clearly that we discourage any use of our software with the intention of harming people.  
+
 ## License
 
 © 2020 Samuel Valenzuela, TNG Technology Consulting GmbH
