@@ -136,7 +136,7 @@ impl Variable {
             Variable::Vehicle2D(v) => *v.pose.borrow_mut() = [u[0], u[1], u[2]],
             Variable::Landmark2D(v) => *v.position.borrow_mut() = [u[0], u[1]],
             Variable::Vehicle3D(v) => *v.pose.borrow_mut() = [u[0], u[1], u[2], u[3], u[4], u[5], u[6]],
-            Variable::Landmark3D(v) => *v.position.borrow_mut() = [u[0], u[1], u[3]],
+            Variable::Landmark3D(v) => *v.position.borrow_mut() = [u[0], u[1], u[2]],
         }
     }
     pub fn get_id(&self) -> usize {
