@@ -60,7 +60,6 @@ mod test {
             Ok(sol) => sol,
             Err(str) => panic!(str),
         };
-        info!("H = {:?}; b = {:?}  |  x = {:?}", positive_definite_H, b, x);
         assert!(relative_eq!(x[0], 9.0, epsilon = 1e-10));
         assert!(relative_eq!(x[1], 12.0, epsilon = 1e-10));
         assert!(relative_eq!(x[2], 9.0, epsilon = 1e-10));

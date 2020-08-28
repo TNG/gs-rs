@@ -140,8 +140,6 @@ mod tests {
                                                               0.0,   b, 0.0,
                                                                -b, 0.0, 0.0,
                                                                a1,  a2,  a3,]);
-        info!("Actual: {}", actual);
-        info!("Expected: {}", expected);
         relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-10);
     }
 
@@ -155,8 +153,6 @@ mod tests {
         let expected = Matrix3::from_vec(vec![      0.0,  -0.282041,   -4.87743,    // transposed matrix is displayed
                                                0.282041,        0.0, -0.0398779,
                                                 4.87743,  0.0398779,        0.0,]);
-        info!("Actual: {}", actual);
-        info!("Expected: {}", expected);
         relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-5 + 1e-10);
     }
 
@@ -178,8 +174,6 @@ mod tests {
         let expected = MatrixMN::<f64, U9, U3>::from_vec(vec![ 5.23021e-08, 0.0694143, 0.0300711, -0.0694142,  2.85328e-07,   -1.99857, -0.0300695,    1.99857,  2.91287e-07,    // transposed matrix is displayed
                                                                3.41719e-07,  0.580168,   1.91338,  -0.580168,  4.58219e-07,  0.0489397,   -1.91338, -0.0489382, -1.44105e-07,
                                                               -1.52217e-06,  -1.91274,  0.581451,    1.91274, -1.52261e-06, -0.0576846,  -0.581452,  0.0576852, -3.31386e-08,]);
-        info!("Actual: {}", actual);
-        info!("Expected: {}", expected);
         relative_eq_slice(actual.data.as_slice(), expected.data.as_slice(), 1e-5);
     }
 }
