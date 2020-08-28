@@ -3,6 +3,8 @@
 Contributions are very welcome!
 
 ## How to contribute
+There are several ways to contribute to this project. You may contribute by providing feedback, by opening issues (please be sure to apply 
+to our [code of conduct](CODE_OF_CONDUCT.md), though) or by contributing source code. 
 
 We love pull requests. Here is a quick guide:
 

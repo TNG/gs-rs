@@ -1,7 +1,10 @@
 # gs-rs [ˈdʒiːzrs]
 
-gs-rs is an implementation of a monocular graph based SLAM backend in pure rust.
+gs-rs is an implementation of a monocular graph based SLAM backend in pure rust. It is largely inspired 
+by the General Graph Optimizer [g2o](https://github.com/RainerKuemmerle/g2o) of Rainer Kümmerle.
 
+## Documentation
+Documentation is available as a Jupyter Notebook [here](doc/documentation.ipynb)
 
 ## Example Usage
 
@@ -42,9 +45,11 @@ The datasets used in data_files/ and examples/ have been described by Carlone et
 
 ## License
 
-Copyright 2020 Samuel Valenzuela, TNG Technology Consulting GmbH
+© 2020 Samuel Valenzuela, TNG Technology Consulting GmbH
 
-Copyright 2020 Daniel Pape, TNG Technology Consulting GmbH
+© 2020 Florian Rohm, TNG Technology Consulting GmbH
 
-gs-rs is licensed under the Apache License, Version 2.0 (LICENSE-APACHE or
-http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (LICENSE-MIT or http://opensource.org/licenses/MIT), at your option.
+© 2020 Daniel Pape, TNG Technology Consulting GmbH
+
+gs-rs is licensed under the Apache License, Version 2.0 (cf. [here](LICENSE-APACHE) or
+http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (cf. [here](LICENSE-MIT) or http://opensource.org/licenses/MIT), at your option.
