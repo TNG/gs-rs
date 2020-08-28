@@ -1,4 +1,18 @@
-//! Solver for linear systems using the Cholesky decomposition on a sparse matrix.
+// gs-rs - Graph SLAM in Rust
+// --------------
+//
+// © 2020 Samuel Valenzuela (samuel.valenzuela@tngtech.com)
+// © 2020 Florian Rohm (florian.rohm@tngtech.com)
+// © 2020 Daniel Pape (daniel.pape@tngtech.com)
+//
+// This product includes software developed at
+// TNG Technology Consulting GmbH (https://www.tngtech.com/).
+//
+// gs-rs is licensed under the Apache License, Version 2.0 (LICENSE-APACHE.md or
+// http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (LICENSE-MIT.md
+// or http://opensource.org/licenses/MIT), at your option.
+
+//! Solver for linear systems using a Cholesky decomposition on a sparse matrix.
 
 #![allow(non_snake_case)]
 
@@ -11,7 +25,7 @@ pub struct SparseCholeskySolver;
 impl Solver for SparseCholeskySolver {
     /// Assumes that H is symmetric. Might return wrong result if this is not the case.
     fn solve(H: DMatrix<f64>, b: &DVector<f64>) -> Result<Vec<f64>, String> {
-        // TODO @Daniel (TODO created by you): pass matrix as sparse already
+        // TODO @Daniel: pass matrix as sparse already
         let sparse = CsCholesky::new(&CsMatrix::from(H));
         match sparse.l() {
             None => Err(String::from("H is not positive-definite")),

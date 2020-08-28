@@ -3,8 +3,15 @@
 gs-rs is an implementation of a monocular graph based SLAM backend in pure rust. It is largely inspired 
 by the General Graph Optimizer [g2o](https://github.com/RainerKuemmerle/g2o) of Rainer Kümmerle.
 
+## Overview
+
+* [Contributing](CONTRIBUTING.md)
+* [Code of Conduct](CODE_OF_CONDUCT.md)
+* [MIT License](LICENSE-MIT.md)
+* [Apache License](LICENSE-APACHE.md)
+
 ## Documentation
-Documentation is available as a Jupyter Notebook [here](doc/documentation.ipynb)
+A brief introduction to the algorithms used is available as a Jupyter Notebook [here](doc/documentation.ipynb)
 
 ## Example Usage
 
@@ -32,16 +39,12 @@ fn main() {
 
 ## Attribution
 
-The file format .g2o as well as the initial implementation in C++ were initially part of the project g2o: https://github.com/RainerKuemmerle/g2o
+The file format `.g2o` as well as the initial implementation in `C++` were 
+initially part of the project [g2o](https://github.com/RainerKuemmerle/g2o).
 
-## Datasets
-
-The datasets used in data_files/ and examples/ have been described by Carlone et al. [1] and adapted to include fixed vertices. Other modifications have been performed as well to demonstrate the different vertex and edge types supported in gs-rs. The original datasets as well as more examples can be found online [2].
-
-[1] L. Carlone, R. Tron, K. Daniilidis, and F. Dellaert. Initialization Techniques for 3D SLAM: a Survey on Rotation Estimation and its Use in Pose Graph Optimization. In IEEE Intl. Conf. on Robotics and Automation (ICRA), pages 4597-4604, 2015.
-
-[2] L. Carlone, "Datasets." [Online]. Available: https://lucacarlone.mit.edu/datasets/
-
+The datasets used in `data_files/` and `examples/` have been described by Carlone et al. and adapted to include fixed vertices. Other modifications have been performed as well to demonstrate the different vertex and edge types supported in gs-rs. 
+The original datasets as well as more examples can be found online.
+Attribution and details may also be found in the [data sets section](data_files/README.md).
 
 ## License
 
@@ -51,5 +54,5 @@ The datasets used in data_files/ and examples/ have been described by Carlone et
 
 © 2020 Daniel Pape, TNG Technology Consulting GmbH
 
-gs-rs is licensed under the Apache License, Version 2.0 (cf. [here](LICENSE-APACHE) or
-http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (cf. [here](LICENSE-MIT) or http://opensource.org/licenses/MIT), at your option.
+**gs-rs** is licensed under the Apache License, Version 2.0 (cf. [here](LICENSE-APACHE.md) or
+http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (cf. [here](LICENSE-MIT.md) or http://opensource.org/licenses/MIT), at your option.

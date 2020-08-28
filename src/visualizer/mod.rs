@@ -1,3 +1,16 @@
+// gs-rs - Graph SLAM in Rust
+// --------------
+//
+// © 2020 Samuel Valenzuela (samuel.valenzuela@tngtech.com)
+// © 2020 Florian Rohm (florian.rohm@tngtech.com)
+// © 2020 Daniel Pape (daniel.pape@tngtech.com)
+//
+// This product includes software developed at
+// TNG Technology Consulting GmbH (https://www.tngtech.com/).
+//
+// gs-rs is licensed under the Apache License, Version 2.0 (LICENSE-APACHE.md or
+// http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (LICENSE-MIT.md
+// or http://opensource.org/licenses/MIT), at your option.
 //! Handles the graphical user interface.
 
 use crate::factor_graph::FactorGraph;
@@ -16,8 +29,8 @@ struct VisualFactorGraph {
     lines: Vec<[Point3<f32>; 3]>,
 }
 
+// TODO: Does not work multiple times in a single execution of the program.
 /// Displays the visualization of the given factor graph in a new window.
-/// Does not work multiple times in a single execution of the program.
 pub fn visualize(factor_graph: &FactorGraph) {
     let mut window = Window::new("gs-rs");
     let visual_factor_graph = add_factor_graph_to_window(&mut window, &factor_graph);

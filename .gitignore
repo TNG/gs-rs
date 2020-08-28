@@ -5,3 +5,6 @@ Cargo.lock
 
 *.iml
 **/.idea
+
+**/*optimized.g2o
+**/*optimized.json

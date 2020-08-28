@@ -1,3 +1,16 @@
+// gs-rs - Graph SLAM in Rust
+// --------------
+//
+// © 2020 Samuel Valenzuela (samuel.valenzuela@tngtech.com)
+// © 2020 Florian Rohm (florian.rohm@tngtech.com)
+// © 2020 Daniel Pape (daniel.pape@tngtech.com)
+//
+// This product includes software developed at
+// TNG Technology Consulting GmbH (https://www.tngtech.com/).
+//
+// gs-rs is licensed under the Apache License, Version 2.0 (LICENSE-APACHE.md or
+// http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (LICENSE-MIT.md
+// or http://opensource.org/licenses/MIT), at your option.
 //! Improves variable estimates to better fit measurements.
 
 #![allow(non_snake_case)]
@@ -22,7 +35,7 @@ pub fn optimize(graph: &FactorGraph, iterations: usize) {
 
 fn update_once(factor_graph: &FactorGraph) {
     let (H, b) = calculate_H_b(&factor_graph);
-    // TODO @Daniel (TODO created by you): clumsy, since the solver transforms the arguments back to nalgebra matrices
+    // TODO @Daniel: clumsy, since the solver transforms the arguments back to nalgebra matrices
     let sol = SparseCholeskySolver::solve(H, &(b * -1.0)).unwrap();
     factor_graph
         .node_indices
@@ -151,9 +164,6 @@ mod tests {
     fn test_multiple_iterations_2d() {
         test_valid_optimization("full2d", 25);
     }
-
-    // NOTE: output for 3D rotation corrections seem to differ from g2o after only one iteration.
-    //       gs-rs is closer to the optimized value then.
 
     #[test]
     #[ignore] // floating point rounding makes results not equal

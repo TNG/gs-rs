@@ -1,3 +1,16 @@
+// gs-rs - Graph SLAM in Rust
+// --------------
+//
+// © 2020 Samuel Valenzuela (samuel.valenzuela@tngtech.com)
+// © 2020 Florian Rohm (florian.rohm@tngtech.com)
+// © 2020 Daniel Pape (daniel.pape@tngtech.com)
+//
+// This product includes software developed at
+// TNG Technology Consulting GmbH (https://www.tngtech.com/).
+//
+// gs-rs is licensed under the Apache License, Version 2.0 (LICENSE-APACHE.md or
+// http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (LICENSE-MIT.md
+// or http://opensource.org/licenses/MIT), at your option.
 //! Structures and functions for an intermediate step when converting between factor graphs and serialized files.
 
 use serde::{Deserialize, Serialize};
@@ -18,7 +31,6 @@ pub struct FactorGraphModel {
     pub fixed_vertices: BTreeSet<usize>,
 }
 
-// ToDo: directly use Variable as Vertex?
 /// Structure containing a factor graph model's vertex, representing a variable.
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Vertex {
