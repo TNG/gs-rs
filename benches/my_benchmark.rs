@@ -1,3 +1,15 @@
+// -----------------------------------------------------------------------------------------------------
+//                                      gs-rs - Graph SLAM in Rust
+// -----------------------------------------------------------------------------------------------------
+//
+// SPDX-FileCopyrightText:      © 2020 Samuel Valenzuela (samuel.valenzuela@tngtech.com)
+//                              © 2020 Florian Rohm (florian.rohm@tngtech.com)
+//                              © 2020 Daniel Pape (daniel.pape@tngtech.com)
+// SPDX-License-Identifier:     MIT OR Apache-2.0
+//
+// This product includes software developed at TNG Technology Consulting GmbH (https://www.tngtech.com/).
+//
+
 use criterion::{criterion_group, criterion_main, Criterion};
 use gs_rs::optimizer::optimize;
 use gs_rs::parser::g2o::G2oParser;

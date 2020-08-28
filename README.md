@@ -5,6 +5,8 @@ by the General Graph Optimizer [g2o](https://github.com/RainerKuemmerle/g2o) of 
 
 ## Overview
 
+* [Examples](examples/README.md)
+* [Data Files](data_files/README.md)
 * [Contributing](CONTRIBUTING.md)
 * [Code of Conduct](CODE_OF_CONDUCT.md)
 * [MIT License](LICENSE-MIT.md)
@@ -12,6 +14,11 @@ by the General Graph Optimizer [g2o](https://github.com/RainerKuemmerle/g2o) of 
 
 ## Documentation
 A brief introduction to the algorithms used is available as a Jupyter Notebook [here](doc/documentation.ipynb)
+
+## Building Instructions
+* Install the [rust toolchain](https://www.rust-lang.org/learn/get-started)
+* Clone the repository
+* Execute `cargo build` in the root directory
 
 ## Example Usage
 
