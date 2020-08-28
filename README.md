@@ -1,7 +1,8 @@
 # gs-rs [ˈdʒiːzrs]
 
-gs-rs is an implementation of a monocular graph based SLAM backend in pure rust. It is largely inspired 
-by the General Graph Optimizer [g2o](https://github.com/RainerKuemmerle/g2o) of Rainer Kümmerle.
+**gs-rs** is an implementation of a monocular graph based SLAM backend in pure rust. It is largely inspired 
+by the General Graph Optimizer [g2o](https://github.com/RainerKuemmerle/g2o) of Rainer Kümmerle, though it is giving it 
+a rusty touch.
 
 ## Overview
 
@@ -18,7 +19,7 @@ A brief introduction to the algorithms used is available as a Jupyter Notebook [
 ## Building Instructions
 * Install the [rust toolchain](https://www.rust-lang.org/learn/get-started)
 * Clone the repository
-* Execute `cargo build` in the root directory
+* Execute `cargo build --release` in the root directory
 
 ## Example Usage
 

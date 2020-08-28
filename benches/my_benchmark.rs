@@ -42,7 +42,7 @@ fn bench_sphere_3d_10(c: &mut Criterion) {
 
 criterion_group! {
     name = benches;
-    config = Criterion::default().sample_size(10)/*.measurement_time(Duration::from_secs(15))*/;
+    config = Criterion::default().sample_size(10);
     targets = bench_mit_2d_1, bench_mit_2d_50, bench_sphere_3d_1, bench_sphere_3d_10
 }
 criterion_main!(benches);
