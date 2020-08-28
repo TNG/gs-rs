@@ -11,7 +11,7 @@ pub mod model;
 // Trait to be used by all parsers with the basic file parsing and composition functionality.
 pub trait Parser {
     /// Tries to parse a file at the given path to the internal factor graph representation.
-    fn parse_file<'a>(file_path: &str) -> Result<FactorGraph<'a>, String> {
+    fn parse_file<'a>(file_path: &str) -> Result<FactorGraph, String> {
         match Self::parse_file_to_model(file_path) {
             Ok(model) => Ok(model.into()),
             Err(s) => Err(s),

@@ -6,13 +6,13 @@ use crate::factor_graph::variable::{FixedType, VehicleVariable2D};
 use std::{ops::Range, f64::consts::PI};
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var: &VehicleVariable2D) {
-    let range = if let FixedType::NonFixed(range) = var.fixed_type {
+    let range = if let FixedType::NonFixed(range) = &var.fixed_type {
         range
     } else {
         return;
     };
 
-    let (pos_v, rot_v) = get_pos_and_rot(&var.pose);
+    let (pos_v, rot_v) = get_pos_and_rot(&*var.pose.borrow());
     let (pos_m, rot_m) = get_pos_and_rot(&factor.constraint);
     let (jacobi, jacobi_T) = calc_jacobians(rot_m);
     let right_mult = &factor.information_matrix.content * jacobi;

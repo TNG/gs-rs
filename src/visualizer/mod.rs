@@ -68,26 +68,27 @@ fn add_var_core(visual_factor_graph: &mut VisualFactorGraph, var_point: &Point3<
 }
 
 fn handle_var_rotation(var: &Variable, var_object: &mut SceneNode) {
-    if var.get_type() != Vehicle2D && var.get_type() != Vehicle3D {
-        return;
-    }
     let mut rot_object = var_object.add_capsule(0.02, 2.0);
-    if var.get_type() == Vehicle2D {
-        rot_object.set_local_rotation(
-            UnitQuaternion::from_axis_angle(&Vector3::z_axis(), get_rot_from_2d(&var.get_content()))
-        );
-    } else if var.get_type() == Vehicle3D {
-        rot_object.set_local_rotation(
-            get_rot_from_3d(&var.get_content())
-        );
+
+    match var {
+        Variable::Vehicle2D(v) => {        
+            rot_object.set_local_rotation(
+            UnitQuaternion::from_axis_angle(&Vector3::z_axis(), get_rot_from_2d(&*v.pose.borrow()))
+        )}
+        Variable::Vehicle3D(v) => {
+            rot_object.set_local_rotation(
+            get_rot_from_3d(&*v.pose.borrow())
+        );}
+        _ => ()
     }
+
     rot_object.prepend_to_local_translation(&Translation3::new(0.0, 0.20, 0.0));
 }
 
 fn color_var_object(var: &Variable, var_object: &mut SceneNode) {
     match var {
-        Variable::VehicleVariable2D(_) | Variable::VehicleVariable3D(_) => var_object.set_color(1.0, 0.0, 0.0),
-        Variable::LandmarkVariable2D(_) | Variable::LandmarkVariable3D(_) => var_object.set_color(0.0, 1.0, 0.0),
+        Variable::Vehicle2D(_) | Variable::Vehicle3D(_) => var_object.set_color(1.0, 0.0, 0.0),
+        Variable::Landmark2D(_) | Variable::Landmark3D(_) => var_object.set_color(0.0, 1.0, 0.0),
     };
 }
 
@@ -96,7 +97,7 @@ fn calc_meas_point(factor: &Factor, source: &Variable) -> Point3<f32> {
     match factor.factor_type {
         Position2D | Position3D => factor_point,
         Odometry2D | Observation2D => {
-            let source_rot = get_rot_from_2d(&source.);
+            let source_rot = get_rot_from_2d(&source.get_content());
             let local_point = Rotation3::new(Vector3::z() * source_rot) * factor_point;
             (get_var_point(source).coords + local_point.coords).into()
         },
@@ -145,9 +146,9 @@ fn add_factor_lines(visual_factor_graph: &mut VisualFactorGraph, factor: &Factor
     let (r, g, b) = get_factor_color(factor);
     visual_factor_graph.lines.push([meas_point, source_point, Point3::new(r, g, b)]);
     if factor.factor_type == Observation2D || factor.factor_type == Observation3D {
-        visual_factor_graph.lines.push([meas_point, target_point, Point3::new(r, g, b)]);
+        visual_factor_graph.lines.push([meas_point.clone(), target_point, Point3::new(r, g, b)]);
     } else if factor.factor_type == Odometry2D || factor.factor_type == Odometry3D {
-        visual_factor_graph.lines.push([source_point, target_point, Point3::new(1.0, 1.0, 1.0)]);
+        visual_factor_graph.lines.push([source_point.clone(), target_point, Point3::new(1.0, 1.0, 1.0)]);
     }
 }
 
@@ -162,13 +163,13 @@ fn get_factor_color(factor: &Factor) -> (f32, f32, f32) {
 
 fn get_var_point(var: &Variable) -> Point3<f32> {
     let (x,y,z) = match var {
-        Variable::Vehicle2D(VehicleVariable2D{pose, ..}) => (pose[0], pose[1], 0),
-        Variable::Landmark2D(LandmarkVariable2D{position, ..}) => (position[0], position[1], 0),
-        Variable::Vehicle3D(VehicleVariable3D{pose, ..}) => (pose[0], pose[1], pose[2]),
-        Variable::Landmark3D(LandmarkVariable3D{position, ..}) => (position[0], position[1], position[2]),
+        Variable::Vehicle2D(VehicleVariable2D{pose, ..}) => (pose.borrow()[0], pose.borrow()[1], 0.),
+        Variable::Landmark2D(LandmarkVariable2D{position, ..}) => (position.borrow()[0], position.borrow()[1], 0.),
+        Variable::Vehicle3D(VehicleVariable3D{pose, ..}) => (pose.borrow()[0], pose.borrow()[1], pose.borrow()[2]),
+        Variable::Landmark3D(LandmarkVariable3D{position, ..}) => (position.borrow()[0], position.borrow()[1], position.borrow()[2]),
     };
 
-    Point3::new(x,y,z)
+    Point3::new(x as f32,y as f32,z as f32)
 }
 
 fn get_factor_point(factor: &Factor) -> Point3<f32> {
@@ -195,6 +196,17 @@ fn get_rot_from_3d(content: &[f64]) -> UnitQuaternion<f32> {
             content[5] as f32,
         )
     )
+}
+
+impl Variable {
+    pub fn get_content(&self) -> Vec<f64>{
+       match self {
+           Variable::Vehicle2D(v) => {v.pose.borrow().to_vec()}
+           Variable::Landmark2D(v) => {v.position.borrow().to_vec()}
+           Variable::Vehicle3D(v) => {v.pose.borrow().to_vec()}
+           Variable::Landmark3D(v) => {v.position.borrow().to_vec()}
+       } 
+    }
 }
 
 #[cfg(test)]

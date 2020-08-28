@@ -7,25 +7,25 @@ use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, calc_dq_dR,
 use std::ops::Range;
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var: &VehicleVariable3D) {
-    let range = if let FixedType::NonFixed(range) = var.fixed_type {
+    let range = if let FixedType::NonFixed(range) = &var.fixed_type {
         range
     } else {
         return;
     };
 
-    let iso_v = get_isometry(&var.pose);
+    let iso_v = get_isometry(&*var.pose.borrow());
     let iso_m = get_isometry(&factor.constraint);
     let (jacobi, jacobi_T) = calc_jacobians(&iso_v, &iso_m);
     let right_mult = &factor.information_matrix.content * jacobi;
 
     let H_update = jacobi_T * &right_mult;
-    update_H_submatrix(H, &H_update, range);
+    update_H_submatrix(H, &H_update, &range);
 
     let err = iso_m.inverse() * iso_v;
     let mut err_vec = err.translation.vector.data.to_vec();
     err_vec.extend_from_slice(&err.rotation.quaternion().coords.data.to_vec()[..3]);
     let b_update = (RowVector6::from_vec(err_vec) * &right_mult).transpose();
-    update_b_subvector(b, &b_update, range);
+    update_b_subvector(b, &b_update, &range);
 }
 
 fn calc_jacobians(iso_v: &Isometry3<f64>, iso_m: &Isometry3<f64>) -> (Matrix6<f64>, Matrix6<f64>) {

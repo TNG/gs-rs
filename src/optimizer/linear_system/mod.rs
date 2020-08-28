@@ -33,31 +33,13 @@ fn update_H_b(factor_graph: &FactorGraph, H: &mut DMatrix<f64>, b: &mut DVector<
     let var_i = &factor_graph.get_var(edge.source());
     let var_j = &factor_graph.get_var(edge.target());
 
-    match (var_i, var_j) {
-        (Vehicle2D(_), Vehicle2D(_)) => {}
-        (Vehicle2D(_), Landmark2D(_)) => {}
-        (Vehicle2D(_), Vehicle3D(_)) => {}
-        (Vehicle2D(_), Landmark3D(_)) => {}
-        (Landmark2D(_), Vehicle2D(_)) => {}
-        (Landmark2D(_), Landmark2D(_)) => {}
-        (Landmark2D(_), Vehicle3D(_)) => {}
-        (Landmark2D(_), Landmark3D(_)) => {}
-        (Vehicle3D(_), Vehicle2D(_)) => {}
-        (Vehicle3D(_), Landmark2D(_)) => {}
-        (Vehicle3D(_), Vehicle3D(_)) => {}
-        (Vehicle3D(_), Landmark3D(_)) => {}
-        (Landmark3D(_), Vehicle2D(_)) => {}
-        (Landmark3D(_), Landmark2D(_)) => {}
-        (Landmark3D(_), Vehicle3D(_)) => {}
-        (Landmark3D(_), Landmark3D(_)) => {}
+    match (&factor.factor_type, var_i, var_j) {
+        (Position2D, Vehicle2D(var_i),_) => {pos2d_handler::update_H_b(H, b, factor, var_i)}
+        (Odometry2D, Vehicle2D(var_i), Vehicle2D(var_j)) => {odo2d_handler::update_H_b(H, b, factor, var_i, var_j)}
+        (Observation2D, Vehicle2D(var_i), Landmark2D(var_j)) => {obs2d_handler::update_H_b(H, b, factor, var_i, var_j)}
+        (Position3D, Vehicle3D(var_i), _) => {pos3d_handler::update_H_b(H, b, factor, var_i)}
+        (Odometry3D, Vehicle3D(var_i), Vehicle3D(var_j)) => {odo3d_handler::update_H_b(H, b, factor, var_i, var_j)}
+        (Observation3D, Vehicle3D(var_i), Landmark3D(var_j)) => {obs3d_handler::update_H_b(H, b, factor, var_i, var_j)}
+        _ => {unreachable!("No valid edge.")}
     }
-
-    match factor.factor_type {
-        Position2D    => pos2d_handler::update_H_b(H, b, factor, var_i),
-        Odometry2D    => odo2d_handler::update_H_b(H, b, factor, var_i, var_j),
-        Observation2D => obs2d_handler::update_H_b(H, b, factor, var_i, var_j),
-        Position3D    => pos3d_handler::update_H_b(H, b, factor, var_i),
-        Odometry3D    => odo3d_handler::update_H_b(H, b, factor, var_i, var_j),
-        Observation3D => obs3d_handler::update_H_b(H, b, factor, var_i, var_j),
-    };
 }

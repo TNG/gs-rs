@@ -18,6 +18,7 @@ pub struct FactorGraphModel {
     pub fixed_vertices: BTreeSet<usize>,
 }
 
+// ToDo: directly use Variable as Vertex?
 /// Structure containing a factor graph model's vertex, representing a variable.
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Vertex {

@@ -24,7 +24,7 @@ pub type FactorGraphCsr<'a> = Csr<Variable, Factor, Directed, usize>;
 
 /// Structure representing the factor graph internally.
 #[derive(Debug)]
-pub struct FactorGraph<'a> {
+pub struct FactorGraph {
     /// The factor graph's CSR (compressed sparse row) representation.
     pub csr: Csr<Variable, Factor, Directed, usize>,
     /// The indices at which the factor graph's nodes can be found in get_var(/*node_index*/).
@@ -35,7 +35,7 @@ pub struct FactorGraph<'a> {
     pub matrix_dim: usize,
 }
 
-impl<'a> FactorGraph<'a> {
+impl FactorGraph {
     /// Returns the variable at the corresponding internal CSR index.
     pub fn get_var(&self, csr_index: usize) -> &Variable {
         self.csr.index(csr_index)

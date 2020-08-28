@@ -2,13 +2,13 @@ use petgraph::csr::Csr;
 
 use crate::factor_graph::factor::{Factor, FactorType::*};
 
-use crate::factor_graph::{variable::{VehicleVariable2D, FixedType, LandmarkVariable2D, VehicleVariable3D, LandmarkVariable3D}, FactorGraph};
+use crate::factor_graph::{variable::{VehicleVariable2D, FixedType, LandmarkVariable2D, VehicleVariable3D, LandmarkVariable3D, Variable}, FactorGraph};
 use crate::parser::model::{Edge, FactorGraphModel, Vertex};
 use std::ops::{Index};
 use petgraph::visit::EdgeRef;
 use std::collections::{BTreeSet, HashMap};
 
-impl From<FactorGraphModel> for FactorGraph<'_> {
+impl From<FactorGraphModel> for FactorGraph {
     fn from(model: FactorGraphModel) -> Self {
         let mut factor_graph = FactorGraph {
             csr: Csr::new(),
@@ -27,18 +27,18 @@ impl From<FactorGraphModel> for FactorGraph<'_> {
     }
 }
 
-impl From<&FactorGraph<'_>> for FactorGraphModel {
+impl From<&FactorGraph> for FactorGraphModel {
     fn from(factor_graph: &FactorGraph) -> Self {
         let mut model = FactorGraphModel { vertices: vec![], edges: vec![], fixed_vertices: BTreeSet::new() };
         for node_index in &factor_graph.node_indices {
             let node = factor_graph.csr.index(*node_index);
             model.vertices.push(Vertex {
                 id: node.get_id(),
-                vertex_type: match node.get_type() {
-                    Vehicle2D => String::from("Vehicle2D"),
-                    Landmark2D => String::from("Landmark2D"),
-                    Vehicle3D => String::from("Vehicle3D"),
-                    Landmark3D => String::from("Landmark3D")
+                vertex_type: match node {
+                    Variable::Vehicle2D(_) => String::from("Vehicle2D"),
+                    Variable::Landmark2D(_) => String::from("Landmark2D"),
+                    Variable::Vehicle3D(_) => String::from("Vehicle3D"),
+                    Variable::Landmark3D(_) => String::from("Landmark3D")
                 },
                 content: node.get_content(),
             });
@@ -95,7 +95,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
     match vertex.vertex_type.as_str() {
         "Vehicle2D" => factor_graph.node_indices.push(
             factor_graph.csr
-                .add_node(Box::new(VehicleVariable2D::new(
+                .add_node(Variable::Vehicle2D(VehicleVariable2D::new(
                     vertex.id,
                     vertex.content[0],
                     vertex.content[1],
@@ -105,7 +105,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
         ),
         "Landmark2D" => factor_graph.node_indices.push(
             factor_graph.csr
-                .add_node(Box::new(LandmarkVariable2D::new(
+                .add_node(Variable::Landmark2D(LandmarkVariable2D::new(
                     vertex.id,
                     vertex.content[0],
                     vertex.content[1],
@@ -114,7 +114,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
         ),
         "Vehicle3D" => factor_graph.node_indices.push(
             factor_graph.csr
-                .add_node(Box::new(VehicleVariable3D::new(
+                .add_node(Variable::Vehicle3D(VehicleVariable3D::new(
                     vertex.id,
                     vertex.content[0],
                     vertex.content[1],
@@ -128,7 +128,7 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
         ),
         "Landmark3D" =>factor_graph.node_indices.push(
             factor_graph.csr
-                .add_node(Box::new(LandmarkVariable3D::new(
+                .add_node(Variable::Landmark3D(LandmarkVariable3D::new(
                     vertex.id,
                     vertex.content[0],
                     vertex.content[1],

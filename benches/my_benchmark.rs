@@ -2,7 +2,6 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use gs_rs::parser::g2o::G2oParser;
 use gs_rs::parser::Parser;
 use gs_rs::optimizer::optimize;
-use std::time::Duration;
 
 fn bench_optimization(file_name: &str, iterations: usize) {
     let factor_graph = G2oParser::parse_file(&["data_files/benchmark_input/", file_name, ".g2o"].concat()).unwrap();

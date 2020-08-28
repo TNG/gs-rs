@@ -5,23 +5,23 @@ use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::{FixedType, VehicleVariable2D, LandmarkVariable2D};
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &VehicleVariable2D, var_j: &LandmarkVariable2D) {
-    let (pos_i, rot_i) = get_pos_and_rot(&var_i.get_content());
-    let pos_j = get_pos(&var_j.get_content());
+    let (pos_i, rot_i) = get_pos_and_rot(&*var_i.pose.borrow());
+    let pos_j = get_pos(&*var_j.position.borrow());
     let pos_ij = get_pos(&factor.constraint);
     let (jacobi, jacobi_T) = calc_jacobians(&pos_i, rot_i, &pos_j);
     let right_mult = &factor.information_matrix.content * jacobi;
 
     let H_updates = jacobi_T * &right_mult;
-    update_H_submatrix(H, &H_updates.index((..3, ..3)), var_i.fixed_type, var_i.fixed_type);
-    update_H_submatrix(H, &H_updates.index((..3, 3..)), var_i.fixed_type, var_j.fixed_type);
-    update_H_submatrix(H, &H_updates.index((3.., ..3)), var_j.fixed_type, var_i.fixed_type);
-    update_H_submatrix(H, &H_updates.index((3.., 3..)), var_j.fixed_type, var_j.fixed_type);
+    update_H_submatrix(H, &H_updates.index((..3, ..3)), &var_i.fixed_type, &var_i.fixed_type);
+    update_H_submatrix(H, &H_updates.index((..3, 3..)), &var_i.fixed_type, &var_j.fixed_type);
+    update_H_submatrix(H, &H_updates.index((3.., ..3)), &var_j.fixed_type, &var_i.fixed_type);
+    update_H_submatrix(H, &H_updates.index((3.., 3..)), &var_j.fixed_type, &var_j.fixed_type);
 
     let err_pos = Rotation2::new(-rot_i) * (pos_j - pos_i) - pos_ij;
     let err_vec = err_pos.data.to_vec();
     let b_updates = (RowVector2::from_vec(err_vec) * &right_mult).transpose();
-    update_b_subvector(b, &b_updates.index((..3, ..)), var_i);
-    update_b_subvector(b, &b_updates.index((3.., ..)), var_j);
+    update_b_subvector(b, &b_updates.index((..3, ..)), &var_i.fixed_type);
+    update_b_subvector(b, &b_updates.index((3.., ..)), &var_j.fixed_type);
 }
 
 fn calc_jacobians(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f64>) -> (Matrix2x5<f64>, Matrix5x2<f64>) {
@@ -46,8 +46,8 @@ fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, 
     }
 }
 
-fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64,Dynamic,U1,U1,U5>>, var: &LandmarkVariable2D) {
-    if let FixedType::NonFixed(range) = var.get_fixed_type() {
+fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64,Dynamic,U1,U1,U5>>, var: &FixedType) {
+    if let FixedType::NonFixed(range) = var {
         let range = range.to_owned();
         let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);
         b.index_mut((range, ..)).copy_from(updated_subvector);

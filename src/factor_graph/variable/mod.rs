@@ -4,12 +4,6 @@ use std::cell::RefCell;
 use std::ops::Range;
 use std::rc::Rc;
 
-pub mod landmark_variable_2d;
-pub mod vehicle_variable_2d;
-
-pub mod landmark_variable_3d;
-pub mod vehicle_variable_3d;
-
 #[derive(Debug, Eq, PartialEq)]
 pub enum FixedType {
     Fixed,
@@ -50,7 +44,7 @@ pub struct LandmarkVariable3D {
 }
 
 /// Enum representing a supported variable type.
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub enum Variable {
     /// Vehicle pose (position and rotation) in 2D.
     Vehicle2D(VehicleVariable2D),
@@ -102,6 +96,34 @@ impl LandmarkVariable3D {
             id,
             position: Rc::new(RefCell::new([x, y, z])),
             fixed_type,
+        }
+    }
+}
+
+impl Variable {
+    pub fn get_fixed_type(&self) -> &FixedType {
+        match self{
+            Variable::Vehicle2D(v) => &v.fixed_type,
+            Variable::Landmark2D(v) => &v.fixed_type,
+            Variable::Vehicle3D(v) => &v.fixed_type,
+            Variable::Landmark3D(v) => &v.fixed_type,
+        }
+    }
+    pub fn set_content(&self, update: Vec<f64>){
+        let u = update;
+        match self {
+            Variable::Vehicle2D(v) => {*v.pose.borrow_mut()=[u[0], u[1], u[2]]}
+            Variable::Landmark2D(v) => {*v.position.borrow_mut()=[u[0], u[1]]}
+            Variable::Vehicle3D(v) => {*v.pose.borrow_mut()=[u[0], u[1], u[2], u[3], u[4], u[5], u[6]]}
+            Variable::Landmark3D(v) => {*v.position.borrow_mut()=[u[0], u[1], u[3]]}
+        }
+    }
+    pub fn get_id(&self) -> usize {
+        match self {
+            Variable::Vehicle2D(v) => v.id,
+            Variable::Landmark2D(v) => v.id,
+            Variable::Vehicle3D(v) => v.id,
+            Variable::Landmark3D(v) => v.id,
         }
     }
 }

@@ -2,8 +2,7 @@
 
 #![allow(non_snake_case)]
 
-use crate::factor_graph::variable::Variable;
-use crate::factor_graph::variable::{FixedType, VariableType::*};
+use crate::factor_graph::variable::{FixedType, Variable};
 use crate::factor_graph::FactorGraph;
 use crate::optimizer::linear_system::calculate_H_b;
 use crate::optimizer::solver::sparse_cholesky::SparseCholeskySolver;
@@ -31,35 +30,38 @@ fn update_once(factor_graph: &FactorGraph) {
 }
 
 fn update_var(var: &Variable, solution: &[f64]) {
-    let range = if let FixedType::NonFixed(range) = var.get_fixed_type() {
-        range.to_owned()
+    let correction = if let FixedType::NonFixed(range) = var.get_fixed_type() {
+        &solution[range.to_owned()]
     } else {
         return;
     };
-    let old_content = var.get_content();
-    let correction = &solution[range];
-
-    let updated_content = match var.get_type() {
-        Landmark2D | Vehicle2D | Landmark3D => {
-            let mut updated_content: Vec<f64> = old_content.iter().zip(correction.iter())
-                .map(|(old, cor)| old + cor).collect();
-            if var.get_type() == Vehicle2D {
-                updated_content[2] %= 2.0 * PI;
-                if updated_content[2] > PI {
-                    updated_content[2] -= 2.0 * PI;
-                } else if updated_content[2] < -PI {
-                    updated_content[2] += 2.0 * PI;
-                }
+    
+    let updated_content = match var {
+        Variable::Vehicle2D(var) => {
+            let mut updated_content: Vec<f64> = var.pose.borrow().iter().zip(correction.iter()).map(|(old, cor)| old + cor).collect();
+            updated_content[2] %= 2.0 * PI;
+            if updated_content[2] > PI {
+                updated_content[2] -= 2.0 * PI;
+            } else if updated_content[2] < -PI {
+                updated_content[2] += 2.0 * PI;
             }
             updated_content
         }
-        Vehicle3D => {
-            let old_iso = get_isometry(&old_content);
+        Variable::Landmark2D(var) => {
+            var.position.borrow().iter().zip(correction.iter())
+            .map(|(old, cor)| old + cor).collect()
+        }
+        Variable::Vehicle3D(var) => {
+            let old_iso = get_isometry(&*var.pose.borrow());
             let cor_iso = get_isometry_normalized(correction);
             let new_iso = old_iso * cor_iso;
             let mut updated_content = new_iso.translation.vector.data.to_vec();
             updated_content.extend(&new_iso.rotation.quaternion().coords.data.to_vec());
             updated_content
+        }
+        Variable::Landmark3D(var) => {
+            var.position.borrow().iter().zip(correction.iter())
+            .map(|(old, cor)| old + cor).collect()
         }
     };
     var.set_content(updated_content);

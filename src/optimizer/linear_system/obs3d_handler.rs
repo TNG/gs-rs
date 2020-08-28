@@ -6,24 +6,24 @@ use crate::factor_graph::variable::{FixedType, VehicleVariable3D, LandmarkVariab
 use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, skew_trans};
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &VehicleVariable3D, var_j: &LandmarkVariable3D) {
-    let iso_i = get_isometry(&var_i.pose);
-    let trans_j = get_trans(&var_j.get_content());
+    let iso_i = get_isometry(&*var_i.pose.borrow());
+    let trans_j = get_trans(&*var_j.position.borrow());
     let local_j = (iso_i.inverse() * trans_j).translation;
     let pos_ij = get_pos(&factor.constraint);
     let (jacobi, jacobi_T) = calc_jacobians(&iso_i, &local_j);
     let right_mult = &factor.information_matrix.content * jacobi;
 
     let H_updates = jacobi_T * &right_mult;
-    update_H_submatrix(H, &H_updates.index((..6, ..6)), var_i.fixed_type, var_i.fixed_type);
-    update_H_submatrix(H, &H_updates.index((..6, 6..)), var_i.fixed_type, var_j.fixed_type);
-    update_H_submatrix(H, &H_updates.index((6.., ..6)), var_j.fixed_type, var_i.fixed_type);
-    update_H_submatrix(H, &H_updates.index((6.., 6..)), var_j.fixed_type, var_j.fixed_type);
+    update_H_submatrix(H, &H_updates.index((..6, ..6)), &var_i.fixed_type, &var_i.fixed_type);
+    update_H_submatrix(H, &H_updates.index((..6, 6..)), &var_i.fixed_type, &var_j.fixed_type);
+    update_H_submatrix(H, &H_updates.index((6.., ..6)), &var_j.fixed_type, &var_i.fixed_type);
+    update_H_submatrix(H, &H_updates.index((6.., 6..)), &var_j.fixed_type, &var_j.fixed_type);
 
     let err_pos = local_j.vector - pos_ij;
     let err_vec = err_pos.data.to_vec();
     let b_updates = (RowVector3::from_vec(err_vec) * &right_mult).transpose();
-    update_b_subvector(b, &b_updates.index((..6, ..)), var_i.fixed_type);
-    update_b_subvector(b, &b_updates.index((6.., ..)), var_j.fixed_type);
+    update_b_subvector(b, &b_updates.index((..6, ..)), &var_i.fixed_type);
+    update_b_subvector(b, &b_updates.index((6.., ..)), &var_j.fixed_type);
 }
 
 fn calc_jacobians(iso_i: &Isometry3<f64>, local_j: &Translation3<f64>) -> (MatrixMN<f64, U3, U9>, MatrixMN<f64, U9, U3>) {
@@ -50,7 +50,7 @@ fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, 
     }
 }
 
-fn get_trans(data: &[f64]) -> Translation3<f64> {
+fn get_trans(data: &[f64; 3]) -> Translation3<f64> {
     Translation3::new(data[0], data[1], data[2])
 }
 

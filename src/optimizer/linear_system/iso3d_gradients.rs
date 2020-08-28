@@ -54,7 +54,7 @@ pub fn skew_matr_T_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> M
     ret
 }
 
-pub fn get_isometry(pose: &[f64; 7]) -> Isometry3<f64> {
+pub fn get_isometry(pose: &[f64]) -> Isometry3<f64> {
     Isometry3::from_parts(
         Translation3::new(pose[0], pose[1], pose[2]),
         UnitQuaternion::from_quaternion(Quaternion::new(pose[6], pose[3], pose[4], pose[5])),
