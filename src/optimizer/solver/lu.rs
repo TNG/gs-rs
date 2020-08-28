@@ -21,12 +21,12 @@ impl Solver for LUSolver {
 
 #[cfg(test)]
 mod test {
-    use log::LevelFilter;
-    use nalgebra::{DMatrix, DVector};
-    use log::info;
-    use approx::relative_eq;
     use crate::optimizer::solver::lu::LUSolver;
     use crate::optimizer::solver::Solver;
+    use approx::relative_eq;
+    use log::info;
+    use log::LevelFilter;
+    use nalgebra::{DMatrix, DVector};
 
     fn init() {
         let _ = env_logger::builder()
@@ -39,14 +39,14 @@ mod test {
     fn solver_invertible_test() {
         init();
         #[allow(non_snake_case)]
-        let invertible_H = vec![ 2.0, -1.0,  2.0,   // transposed H is displayed
-                                -1.0,  2.0, -1.0,
-                                 0.0, -1.0,  2.0,];
+        #[rustfmt::skip]
+        let invertible_H = vec![
+            2.0, -1.0, 2.0, // transposed H is displayed
+            -1.0, 2.0, -1.0,
+            0.0, -1.0, 2.0,
+        ];
         let b = vec![6.0, 6.0, 6.0];
-        let solve_output = LUSolver::solve(
-            DMatrix::<f64>::from_vec(3, 3, invertible_H),
-            &DVector::from_vec(b),
-        );
+        let solve_output = LUSolver::solve(DMatrix::<f64>::from_vec(3, 3, invertible_H), &DVector::from_vec(b));
         let x = match solve_output {
             Ok(sol) => sol,
             Err(str) => panic!(str),
@@ -61,9 +61,12 @@ mod test {
     fn solver_not_invertible_test() {
         init();
         #[allow(non_snake_case)]
-        let not_invertible_H = vec![0.0,  2.0, -1.0,   // transposed H is displayed
-                                    3.0, -2.0,  1.0,
-                                    3.0,  2.0, -1.0,];
+        #[rustfmt::skip]
+        let not_invertible_H = vec![
+            0.0, 2.0, -1.0, // transposed H is displayed
+            3.0, -2.0, 1.0,
+            3.0, 2.0, -1.0,
+        ];
         let b = vec![6.0, 6.0, 6.0];
         let solve_output = LUSolver::solve(
             DMatrix::<f64>::from_vec(3, 3, not_invertible_H.clone()),
@@ -84,9 +87,12 @@ mod test {
     fn solver_incompatible_dimension_test() {
         init();
         #[allow(non_snake_case)]
-        let positive_definite_H = vec![ 2.0, -1.0,  0.0,   // transposed H is displayed
-                                       -1.0,  2.0, -1.0,
-                                        0.0, -1.0,  2.0,];
+        #[rustfmt::skip]
+        let positive_definite_H = vec![
+            2.0, -1.0, 0.0, // transposed H is displayed
+            -1.0, 2.0, -1.0,
+            0.0, -1.0, 2.0,
+        ];
         let b = vec![6.0, 6.0, 6.0, 6.0];
         let solve_output = LUSolver::solve(
             DMatrix::<f64>::from_vec(3, 3, positive_definite_H.clone()),

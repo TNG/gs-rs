@@ -1,6 +1,6 @@
+use gs_rs::optimizer::optimize;
 use gs_rs::parser::g2o::G2oParser;
 use gs_rs::parser::Parser;
-use gs_rs::optimizer::optimize;
 
 fn main() {
     // parse g2o file containing 2D variables and odometries to internal factor graph representation

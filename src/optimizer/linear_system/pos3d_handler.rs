@@ -1,9 +1,9 @@
 #![allow(non_snake_case)]
 
-use nalgebra::{DMatrix, DVector, Matrix3, Matrix6, Isometry3, RowVector6, Matrix, ArrayStorage, Vector, U1, U6};
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::{FixedType, VehicleVariable3D};
-use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, calc_dq_dR, skew_matr_and_mult_parts};
+use crate::optimizer::linear_system::iso3d_gradients::{calc_dq_dR, get_isometry, skew_matr_and_mult_parts};
+use nalgebra::{ArrayStorage, DMatrix, DVector, Isometry3, Matrix, Matrix3, Matrix6, RowVector6, Vector, U1, U6};
 use std::ops::Range;
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var: &VehicleVariable3D) {
@@ -35,17 +35,28 @@ fn calc_jacobians(iso_v: &Isometry3<f64>, iso_m: &Isometry3<f64>) -> (Matrix6<f6
 
     let mut jacobian = Matrix6::from_vec(vec![0.0; 72]);
     jacobian.index_mut((..3, ..3)).copy_from(&Err_rot.matrix());
-    jacobian.index_mut((3.., 3..)).copy_from(&(dq_dR * skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
+    jacobian
+        .index_mut((3.., 3..))
+        .copy_from(&(dq_dR * skew_matr_and_mult_parts(&Matrix3::<f64>::identity(), &Err_rot.matrix())));
 
     (jacobian, jacobian.transpose())
 }
 
-fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, U6, U6, ArrayStorage<f64,U6,U6>>, range: &Range<usize>) {
+fn update_H_submatrix(
+    H: &mut DMatrix<f64>,
+    added_matrix: &Matrix<f64, U6, U6, ArrayStorage<f64, U6, U6>>,
+    range: &Range<usize>,
+) {
     let updated_submatrix = &(H.index((range.to_owned(), range.to_owned())) + added_matrix);
-    H.index_mut((range.to_owned(), range.to_owned())).copy_from(updated_submatrix);
+    H.index_mut((range.to_owned(), range.to_owned()))
+        .copy_from(updated_submatrix);
 }
 
-fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, U6, ArrayStorage<f64,U6,U1>>, range: &Range<usize>) {
+fn update_b_subvector(
+    b: &mut DVector<f64>,
+    added_vector: &Vector<f64, U6, ArrayStorage<f64, U6, U1>>,
+    range: &Range<usize>,
+) {
     let updated_subvector = &(b.index((range.to_owned(), ..)) + added_vector);
     b.index_mut((range.to_owned(), ..)).copy_from(updated_subvector);
 }

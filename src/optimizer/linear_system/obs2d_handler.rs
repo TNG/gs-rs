@@ -1,10 +1,19 @@
 #![allow(non_snake_case)]
 
-use nalgebra::{DMatrix, DVector, Vector2, Matrix2x5, Matrix5x2, Matrix, Dynamic, U1, U5, SliceStorage, Vector, RowVector2, Rotation2};
 use crate::factor_graph::factor::Factor;
-use crate::factor_graph::variable::{FixedType, VehicleVariable2D, LandmarkVariable2D};
+use crate::factor_graph::variable::{FixedType, LandmarkVariable2D, VehicleVariable2D};
+use nalgebra::{
+    DMatrix, DVector, Dynamic, Matrix, Matrix2x5, Matrix5x2, Rotation2, RowVector2, SliceStorage, Vector, Vector2, U1,
+    U5,
+};
 
-pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &VehicleVariable2D, var_j: &LandmarkVariable2D) {
+pub fn update_H_b(
+    H: &mut DMatrix<f64>,
+    b: &mut DVector<f64>,
+    factor: &Factor,
+    var_i: &VehicleVariable2D,
+    var_j: &LandmarkVariable2D,
+) {
     let (pos_i, rot_i) = get_pos_and_rot(&*var_i.pose.borrow());
     let pos_j = get_pos(&*var_j.position.borrow());
     let pos_ij = get_pos(&factor.constraint);
@@ -31,6 +40,7 @@ fn calc_jacobians(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f64>) -> (Ma
     let cos_i = rot_i.cos();
     let mid_col_top = -sin_i * delta_pos[0] + cos_i * delta_pos[1];
     let mid_col_bot = -cos_i * delta_pos[0] - sin_i * delta_pos[1];
+    #[rustfmt::skip]
     let jacobian = Matrix2x5::from_vec(vec![     -cos_i,       sin_i,    // transposed matrix is displayed
                                                  -sin_i,      -cos_i,
                                             mid_col_top, mid_col_bot,
@@ -39,14 +49,24 @@ fn calc_jacobians(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f64>) -> (Ma
     (jacobian, jacobian.transpose())
 }
 
-fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U5>>, var_row: &FixedType, var_col: &FixedType) {
-    if let (FixedType::NonFixed(row_range), FixedType::NonFixed(col_range)) = (var_row, var_col){
+fn update_H_submatrix(
+    H: &mut DMatrix<f64>,
+    added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64, Dynamic, Dynamic, U1, U5>>,
+    var_row: &FixedType,
+    var_col: &FixedType,
+) {
+    if let (FixedType::NonFixed(row_range), FixedType::NonFixed(col_range)) = (var_row, var_col) {
         let updated_submatrix = &(H.index((row_range.to_owned(), col_range.to_owned())) + added_matrix);
-        H.index_mut((row_range.to_owned(), col_range.to_owned())).copy_from(updated_submatrix);
+        H.index_mut((row_range.to_owned(), col_range.to_owned()))
+            .copy_from(updated_submatrix);
     }
 }
 
-fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64,Dynamic,U1,U1,U5>>, var: &FixedType) {
+fn update_b_subvector(
+    b: &mut DVector<f64>,
+    added_vector: &Vector<f64, Dynamic, SliceStorage<f64, Dynamic, U1, U1, U5>>,
+    var: &FixedType,
+) {
     if let FixedType::NonFixed(range) = var {
         let range = range.to_owned();
         let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);

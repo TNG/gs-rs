@@ -1,13 +1,15 @@
 //! Handles the graphical user interface.
 
-use kiss3d::scene::SceneNode;
-use nalgebra::{Point3, UnitQuaternion, Vector3, Translation3, Rotation3, Quaternion};
-use kiss3d::window::Window;
-use kiss3d::camera::ArcBall;
-use petgraph::visit::EdgeRef;
 use crate::factor_graph::FactorGraph;
-use crate::factor_graph::{variable::{VehicleVariable2D, Variable, LandmarkVariable2D, LandmarkVariable3D, VehicleVariable3D}, factor::{Factor, FactorType::*}};
-
+use crate::factor_graph::{
+    factor::{Factor, FactorType::*},
+    variable::{LandmarkVariable2D, LandmarkVariable3D, Variable, VehicleVariable2D, VehicleVariable3D},
+};
+use kiss3d::camera::ArcBall;
+use kiss3d::scene::SceneNode;
+use kiss3d::window::Window;
+use nalgebra::{Point3, Quaternion, Rotation3, Translation3, UnitQuaternion, Vector3};
+use petgraph::visit::EdgeRef;
 
 struct VisualFactorGraph {
     scene_node: SceneNode,
@@ -25,7 +27,9 @@ pub fn visualize(factor_graph: &FactorGraph) {
     };
     let mut cam = ArcBall::new(Point3::new(0.0, 0.0, 50.0), init_point);
     while window.render_with_camera(&mut cam) {
-        visual_factor_graph.lines.iter()
+        visual_factor_graph
+            .lines
+            .iter()
             .for_each(|line| window.draw_line(&line[0], &line[1], &line[2]));
     }
 }
@@ -36,12 +40,21 @@ fn add_factor_graph_to_window(window: &mut Window, factor_graph: &FactorGraph) -
         lines: vec![],
     };
 
-    factor_graph.node_indices.iter()
+    factor_graph
+        .node_indices
+        .iter()
         .for_each(|i| add_var(&mut visual_factor_graph, factor_graph.get_var(*i)));
 
-    factor_graph.node_indices.iter()
-        .for_each(|i| factor_graph.csr.edges(*i)
-            .for_each(|edge| add_factor(&mut visual_factor_graph, edge.weight(), factor_graph.get_var(edge.source()), factor_graph.get_var(edge.target()))));
+    factor_graph.node_indices.iter().for_each(|i| {
+        factor_graph.csr.edges(*i).for_each(|edge| {
+            add_factor(
+                &mut visual_factor_graph,
+                edge.weight(),
+                factor_graph.get_var(edge.source()),
+                factor_graph.get_var(edge.target()),
+            )
+        })
+    });
 
     visual_factor_graph
 }
@@ -58,7 +71,13 @@ fn add_factor(visual_factor_graph: &mut VisualFactorGraph, factor: &Factor, sour
     let mut meas_object = add_factor_core(visual_factor_graph, &meas_point);
     handle_factor_rotation(factor, &mut meas_object, source);
     color_meas_object(factor, &mut meas_object);
-    add_factor_lines(visual_factor_graph, factor, meas_point, get_var_point(source), get_var_point(target));
+    add_factor_lines(
+        visual_factor_graph,
+        factor,
+        meas_point,
+        get_var_point(source),
+        get_var_point(target),
+    );
 }
 
 fn add_var_core(visual_factor_graph: &mut VisualFactorGraph, var_point: &Point3<f32>) -> SceneNode {
@@ -71,15 +90,14 @@ fn handle_var_rotation(var: &Variable, var_object: &mut SceneNode) {
     let mut rot_object = var_object.add_capsule(0.02, 2.0);
 
     match var {
-        Variable::Vehicle2D(v) => {        
-            rot_object.set_local_rotation(
-            UnitQuaternion::from_axis_angle(&Vector3::z_axis(), get_rot_from_2d(&*v.pose.borrow()))
-        )}
+        Variable::Vehicle2D(v) => rot_object.set_local_rotation(UnitQuaternion::from_axis_angle(
+            &Vector3::z_axis(),
+            get_rot_from_2d(&*v.pose.borrow()),
+        )),
         Variable::Vehicle3D(v) => {
-            rot_object.set_local_rotation(
-            get_rot_from_3d(&*v.pose.borrow())
-        );}
-        _ => ()
+            rot_object.set_local_rotation(get_rot_from_3d(&*v.pose.borrow()));
+        }
+        _ => (),
     }
 
     rot_object.prepend_to_local_translation(&Translation3::new(0.0, 0.20, 0.0));
@@ -100,7 +118,7 @@ fn calc_meas_point(factor: &Factor, source: &Variable) -> Point3<f32> {
             let source_rot = get_rot_from_2d(&source.get_content());
             let local_point = Rotation3::new(Vector3::z() * source_rot) * factor_point;
             (get_var_point(source).coords + local_point.coords).into()
-        },
+        }
         Odometry3D | Observation3D => {
             let source_rot = get_rot_from_3d(&source.get_content());
             let local_point = source_rot.to_rotation_matrix() * factor_point;
@@ -124,9 +142,7 @@ fn handle_factor_rotation(factor: &Factor, meas_object: &mut SceneNode, source: 
             _ => panic!("Internal Error at visualization of unsupported rotation."),
         };
         let mut meas_rot_object = meas_object.add_capsule(0.04, 1.5);
-        meas_rot_object.set_local_rotation(
-            UnitQuaternion::from_axis_angle(&Vector3::z_axis(), meas_rot)
-        );
+        meas_rot_object.set_local_rotation(UnitQuaternion::from_axis_angle(&Vector3::z_axis(), meas_rot));
         meas_rot_object.prepend_to_local_translation(&Translation3::new(0.0, 0.15, 0.0));
     } else if factor.factor_type == Position3D || factor.factor_type == Odometry3D {
         let factor_rot = get_rot_from_3d(&factor.constraint);
@@ -142,13 +158,25 @@ fn color_meas_object(factor: &Factor, meas_object: &mut SceneNode) {
     meas_object.set_color(r, g, b);
 }
 
-fn add_factor_lines(visual_factor_graph: &mut VisualFactorGraph, factor: &Factor, meas_point: Point3<f32>, source_point: Point3<f32>, target_point: Point3<f32>) {
+fn add_factor_lines(
+    visual_factor_graph: &mut VisualFactorGraph,
+    factor: &Factor,
+    meas_point: Point3<f32>,
+    source_point: Point3<f32>,
+    target_point: Point3<f32>,
+) {
     let (r, g, b) = get_factor_color(factor);
-    visual_factor_graph.lines.push([meas_point, source_point, Point3::new(r, g, b)]);
+    visual_factor_graph
+        .lines
+        .push([meas_point, source_point, Point3::new(r, g, b)]);
     if factor.factor_type == Observation2D || factor.factor_type == Observation3D {
-        visual_factor_graph.lines.push([meas_point.clone(), target_point, Point3::new(r, g, b)]);
+        visual_factor_graph
+            .lines
+            .push([meas_point.clone(), target_point, Point3::new(r, g, b)]);
     } else if factor.factor_type == Odometry2D || factor.factor_type == Odometry3D {
-        visual_factor_graph.lines.push([source_point.clone(), target_point, Point3::new(1.0, 1.0, 1.0)]);
+        visual_factor_graph
+            .lines
+            .push([source_point.clone(), target_point, Point3::new(1.0, 1.0, 1.0)]);
     }
 }
 
@@ -160,16 +188,17 @@ fn get_factor_color(factor: &Factor) -> (f32, f32, f32) {
     }
 }
 
-
 fn get_var_point(var: &Variable) -> Point3<f32> {
-    let (x,y,z) = match var {
-        Variable::Vehicle2D(VehicleVariable2D{pose, ..}) => (pose.borrow()[0], pose.borrow()[1], 0.),
-        Variable::Landmark2D(LandmarkVariable2D{position, ..}) => (position.borrow()[0], position.borrow()[1], 0.),
-        Variable::Vehicle3D(VehicleVariable3D{pose, ..}) => (pose.borrow()[0], pose.borrow()[1], pose.borrow()[2]),
-        Variable::Landmark3D(LandmarkVariable3D{position, ..}) => (position.borrow()[0], position.borrow()[1], position.borrow()[2]),
+    let (x, y, z) = match var {
+        Variable::Vehicle2D(VehicleVariable2D { pose, .. }) => (pose.borrow()[0], pose.borrow()[1], 0.),
+        Variable::Landmark2D(LandmarkVariable2D { position, .. }) => (position.borrow()[0], position.borrow()[1], 0.),
+        Variable::Vehicle3D(VehicleVariable3D { pose, .. }) => (pose.borrow()[0], pose.borrow()[1], pose.borrow()[2]),
+        Variable::Landmark3D(LandmarkVariable3D { position, .. }) => {
+            (position.borrow()[0], position.borrow()[1], position.borrow()[2])
+        }
     };
 
-    Point3::new(x as f32,y as f32,z as f32)
+    Point3::new(x as f32, y as f32, z as f32)
 }
 
 fn get_factor_point(factor: &Factor) -> Point3<f32> {
@@ -188,34 +217,32 @@ fn get_rot_from_2d(content: &[f64]) -> f32 {
 }
 
 fn get_rot_from_3d(content: &[f64]) -> UnitQuaternion<f32> {
-    UnitQuaternion::from_quaternion(
-        Quaternion::new(
-            content[6] as f32,
-            content[3] as f32,
-            content[4] as f32,
-            content[5] as f32,
-        )
-    )
+    UnitQuaternion::from_quaternion(Quaternion::new(
+        content[6] as f32,
+        content[3] as f32,
+        content[4] as f32,
+        content[5] as f32,
+    ))
 }
 
 impl Variable {
-    pub fn get_content(&self) -> Vec<f64>{
-       match self {
-           Variable::Vehicle2D(v) => {v.pose.borrow().to_vec()}
-           Variable::Landmark2D(v) => {v.position.borrow().to_vec()}
-           Variable::Vehicle3D(v) => {v.pose.borrow().to_vec()}
-           Variable::Landmark3D(v) => {v.position.borrow().to_vec()}
-       } 
+    pub fn get_content(&self) -> Vec<f64> {
+        match self {
+            Variable::Vehicle2D(v) => v.pose.borrow().to_vec(),
+            Variable::Landmark2D(v) => v.position.borrow().to_vec(),
+            Variable::Vehicle3D(v) => v.pose.borrow().to_vec(),
+            Variable::Landmark3D(v) => v.position.borrow().to_vec(),
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use log::LevelFilter;
-    use crate::parser::json::JsonParser;
-    use crate::parser::Parser;
     use super::*;
     use crate::parser::g2o::G2oParser;
+    use crate::parser::json::JsonParser;
+    use crate::parser::Parser;
+    use log::LevelFilter;
 
     fn init() {
         let _ = env_logger::builder()

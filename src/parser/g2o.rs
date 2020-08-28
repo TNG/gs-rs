@@ -1,6 +1,6 @@
 //! Conversion between factor graph structures and G2O files.
 
-use crate::parser::model::{FactorGraphModel, Vertex, Edge};
+use crate::parser::model::{Edge, FactorGraphModel, Vertex};
 use crate::parser::Parser;
 use std::collections::BTreeSet;
 
@@ -31,17 +31,28 @@ impl Parser for G2oParser {
             fixed_vertices: BTreeSet::new(),
         };
         let lines = s.split("\n");
-        lines.enumerate()
-            .for_each(|(i, line)| Self::parse_line(&mut model, line, i+1));
+        lines
+            .enumerate()
+            .for_each(|(i, line)| Self::parse_line(&mut model, line, i + 1));
         Ok(model)
     }
 
     fn compose_model_to_string(model: FactorGraphModel) -> Result<String, String> {
         let mut str_vec: Vec<String> = vec![];
-        if model.edges.iter().any(|e| e.edge_type == "Position3D" || e.edge_type == "Observation3D") {
+        if model
+            .edges
+            .iter()
+            .any(|e| e.edge_type == "Position3D" || e.edge_type == "Observation3D")
+        {
             str_vec.push(String::from("PARAMS_SE3OFFSET 0 0 0 0 0 0 0 1"));
         }
-        str_vec.extend::<Vec<String>>(model.vertices.iter().map(|v| Self::vertex_to_string(v, &model.fixed_vertices)).collect());
+        str_vec.extend::<Vec<String>>(
+            model
+                .vertices
+                .iter()
+                .map(|v| Self::vertex_to_string(v, &model.fixed_vertices))
+                .collect(),
+        );
         str_vec.extend::<Vec<String>>(model.edges.iter().map(Self::edge_to_string).collect());
         Ok(str_vec.join("\n"))
     }
@@ -54,13 +65,14 @@ impl G2oParser {
             return;
         }
         match tokens[0] {
-            "VERTEX_SE2" | "VERTEX_XY"
-            | "VERTEX_SE3:QUAT" | "VERTEX_TRACKXYZ"
-            => model.vertices.push(Self::parse_vertex(&tokens, line_number)),
-            "EDGE_PRIOR_SE2" | "EDGE_SE2" | "EDGE_SE2_XY"
-            | "EDGE_SE3_PRIOR" | "EDGE_SE3:QUAT" | "EDGE_SE3_TRACKXYZ"
-            => model.edges.push(Self::parse_edge(&tokens, line_number)),
-            "FIX" => {model.fixed_vertices.extend(Self::parse_fix(&tokens, line_number));},
+            "VERTEX_SE2" | "VERTEX_XY" | "VERTEX_SE3:QUAT" | "VERTEX_TRACKXYZ" => {
+                model.vertices.push(Self::parse_vertex(&tokens, line_number))
+            }
+            "EDGE_PRIOR_SE2" | "EDGE_SE2" | "EDGE_SE2_XY" | "EDGE_SE3_PRIOR" | "EDGE_SE3:QUAT"
+            | "EDGE_SE3_TRACKXYZ" => model.edges.push(Self::parse_edge(&tokens, line_number)),
+            "FIX" => {
+                model.fixed_vertices.extend(Self::parse_fix(&tokens, line_number));
+            }
             "PARAMS_SE3OFFSET" => (), // line expected to equal "PARAMS_SE3OFFSET 0 0 0 0 0 0 0 1"
             _ => panic!("Unknown keyword at beginning of line {}: {}", line_number, tokens[0]),
         };
@@ -79,8 +91,7 @@ impl G2oParser {
         Vertex {
             id: Self::parse_val(tokens[1], line_number),
             vertex_type: String::from(type_str),
-            content: tokens[2..].iter()
-                .map(|s| Self::parse_val(s, line_number)).collect(),
+            content: tokens[2..].iter().map(|s| Self::parse_val(s, line_number)).collect(),
         }
     }
 
@@ -99,15 +110,23 @@ impl G2oParser {
         Edge {
             edge_type: String::from(type_str),
             vertices: match tokens[0] {
-                "EDGE_SE3_PRIOR" | "EDGE_SE3_TRACKXYZ" => tokens[1..v_num].iter().
-                    map(|s| Self::parse_val(s, line_number)).collect(),
-                _ => tokens[1..1+v_num].iter().
-                    map(|s| Self::parse_val(s, line_number)).collect(),
+                "EDGE_SE3_PRIOR" | "EDGE_SE3_TRACKXYZ" => tokens[1..v_num]
+                    .iter()
+                    .map(|s| Self::parse_val(s, line_number))
+                    .collect(),
+                _ => tokens[1..1 + v_num]
+                    .iter()
+                    .map(|s| Self::parse_val(s, line_number))
+                    .collect(),
             },
-            restriction: tokens[1+v_num..1+v_num+c_len].iter()
-                .map(|s| Self::parse_val(s, line_number)).collect(),
-            information_matrix: index_mapping.iter()
-                .map(|i| Self::parse_val(tokens[1+v_num+c_len + *i], line_number)).collect(),
+            restriction: tokens[1 + v_num..1 + v_num + c_len]
+                .iter()
+                .map(|s| Self::parse_val(s, line_number))
+                .collect(),
+            information_matrix: index_mapping
+                .iter()
+                .map(|i| Self::parse_val(tokens[1 + v_num + c_len + *i], line_number))
+                .collect(),
         }
     }
 
@@ -116,33 +135,41 @@ impl G2oParser {
         let mut upper_t_len = 0;
         for i in 0..dim {
             for j in i..dim {
-                full_matrix_vec[i*dim + j] = upper_t_len;
-                full_matrix_vec[i + j*dim] = upper_t_len;
+                full_matrix_vec[i * dim + j] = upper_t_len;
+                full_matrix_vec[i + j * dim] = upper_t_len;
                 upper_t_len += 1;
             }
         }
-        let upper_t_len = dim * (dim+1) / 2;
+        let upper_t_len = dim * (dim + 1) / 2;
         (full_matrix_vec, upper_t_len)
     }
 
     fn parse_fix(tokens: &[&str], line_number: usize) -> BTreeSet<usize> {
         if tokens.len() == 1 {
-            panic!("Empty set of fixed vertices in line {}: Expected at least one vertex ID.", line_number);
+            panic!(
+                "Empty set of fixed vertices in line {}: Expected at least one vertex ID.",
+                line_number
+            );
         }
-        tokens[1..].iter()
-            .map(|s| Self::parse_val(s, line_number)).collect()
+        tokens[1..].iter().map(|s| Self::parse_val(s, line_number)).collect()
     }
 
     fn assert_tokens(expected: usize, actual: usize, line_number: usize) {
         if actual != expected {
-            panic!("Wrong number of tokens in line {}: Expected: {}; Actual: {}", line_number, expected, actual);
+            panic!(
+                "Wrong number of tokens in line {}: Expected: {}; Actual: {}",
+                line_number, expected, actual
+            );
         }
     }
 
     fn parse_val<T: std::str::FromStr>(s: &str, line_number: usize) -> T {
         match s.parse() {
             Ok(val) => val,
-            Err(_str) => panic!("Could not parse the following value to the correct data type in line {}: {}", line_number, s),
+            Err(_str) => panic!(
+                "Could not parse the following value to the correct data type in line {}: {}",
+                line_number, s
+            ),
         }
     }
 
@@ -153,7 +180,10 @@ impl G2oParser {
             "Landmark2D" => tokens.push(String::from("VERTEX_XY")),
             "Vehicle3D" => tokens.push(String::from("VERTEX_SE3:QUAT")),
             "Landmark3D" => tokens.push(String::from("VERTEX_TRACKXYZ")),
-            other_type => panic!(format!("Vertex type unsupported to be composed to G2O format: {}", other_type)),
+            other_type => panic!(format!(
+                "Vertex type unsupported to be composed to G2O format: {}",
+                other_type
+            )),
         }
         tokens.push(v.id.to_string());
         Self::append_f64_slice_to_string_vec(&mut tokens, &v.content);
@@ -173,7 +203,10 @@ impl G2oParser {
             "Position3D" => tokens.push(String::from("EDGE_SE3_PRIOR")),
             "Odometry3D" => tokens.push(String::from("EDGE_SE3:QUAT")),
             "Observation3D" => tokens.push(String::from("EDGE_SE3_TRACKXYZ")),
-            other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
+            other_type => panic!(format!(
+                "Edge type unsupported to be composed to G2O format: {}",
+                other_type
+            )),
         }
         Self::append_usize_slice_to_string_vec(&mut tokens, e.vertices.as_slice());
         if e.edge_type == "Position3D" || e.edge_type == "Observation3D" {
@@ -184,7 +217,10 @@ impl G2oParser {
             "Position2D" | "Odometry2D" | "Observation3D" => Self::get_upper_triangle_indices(3),
             "Observation2D" => Self::get_upper_triangle_indices(2),
             "Position3D" | "Odometry3D" => Self::get_upper_triangle_indices(6),
-            other_type => panic!(format!("Edge type unsupported to be composed to G2O format: {}", other_type)),
+            other_type => panic!(format!(
+                "Edge type unsupported to be composed to G2O format: {}",
+                other_type
+            )),
         };
         Self::append_f64_slice_elements_to_string_vec(&mut tokens, &e.information_matrix, &upper_triangle);
         tokens.join(" ")
@@ -194,7 +230,7 @@ impl G2oParser {
         let mut indices: Vec<usize> = vec![];
         for i in 0..dim {
             for j in i..dim {
-                indices.push(i*dim+j)
+                indices.push(i * dim + j)
             }
         }
         indices
@@ -315,20 +351,96 @@ mod tests {
                 edge_type: String::from("Odometry3D"),
                 vertices: vec![0, 1],
                 restriction: vec![0.309576, 2.34636, 0.00315914, -0.139007, 0.0806488, 0.14657, 0.976059],
-                information_matrix: vec![1.0, 0.000000000000000000962965, 0.000000000000000000962965, 0.0000000588441, -0.0000000203096, 0.00000000340337, 0.000000000000000000962965, 1.0, 0.000000000000000000962965, 0.0000000588441, -0.0000000203096, 0.00000000340337, 0.000000000000000000962965, 0.000000000000000000962965, 1.0, 0.0000000588441, -0.0000000203096, 0.00000000340337, 0.0000000588441, 0.0000000588441, 0.0000000588441, 4108.72, -34.2982, 884.091, -0.0000000203096, -0.0000000203096, -0.0000000203096, -34.2982, 3951.5, 40.2084, 0.00000000340337, 0.00000000340337, 0.00000000340337, 884.091, 40.2084, 4100.08],
+                information_matrix: vec![
+                    1.0,
+                    0.000000000000000000962965,
+                    0.000000000000000000962965,
+                    0.0000000588441,
+                    -0.0000000203096,
+                    0.00000000340337,
+                    0.000000000000000000962965,
+                    1.0,
+                    0.000000000000000000962965,
+                    0.0000000588441,
+                    -0.0000000203096,
+                    0.00000000340337,
+                    0.000000000000000000962965,
+                    0.000000000000000000962965,
+                    1.0,
+                    0.0000000588441,
+                    -0.0000000203096,
+                    0.00000000340337,
+                    0.0000000588441,
+                    0.0000000588441,
+                    0.0000000588441,
+                    4108.72,
+                    -34.2982,
+                    884.091,
+                    -0.0000000203096,
+                    -0.0000000203096,
+                    -0.0000000203096,
+                    -34.2982,
+                    3951.5,
+                    40.2084,
+                    0.00000000340337,
+                    0.00000000340337,
+                    0.00000000340337,
+                    884.091,
+                    40.2084,
+                    4100.08,
+                ],
             },
             Edge {
                 edge_type: String::from("Position3D"),
                 vertices: vec![1],
                 restriction: vec![0.309576, 2.34636, 0.00315914, -0.139007, 0.0806488, 0.14657, 0.976059],
-                information_matrix: vec![1.0, 0.000000000000000000962965, 0.000000000000000000962965, 0.0000000588441, -0.0000000203096, 0.00000000340337, 0.000000000000000000962965, 1.0, 0.000000000000000000962965, 0.0000000588441, -0.0000000203096, 0.00000000340337, 0.000000000000000000962965, 0.000000000000000000962965, 1.0, 0.0000000588441, -0.0000000203096, 0.00000000340337, 0.0000000588441, 0.0000000588441, 0.0000000588441, 4108.72, -34.2982, 884.091, -0.0000000203096, -0.0000000203096, -0.0000000203096, -34.2982, 3951.5, 40.2084, 0.00000000340337, 0.00000000340337, 0.00000000340337, 884.091, 40.2084, 4100.08],
+                information_matrix: vec![
+                    1.0,
+                    0.000000000000000000962965,
+                    0.000000000000000000962965,
+                    0.0000000588441,
+                    -0.0000000203096,
+                    0.00000000340337,
+                    0.000000000000000000962965,
+                    1.0,
+                    0.000000000000000000962965,
+                    0.0000000588441,
+                    -0.0000000203096,
+                    0.00000000340337,
+                    0.000000000000000000962965,
+                    0.000000000000000000962965,
+                    1.0,
+                    0.0000000588441,
+                    -0.0000000203096,
+                    0.00000000340337,
+                    0.0000000588441,
+                    0.0000000588441,
+                    0.0000000588441,
+                    4108.72,
+                    -34.2982,
+                    884.091,
+                    -0.0000000203096,
+                    -0.0000000203096,
+                    -0.0000000203096,
+                    -34.2982,
+                    3951.5,
+                    40.2084,
+                    0.00000000340337,
+                    0.00000000340337,
+                    0.00000000340337,
+                    884.091,
+                    40.2084,
+                    4100.08,
+                ],
             },
             Edge {
                 edge_type: String::from("Observation3D"),
                 vertices: vec![1, 2],
                 restriction: vec![-0.034127, 2.24359, -0.503123],
-                information_matrix: vec![3934.45, -9.14727, 63.005, -9.14727, 3998.72, 10.7561, 63.005, 10.7561, 3909.38],
-            }
+                information_matrix: vec![
+                    3934.45, -9.14727, 63.005, -9.14727, 3998.72, 10.7561, 63.005, 10.7561, 3909.38,
+                ],
+            },
         ];
         let mut fixed_vertices = BTreeSet::new();
         fixed_vertices.insert(0);

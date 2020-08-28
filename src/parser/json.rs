@@ -28,8 +28,8 @@ impl Parser for JsonParser {
 mod tests {
     use super::*;
     use crate::parser::model::{Edge, Vertex};
-    use log::LevelFilter;
     use log::info;
+    use log::LevelFilter;
     use std::collections::BTreeSet;
     use std::fs;
 
@@ -45,7 +45,10 @@ mod tests {
     fn test_parse_missing_file() {
         init();
         let parsed_model: FactorGraphModel = JsonParser::parse_file_to_model("data_files/missing_file.json").unwrap();
-        info!("TEST FAILED! The missing file was able to be parsed: {:?}", parsed_model);
+        info!(
+            "TEST FAILED! The missing file was able to be parsed: {:?}",
+            parsed_model
+        );
     }
 
     fn get_2d_model() -> FactorGraphModel {
@@ -130,6 +133,7 @@ mod tests {
                 content: vec![18.2645, 4.24943, 15.2057],
             },
         ];
+        #[rustfmt::skip]
         let edges = vec![
             Edge {
                 edge_type: String::from("Odometry3D"),

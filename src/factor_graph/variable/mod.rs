@@ -10,7 +10,6 @@ pub enum FixedType {
     NonFixed(Range<usize>),
 }
 
-
 /// Representation of an optimizable vehicle variable.
 #[derive(Debug)]
 pub struct VehicleVariable2D {
@@ -62,7 +61,6 @@ impl VehicleVariable2D {
             id,
             pose: Rc::new(RefCell::new([x, y, phi])),
             fixed_type,
-
         }
     }
 }
@@ -80,7 +78,17 @@ impl LandmarkVariable2D {
 
 impl VehicleVariable3D {
     /// Returns a new variable from a 3D pose, a given ID and whether the variable is fixed.
-    pub fn new(id: usize, x: f64, y: f64, z: f64, rot_x: f64, rot_y: f64, rot_z: f64, rot_w: f64, fixed_type: FixedType) -> Self {
+    pub fn new(
+        id: usize,
+        x: f64,
+        y: f64,
+        z: f64,
+        rot_x: f64,
+        rot_y: f64,
+        rot_z: f64,
+        rot_w: f64,
+        fixed_type: FixedType,
+    ) -> Self {
         VehicleVariable3D {
             id,
             pose: Rc::new(RefCell::new([x, y, z, rot_x, rot_y, rot_z, rot_w])),
@@ -102,20 +110,20 @@ impl LandmarkVariable3D {
 
 impl Variable {
     pub fn get_fixed_type(&self) -> &FixedType {
-        match self{
+        match self {
             Variable::Vehicle2D(v) => &v.fixed_type,
             Variable::Landmark2D(v) => &v.fixed_type,
             Variable::Vehicle3D(v) => &v.fixed_type,
             Variable::Landmark3D(v) => &v.fixed_type,
         }
     }
-    pub fn set_content(&self, update: Vec<f64>){
+    pub fn set_content(&self, update: Vec<f64>) {
         let u = update;
         match self {
-            Variable::Vehicle2D(v) => {*v.pose.borrow_mut()=[u[0], u[1], u[2]]}
-            Variable::Landmark2D(v) => {*v.position.borrow_mut()=[u[0], u[1]]}
-            Variable::Vehicle3D(v) => {*v.pose.borrow_mut()=[u[0], u[1], u[2], u[3], u[4], u[5], u[6]]}
-            Variable::Landmark3D(v) => {*v.position.borrow_mut()=[u[0], u[1], u[3]]}
+            Variable::Vehicle2D(v) => *v.pose.borrow_mut() = [u[0], u[1], u[2]],
+            Variable::Landmark2D(v) => *v.position.borrow_mut() = [u[0], u[1]],
+            Variable::Vehicle3D(v) => *v.pose.borrow_mut() = [u[0], u[1], u[2], u[3], u[4], u[5], u[6]],
+            Variable::Landmark3D(v) => *v.position.borrow_mut() = [u[0], u[1], u[3]],
         }
     }
     pub fn get_id(&self) -> usize {
@@ -127,4 +135,3 @@ impl Variable {
         }
     }
 }
-
