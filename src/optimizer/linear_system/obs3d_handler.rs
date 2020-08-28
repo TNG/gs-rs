@@ -2,10 +2,10 @@
 
 use nalgebra::{DMatrix, DVector, Matrix3, MatrixMN, U1, U3, U9, Translation3, Isometry3, RowVector3, Matrix, Dynamic, Vector, SliceStorage, Vector3};
 use crate::factor_graph::factor::Factor;
-use crate::factor_graph::variable::{FixedType, Variable, VehicleVariable3D};
+use crate::factor_graph::variable::{FixedType, Variable, VehicleVariable3D, LandmarkVariable3D};
 use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, skew_trans};
 
-pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &VehicleVariable3D, var_j: &Box<dyn Variable>) {
+pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &VehicleVariable3D, var_j: &LandmarkVariable3D) {
     let iso_i = get_isometry(&var_i.pose);
     let trans_j = get_trans(&var_j.get_content());
     let local_j = (iso_i.inverse() * trans_j).translation;
