@@ -111,10 +111,42 @@ mod tests {
                 &iterations.to_string(),
                 ".g2o",
             ]
-            .concat(),
-        )
-        .unwrap();
-        assert_eq!(test_model, expected_model);
+                .concat(),
+        ).unwrap();
+        assert_model_approx_equal(test_model, expected_model);
+    }
+
+    fn assert_model_approx_equal(a: FactorGraphModel, b: FactorGraphModel) {
+        assert_eq!(a.fixed_vertices, b.fixed_vertices);
+        assert_eq!(a.edges.len(), b.edges.len());
+        assert_eq!(a.vertices.len(), b.vertices.len());
+
+        a.edges.into_iter().zip(b.edges.into_iter()).enumerate().for_each(|(index, (e1, e2))| {
+            assert_eq!(e1.edge_type, e2.edge_type, "edge nr {} had different edgetypes {} versus {}", index, e1.edge_type, e2.edge_type);
+            assert_eq!(e1.information_matrix.len(), e2.information_matrix.len());
+            assert_eq!(e1.restriction.len(), e2.restriction.len());
+            assert_eq!(e1.vertices.len(), e2.vertices.len());
+
+            e1.information_matrix.into_iter().zip(e2.information_matrix.into_iter()).enumerate().for_each(|(sub_index, (i1, i2))| {
+                assert_eq!(i1, i2, "information matrix is different at edge {}, index {}: {} versus {}", index, sub_index, i1, i2);
+            });
+            e1.restriction.into_iter().zip(e2.restriction.into_iter()).enumerate().for_each(|(sub_index, (r1, r2))| {
+                assert_eq!(r1, r2, "restrictions are different at edge {}, index {}: {} versus {}", index, sub_index, r1, r2);
+            });
+            e1.vertices.into_iter().zip(e2.vertices.into_iter()).enumerate().for_each(|(sub_index, (v1, v2))| {
+                assert_eq!(v1, v2, "vertices are different at edge {}, index {}: {} versus {}", index, sub_index, v1, v2);
+            });
+        });
+
+        a.vertices.into_iter().zip(b.vertices.into_iter()).enumerate().for_each(|(index, (v1, v2))| {
+            assert_eq!(v1.id, v2.id);
+            assert_eq!(v1.vertex_type, v2.vertex_type);
+            assert_eq!(v1.content.len(), v2.content.len());
+
+            v1.content.into_iter().zip(v2.content.into_iter()).enumerate().for_each(|(sub_index, (c1, c2))| {
+                assert!(approx::relative_eq!(c1, c2, epsilon=1e-7f64), "vertex content is different at edge {}, index {}: {} versus {}, difference {:+.2e}", index, sub_index, c1, c2, (c1-c2).abs());
+            });
+        });
     }
 
     #[test]
@@ -152,11 +184,7 @@ mod tests {
         test_valid_optimization("full2d", 25);
     }
 
-    // NOTE: output for 3D rotation corrections seem to differ from g2o after only one iteration.
-    //       gs-rs is closer to the optimized value then.
-
     #[test]
-    #[ignore] // floating point rounding makes results not equal
     fn test_only_pos3d_factors() {
         test_valid_optimization("pos3d_only", 1);
     }
