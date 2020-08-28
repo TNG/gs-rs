@@ -1,4 +1,15 @@
 language: rust
+cache: cargo
 rust:
-  - 1.0.0
-  - 1.1.0
+  - stable
+
+before_script:
+  - eval git pull --rebase https://github.com/Geal/nom master
+  - eval git log --pretty=oneline HEAD~5..HEAD
+
+addons:
+  apt:
+    packages:
+      - gfortran
+      - libblas-dev
+      - liblapack-dev
