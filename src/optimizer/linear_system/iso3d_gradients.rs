@@ -12,15 +12,16 @@ pub fn calc_dq_dR(matr: &Matrix3<f64>) -> MatrixMN<f64, U3, U9> {
     let b = 0.25 / sin;
 
     #[rustfmt::skip]
-    MatrixMN::<f64, U3, U9>::from_vec(vec![ a1,  a2,  a3,   // transposed matrix is displayed
-                                           0.0, 0.0,   b,
-                                           0.0,  -b, 0.0,
-                                           0.0, 0.0,  -b,
-                                            a1,  a2,  a3,
-                                             b, 0.0, 0.0,
-                                           0.0,   b, 0.0,
-                                            -b, 0.0, 0.0,
-                                            a1,  a2,  a3,])
+    let res = MatrixMN::<f64, U3, U9>::from_vec(vec![ a1,  a2,  a3,   // transposed matrix is displayed
+                                                    0.0, 0.0,   b,
+                                                     0.0,  -b, 0.0,
+                                                     0.0, 0.0,  -b,
+                                                      a1,  a2,  a3,
+                                                       b, 0.0, 0.0,
+                                                     0.0,   b, 0.0,
+                                                      -b, 0.0, 0.0,
+                                                      a1,  a2,  a3,]);
+    res
 }
 
 pub fn skew_trans(trans: &Translation3<f64>) -> Matrix3<f64> {
@@ -28,9 +29,10 @@ pub fn skew_trans(trans: &Translation3<f64>) -> Matrix3<f64> {
     let data = t.data.as_slice();
     // to match g2o output, skew seems to need to return skew_T
     #[rustfmt::skip]
-    Matrix3::from_vec(vec![     0.0, -data[2],  data[1],   // transposed matrix is displayed
+    let res = Matrix3::from_vec(vec![     0.0, -data[2],  data[1],   // transposed matrix is displayed
                             data[2],      0.0, -data[0],
-                           -data[1],  data[0],      0.0,])
+                           -data[1],  data[0],      0.0,]);
+    res
 }
 
 pub fn skew_matr_and_mult_parts(matr: &Matrix3<f64>, mult: &Matrix3<f64>) -> MatrixMN<f64, U9, U3> {
@@ -161,14 +163,13 @@ mod tests {
     #[test]
     fn test_skew_matr_T_and_mult_parts() {
         init();
+        #[rustfmt::skip]
         let actual = skew_matr_T_and_mult_parts(
             // variable Rb of last factor in first iteration of mini_3d.g2o
-            #[rustfmt::skip]
             &Matrix3::<f64>::from_vec(vec![  0.999284, -0.0244698, 0.0288424,    // transposed matrix is displayed
                                             0.0150356,   0.956688,  0.290726,
                                            -0.0347072,  -0.290084,  0.956372,]),
             // variable Ra of last factor in first iteration of mini_3d.g2o
-            #[rustfmt::skip]
             &Matrix3::<f64>::from_vec(vec![  0.999284, 0.0150348, -0.0347071,    // transposed matrix is displayed
                                            -0.0244691,  0.956688,  -0.290084,
                                             0.0288425,  0.290726,   0.956372,]),
