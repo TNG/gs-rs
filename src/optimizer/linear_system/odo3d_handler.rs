@@ -49,8 +49,8 @@ fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isome
     (jacobian, jacobian.transpose())
 }
 
-fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U12>>, var_row: &VehicleVariable3D, var_col: &VehicleVariable3D) {
-    if let (FixedType::NonFixed(row_range), FixedType::NonFixed(col_range)) = (var_row.fixed_type, var_col.fixed_type){
+fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U12>>, row_type: &FixedType, col_type: &FixedType) {
+    if let (FixedType::NonFixed(row_range), FixedType::NonFixed(col_range)) = (row_type, col_type){
         let (row_range, col_range) = (row_range.to_owned(), col_range.to_owned());
         let updated_submatrix = &(H.index((row_range.clone(), col_range.clone())) + added_matrix);
         H.index_mut((row_range, col_range)).copy_from(updated_submatrix);

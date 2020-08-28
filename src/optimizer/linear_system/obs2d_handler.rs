@@ -2,7 +2,7 @@
 
 use nalgebra::{DMatrix, DVector, Vector2, Matrix2x5, Matrix5x2, Matrix, Dynamic, U1, U5, SliceStorage, Vector, RowVector2, Rotation2};
 use crate::factor_graph::factor::Factor;
-use crate::factor_graph::variable::{FixedType, Variable, VehicleVariable2D, LandmarkVariable2D};
+use crate::factor_graph::variable::{FixedType, VehicleVariable2D, LandmarkVariable2D};
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &VehicleVariable2D, var_j: &LandmarkVariable2D) {
     let (pos_i, rot_i) = get_pos_and_rot(&var_i.get_content());
@@ -12,10 +12,10 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     let right_mult = &factor.information_matrix.content * jacobi;
 
     let H_updates = jacobi_T * &right_mult;
-    update_H_submatrix(H, &H_updates.index((..3, ..3)), var_i, var_i);
-    update_H_submatrix(H, &H_updates.index((..3, 3..)), var_i, var_j);
-    update_H_submatrix(H, &H_updates.index((3.., ..3)), var_j, var_i);
-    update_H_submatrix(H, &H_updates.index((3.., 3..)), var_j, var_j);
+    update_H_submatrix(H, &H_updates.index((..3, ..3)), var_i.fixed_type, var_i.fixed_type);
+    update_H_submatrix(H, &H_updates.index((..3, 3..)), var_i.fixed_type, var_j.fixed_type);
+    update_H_submatrix(H, &H_updates.index((3.., ..3)), var_j.fixed_type, var_i.fixed_type);
+    update_H_submatrix(H, &H_updates.index((3.., 3..)), var_j.fixed_type, var_j.fixed_type);
 
     let err_pos = Rotation2::new(-rot_i) * (pos_j - pos_i) - pos_ij;
     let err_vec = err_pos.data.to_vec();
@@ -39,8 +39,8 @@ fn calc_jacobians(pos_i: &Vector2<f64>, rot_i: f64, pos_j: &Vector2<f64>) -> (Ma
     (jacobian, jacobian.transpose())
 }
 
-fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U5>>, var_row: &Box<dyn Variable>, var_col: &Box<dyn Variable>) {
-    if let (FixedType::NonFixed(row_range), FixedType::NonFixed(col_range)) = (var_row.get_fixed_type(), var_col.get_fixed_type()){
+fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, Dynamic, Dynamic, SliceStorage<f64,Dynamic,Dynamic,U1,U5>>, var_row: &FixedType, var_col: &FixedType) {
+    if let (FixedType::NonFixed(row_range), FixedType::NonFixed(col_range)) = (var_row, var_col){
         let updated_submatrix = &(H.index((row_range.to_owned(), col_range.to_owned())) + added_matrix);
         H.index_mut((row_range.to_owned(), col_range.to_owned())).copy_from(updated_submatrix);
     }
