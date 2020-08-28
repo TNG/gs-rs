@@ -43,7 +43,7 @@ impl Parser for G2oParser {
             edges: vec![],
             fixed_vertices: BTreeSet::new(),
         };
-        let lines = s.split("\n");
+        let lines = s.split('\n');
         lines
             .enumerate()
             .for_each(|(i, line)| Self::parse_line(&mut model, line, i + 1));
@@ -74,7 +74,7 @@ impl Parser for G2oParser {
 impl G2oParser {
     fn parse_line(model: &mut FactorGraphModel, line: &str, line_number: usize) {
         let tokens: Vec<&str> = line.split_whitespace().collect();
-        if tokens.len() == 0 || line.starts_with('#') {
+        if tokens.is_empty() || line.starts_with('#') {
             return;
         }
         match tokens[0] {

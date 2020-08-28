@@ -38,7 +38,6 @@ pub fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>)
         .map(|i| factor_graph.csr.edges(*i))
         .for_each(|edges| {
             edges
-                .into_iter()
                 .for_each(|edge| update_H_b(factor_graph, &mut H, &mut b, edge))
         });
 

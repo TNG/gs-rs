@@ -94,7 +94,6 @@ mod tests {
     use super::*;
 
     use approx::relative_eq;
-    use log::info;
     use log::LevelFilter;
 
     fn init() {

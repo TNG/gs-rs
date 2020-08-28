@@ -58,7 +58,7 @@ fn update_H_submatrix(
     added_matrix: &Matrix<f64, U3, U3, ArrayStorage<f64, U3, U3>>,
     range: Range<usize>,
 ) {
-    let updated_submatrix = &(H.index((range.clone(), range.clone().clone())) + added_matrix);
+    let updated_submatrix = &(H.index((range.clone(), range.clone())) + added_matrix);
     H.index_mut((range.clone(), range)).copy_from(updated_submatrix);
 }
 

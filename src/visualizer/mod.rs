@@ -185,11 +185,11 @@ fn add_factor_lines(
     if factor.factor_type == Observation2D || factor.factor_type == Observation3D {
         visual_factor_graph
             .lines
-            .push([meas_point.clone(), target_point, Point3::new(r, g, b)]);
+            .push([meas_point, target_point, Point3::new(r, g, b)]);
     } else if factor.factor_type == Odometry2D || factor.factor_type == Odometry3D {
         visual_factor_graph
             .lines
-            .push([source_point.clone(), target_point, Point3::new(1.0, 1.0, 1.0)]);
+            .push([source_point, target_point, Point3::new(1.0, 1.0, 1.0)]);
     }
 }
 
