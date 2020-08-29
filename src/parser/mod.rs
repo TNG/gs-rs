@@ -10,7 +10,6 @@
 // This product includes software developed at TNG Technology Consulting GmbH (https://www.tngtech.com/).
 //
 
-
 //! Conversion between factor graph structures and files.
 
 use crate::factor_graph::FactorGraph;

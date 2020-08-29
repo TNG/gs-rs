@@ -10,7 +10,6 @@
 // This product includes software developed at TNG Technology Consulting GmbH (https://www.tngtech.com/).
 //
 
-
 //! Structures and functions for an intermediate step when converting between factor graphs and serialized files.
 
 use serde::{Deserialize, Serialize};

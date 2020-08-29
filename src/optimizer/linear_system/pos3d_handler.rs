@@ -55,21 +55,12 @@ fn calc_jacobians(iso_v: &Isometry3<f64>, iso_m: &Isometry3<f64>) -> (Matrix6<f6
     (jacobian, jacobian.transpose())
 }
 
-fn update_H_submatrix(
-    H: &mut DMatrix<f64>,
-    added_matrix: &Matrix<f64, U6, U6, ArrayStorage<f64, U6, U6>>,
-    range: &Range<usize>,
-) {
+fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, U6, U6, ArrayStorage<f64, U6, U6>>, range: &Range<usize>) {
     let updated_submatrix = &(H.index((range.to_owned(), range.to_owned())) + added_matrix);
-    H.index_mut((range.to_owned(), range.to_owned()))
-        .copy_from(updated_submatrix);
+    H.index_mut((range.to_owned(), range.to_owned())).copy_from(updated_submatrix);
 }
 
-fn update_b_subvector(
-    b: &mut DVector<f64>,
-    added_vector: &Vector<f64, U6, ArrayStorage<f64, U6, U1>>,
-    range: &Range<usize>,
-) {
+fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, U6, ArrayStorage<f64, U6, U1>>, range: &Range<usize>) {
     let updated_subvector = &(b.index((range.to_owned(), ..)) + added_vector);
     b.index_mut((range.to_owned(), ..)).copy_from(updated_subvector);
 }

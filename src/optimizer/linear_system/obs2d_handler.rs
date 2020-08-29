@@ -15,18 +15,9 @@
 
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::{FixedType, LandmarkVariable2D, VehicleVariable2D};
-use nalgebra::{
-    DMatrix, DVector, Dynamic, Matrix, Matrix2x5, Matrix5x2, Rotation2, RowVector2, SliceStorage, Vector, Vector2, U1,
-    U5,
-};
+use nalgebra::{DMatrix, DVector, Dynamic, Matrix, Matrix2x5, Matrix5x2, Rotation2, RowVector2, SliceStorage, Vector, Vector2, U1, U5};
 
-pub fn update_H_b(
-    H: &mut DMatrix<f64>,
-    b: &mut DVector<f64>,
-    factor: &Factor,
-    var_i: &VehicleVariable2D,
-    var_j: &LandmarkVariable2D,
-) {
+pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &VehicleVariable2D, var_j: &LandmarkVariable2D) {
     let (pos_i, rot_i) = get_pos_and_rot(&*var_i.pose.borrow());
     let pos_j = get_pos(&*var_j.position.borrow());
     let pos_ij = get_pos(&factor.constraint);
@@ -70,16 +61,11 @@ fn update_H_submatrix(
 ) {
     if let (FixedType::NonFixed(row_range), FixedType::NonFixed(col_range)) = (var_row, var_col) {
         let updated_submatrix = &(H.index((row_range.to_owned(), col_range.to_owned())) + added_matrix);
-        H.index_mut((row_range.to_owned(), col_range.to_owned()))
-            .copy_from(updated_submatrix);
+        H.index_mut((row_range.to_owned(), col_range.to_owned())).copy_from(updated_submatrix);
     }
 }
 
-fn update_b_subvector(
-    b: &mut DVector<f64>,
-    added_vector: &Vector<f64, Dynamic, SliceStorage<f64, Dynamic, U1, U1, U5>>,
-    var: &FixedType,
-) {
+fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64, Dynamic, U1, U1, U5>>, var: &FixedType) {
     if let FixedType::NonFixed(range) = var {
         let range = range.to_owned();
         let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);

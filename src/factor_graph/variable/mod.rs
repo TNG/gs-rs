@@ -10,7 +10,6 @@
 // This product includes software developed at TNG Technology Consulting GmbH (https://www.tngtech.com/).
 //
 
-
 //! The internal representation of a factor graph's optimizable variable.
 
 use std::cell::RefCell;
@@ -91,17 +90,7 @@ impl LandmarkVariable2D {
 
 impl VehicleVariable3D {
     /// Returns a new variable from a 3D pose, a given ID and whether the variable is fixed.
-    pub fn new(
-        id: usize,
-        x: f64,
-        y: f64,
-        z: f64,
-        rot_x: f64,
-        rot_y: f64,
-        rot_z: f64,
-        rot_w: f64,
-        fixed_type: FixedType,
-    ) -> Self {
+    pub fn new(id: usize, x: f64, y: f64, z: f64, rot_x: f64, rot_y: f64, rot_z: f64, rot_w: f64, fixed_type: FixedType) -> Self {
         VehicleVariable3D {
             id,
             pose: Rc::new(RefCell::new([x, y, z, rot_x, rot_y, rot_z, rot_w])),

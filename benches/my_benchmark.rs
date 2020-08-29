@@ -29,15 +29,11 @@ fn bench_mit_2d_50(c: &mut Criterion) {
 }
 
 fn bench_sphere_3d_1(c: &mut Criterion) {
-    c.bench_function("Sphere_3D_1_iteration", |b| {
-        b.iter(|| bench_optimization("Sphere_3D", 1))
-    });
+    c.bench_function("Sphere_3D_1_iteration", |b| b.iter(|| bench_optimization("Sphere_3D", 1)));
 }
 
 fn bench_sphere_3d_10(c: &mut Criterion) {
-    c.bench_function("Sphere_3D_10_iterations", |b| {
-        b.iter(|| bench_optimization("Sphere_3D", 10))
-    });
+    c.bench_function("Sphere_3D_10_iterations", |b| b.iter(|| bench_optimization("Sphere_3D", 10)));
 }
 
 criterion_group! {

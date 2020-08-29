@@ -23,7 +23,10 @@ A brief introduction to the algorithms used is available as a Jupyter Notebook [
 
 ## Example Usage
 
-In addition to the code snippet below, further examples for different use cases can be found in examples/. Information regarding that directory can be found in its respective README file.
+In addition to the code snippet below, further examples for 
+different use cases can be found in `examples/`. 
+Information regarding that directory can be found in its respective 
+[README](examples/README.md) file.
 
 ```
 use gs_rs::parser::json::JsonParser;

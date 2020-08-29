@@ -10,7 +10,6 @@
 // This product includes software developed at TNG Technology Consulting GmbH (https://www.tngtech.com/).
 //
 
-
 //! Conversion between factor graph structures and JSON files.
 
 use crate::parser::model::FactorGraphModel;
@@ -47,10 +46,7 @@ mod tests {
     use std::fs;
 
     fn init() {
-        let _ = env_logger::builder()
-            .is_test(true)
-            .filter_level(LevelFilter::Debug)
-            .try_init();
+        let _ = env_logger::builder().is_test(true).filter_level(LevelFilter::Debug).try_init();
     }
 
     #[test]
@@ -58,10 +54,7 @@ mod tests {
     fn test_parse_missing_file() {
         init();
         let parsed_model: FactorGraphModel = JsonParser::parse_file_to_model("data_files/missing_file.json").unwrap();
-        info!(
-            "TEST FAILED! The missing file was able to be parsed: {:?}",
-            parsed_model
-        );
+        info!("TEST FAILED! The missing file was able to be parsed: {:?}", parsed_model);
     }
 
     fn get_2d_model() -> FactorGraphModel {

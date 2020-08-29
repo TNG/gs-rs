@@ -10,7 +10,6 @@
 // This product includes software developed at TNG Technology Consulting GmbH (https://www.tngtech.com/).
 //
 
-
 //! Solvers for systems of linear equations (linear systems).
 
 #![allow(non_snake_case)]

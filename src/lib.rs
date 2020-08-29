@@ -10,7 +10,6 @@
 // This product includes software developed at TNG Technology Consulting GmbH (https://www.tngtech.com/).
 //
 
-
 pub mod factor_graph;
 pub mod optimizer;
 pub mod parser;

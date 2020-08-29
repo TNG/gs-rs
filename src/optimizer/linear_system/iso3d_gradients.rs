@@ -10,7 +10,6 @@
 // This product includes software developed at TNG Technology Consulting GmbH (https://www.tngtech.com/).
 //
 
-
 use nalgebra::{Isometry3, Matrix3, MatrixMN, Quaternion, Translation3, UnitQuaternion, U3, U9};
 
 // code copied from g2o for the case [ sin >= 0 && trace > 0 ]
@@ -97,10 +96,7 @@ mod tests {
     use log::LevelFilter;
 
     fn init() {
-        let _ = env_logger::builder()
-            .is_test(true)
-            .filter_level(LevelFilter::Debug)
-            .try_init();
+        let _ = env_logger::builder().is_test(true).filter_level(LevelFilter::Debug).try_init();
     }
 
     fn relative_eq_slice(actual: &[f64], expected: &[f64], epsilon: f64) {
