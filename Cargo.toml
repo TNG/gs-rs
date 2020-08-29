@@ -3,12 +3,13 @@ name = "gs-rs"
 version = "0.1.0"
 authors = [
     "Samuel Valezuela <samuel.valenzuela@tngtech.com>",
+    "Florian Rohm <florian.rohm@tngtech.com>",
     "Daniel Pape <daniel.pape@tngtech.com>"
 ]
 edition = "2018"
 readme="README.md"
-documentation="???"
-repository="???"
+documentation="https://docs.rs/gs-rs"
+repository="https://github.com/TNG/gs-rs"
 description="Implementation of a basic monocular SLAM (Simultaneous Localization and Mapping) Algorithm in pure Rust."
 categories=['science', 'robotics']
 keywords=['slam', 'robotics', 'math']
@@ -23,6 +24,11 @@ bench = true
 doc = true
 edition = "2018"
 crate-type = ["lib"]
+
+[badges]
+travis-ci = { repository = "TNG/gs-rs" }
+coveralls = { repository = "TNG/gs-rs", branch = "master", service = "github" }
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 nalgebra = { version = "0.22.0", features = ["sparse"] }

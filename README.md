@@ -1,4 +1,14 @@
-# gs-rs [ˈdʒiːzrs]
+# gs-rs [ˈdʒiːzrs] - GraphSLAM in Rust
+[![Travis CI](https://travis-ci.org/TNG/gs-rs.png?branch=master)](https://travis-ci.org/TNG/gs-rs)
+[![Coverage Status](https://coveralls.io/repos/TNG/gs-rs/badge.png?branch=master)](https://coveralls.io/r/TNG/gs-rs)
+[![License-MIT](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-MIT)
+[![License-Apache](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-APACHE)
+[![Issues](https://img.shields.io/github/issues/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/issues)
+[![Forks](https://img.shields.io/github/forks/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/network)
+[![Stars](https://img.shields.io/github/stars/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/stargazers)
+[![Crates.io Version](https://img.shields.io/crates/v/gs-rs.svg)](https://crates.io/crates/gs-rs)
+
+
 
 **gs-rs** is an implementation of a monocular graph based SLAM backend in pure rust. It is largely inspired 
 by the General Graph Optimizer [g2o](https://github.com/RainerKuemmerle/g2o) of Rainer Kümmerle, though it is giving it 

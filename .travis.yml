@@ -1,15 +1,40 @@
 language: rust
+sudo: required
+dist: trusty
 cache: cargo
-rust:
-  - stable
-
-before_script:
-  - eval git pull --rebase https://github.com/Geal/nom master
-  - eval git log --pretty=oneline HEAD~5..HEAD
 
 addons:
   apt:
     packages:
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - binutils-dev
+      - cmake
       - gfortran
       - libblas-dev
       - liblapack-dev
+    sources:
+      - kalakris-cmake
+
+rust:
+  - stable
+  - 1.0.0
+
+before_script:
+  - export PATH=$HOME/.cargo/bin:$PATH
+  - cargo install cargo-update || echo "cargo-update already installed"
+  - cargo install cargo-travis || echo "cargo-travis already installed"
+  - cargo install-update -a # update outdated cached binaries
+
+# the main build
+script:
+  - |
+    cargo build &&
+    cargo test &&
+    cargo bench &&
+    cargo doc
+
+after_success:
+  # measure code coverage and upload to coveralls.io
+  - cargo coveralls
