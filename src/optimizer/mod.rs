@@ -52,7 +52,13 @@ fn update_var(var: &Variable, solution: &[f64]) {
 
     let updated_content = match var {
         Variable::Vehicle2D(var) => {
-            let mut updated_content: Vec<f64> = var.pose.borrow().iter().zip(correction.iter()).map(|(old, cor)| old + cor).collect();
+            let mut updated_content: Vec<f64> = var
+                .pose
+                .borrow()
+                .iter()
+                .zip(correction.iter())
+                .map(|(old, cor)| old + cor)
+                .collect();
             updated_content[2] %= 2.0 * PI;
             if updated_content[2] > PI {
                 updated_content[2] -= 2.0 * PI;
@@ -61,7 +67,13 @@ fn update_var(var: &Variable, solution: &[f64]) {
             }
             updated_content
         }
-        Variable::Landmark2D(var) => var.position.borrow().iter().zip(correction.iter()).map(|(old, cor)| old + cor).collect(),
+        Variable::Landmark2D(var) => var
+            .position
+            .borrow()
+            .iter()
+            .zip(correction.iter())
+            .map(|(old, cor)| old + cor)
+            .collect(),
         Variable::Vehicle3D(var) => {
             let old_iso = get_isometry(&*var.pose.borrow());
             let cor_iso = get_isometry_normalized(correction);
@@ -70,7 +82,13 @@ fn update_var(var: &Variable, solution: &[f64]) {
             updated_content.extend(&new_iso.rotation.quaternion().coords.data.to_vec());
             updated_content
         }
-        Variable::Landmark3D(var) => var.position.borrow().iter().zip(correction.iter()).map(|(old, cor)| old + cor).collect(),
+        Variable::Landmark3D(var) => var
+            .position
+            .borrow()
+            .iter()
+            .zip(correction.iter())
+            .map(|(old, cor)| old + cor)
+            .collect(),
     };
     var.set_content(updated_content);
 }
@@ -85,16 +103,29 @@ mod tests {
     use log::LevelFilter;
 
     fn init() {
-        let _ = env_logger::builder().is_test(true).filter_level(LevelFilter::Debug).try_init();
+        let _ = env_logger::builder()
+            .is_test(true)
+            .filter_level(LevelFilter::Debug)
+            .try_init();
     }
 
     fn test_valid_optimization(file_name: &str, iterations: usize) {
         init();
-        let test_factor_graph = G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat()).unwrap();
+        let test_factor_graph =
+            G2oParser::parse_file(&["data_files/optimizer_tests/", file_name, "_0.g2o"].concat()).unwrap();
         optimize(&test_factor_graph, iterations);
         let test_model = FactorGraphModel::from(&test_factor_graph);
-        let expected_model =
-            G2oParser::parse_file_to_model(&["data_files/optimizer_tests/", file_name, "_", &iterations.to_string(), ".g2o"].concat()).unwrap();
+        let expected_model = G2oParser::parse_file_to_model(
+            &[
+                "data_files/optimizer_tests/",
+                file_name,
+                "_",
+                &iterations.to_string(),
+                ".g2o",
+            ]
+            .concat(),
+        )
+        .unwrap();
         assert_model_approx_equal(test_model, expected_model);
     }
 
@@ -103,68 +134,80 @@ mod tests {
         assert_eq!(a.edges.len(), b.edges.len());
         assert_eq!(a.vertices.len(), b.vertices.len());
 
-        a.edges.into_iter().zip(b.edges.into_iter()).enumerate().for_each(|(index, (e1, e2))| {
-            assert_eq!(
-                e1.edge_type, e2.edge_type,
-                "edge nr {} had different edgetypes {} versus {}",
-                index, e1.edge_type, e2.edge_type
-            );
-            assert_eq!(e1.information_matrix.len(), e2.information_matrix.len());
-            assert_eq!(e1.restriction.len(), e2.restriction.len());
-            assert_eq!(e1.vertices.len(), e2.vertices.len());
+        a.edges
+            .into_iter()
+            .zip(b.edges.into_iter())
+            .enumerate()
+            .for_each(|(index, (e1, e2))| {
+                assert_eq!(
+                    e1.edge_type, e2.edge_type,
+                    "edge nr {} had different edgetypes {} versus {}",
+                    index, e1.edge_type, e2.edge_type
+                );
+                assert_eq!(e1.information_matrix.len(), e2.information_matrix.len());
+                assert_eq!(e1.restriction.len(), e2.restriction.len());
+                assert_eq!(e1.vertices.len(), e2.vertices.len());
 
-            e1.information_matrix
-                .into_iter()
-                .zip(e2.information_matrix.into_iter())
-                .enumerate()
-                .for_each(|(sub_index, (i1, i2))| {
-                    assert_eq!(
-                        i1, i2,
-                        "information matrix is different at edge {}, index {}: {} versus {}",
-                        index, sub_index, i1, i2
-                    );
-                });
-            e1.restriction
-                .into_iter()
-                .zip(e2.restriction.into_iter())
-                .enumerate()
-                .for_each(|(sub_index, (r1, r2))| {
-                    assert_eq!(
-                        r1, r2,
-                        "restrictions are different at edge {}, index {}: {} versus {}",
-                        index, sub_index, r1, r2
-                    );
-                });
-            e1.vertices
-                .into_iter()
-                .zip(e2.vertices.into_iter())
-                .enumerate()
-                .for_each(|(sub_index, (v1, v2))| {
-                    assert_eq!(v1, v2, "vertices are different at edge {}, index {}: {} versus {}", index, sub_index, v1, v2);
-                });
-        });
+                e1.information_matrix
+                    .into_iter()
+                    .zip(e2.information_matrix.into_iter())
+                    .enumerate()
+                    .for_each(|(sub_index, (i1, i2))| {
+                        assert_eq!(
+                            i1, i2,
+                            "information matrix is different at edge {}, index {}: {} versus {}",
+                            index, sub_index, i1, i2
+                        );
+                    });
+                e1.restriction
+                    .into_iter()
+                    .zip(e2.restriction.into_iter())
+                    .enumerate()
+                    .for_each(|(sub_index, (r1, r2))| {
+                        assert_eq!(
+                            r1, r2,
+                            "restrictions are different at edge {}, index {}: {} versus {}",
+                            index, sub_index, r1, r2
+                        );
+                    });
+                e1.vertices
+                    .into_iter()
+                    .zip(e2.vertices.into_iter())
+                    .enumerate()
+                    .for_each(|(sub_index, (v1, v2))| {
+                        assert_eq!(
+                            v1, v2,
+                            "vertices are different at edge {}, index {}: {} versus {}",
+                            index, sub_index, v1, v2
+                        );
+                    });
+            });
 
-        a.vertices.into_iter().zip(b.vertices.into_iter()).enumerate().for_each(|(index, (v1, v2))| {
-            assert_eq!(v1.id, v2.id);
-            assert_eq!(v1.vertex_type, v2.vertex_type);
-            assert_eq!(v1.content.len(), v2.content.len());
+        a.vertices
+            .into_iter()
+            .zip(b.vertices.into_iter())
+            .enumerate()
+            .for_each(|(index, (v1, v2))| {
+                assert_eq!(v1.id, v2.id);
+                assert_eq!(v1.vertex_type, v2.vertex_type);
+                assert_eq!(v1.content.len(), v2.content.len());
 
-            v1.content
-                .into_iter()
-                .zip(v2.content.into_iter())
-                .enumerate()
-                .for_each(|(sub_index, (c1, c2))| {
-                    assert!(
-                        approx::relative_eq!(c1, c2, epsilon = 1e-7f64),
-                        "vertex content is different at edge {}, index {}: {} versus {}, difference {:+.2e}",
-                        index,
-                        sub_index,
-                        c1,
-                        c2,
-                        (c1 - c2).abs()
-                    );
-                });
-        });
+                v1.content
+                    .into_iter()
+                    .zip(v2.content.into_iter())
+                    .enumerate()
+                    .for_each(|(sub_index, (c1, c2))| {
+                        assert!(
+                            approx::relative_eq!(c1, c2, epsilon = 1e-7f64),
+                            "vertex content is different at edge {}, index {}: {} versus {}, difference {:+.2e}",
+                            index,
+                            sub_index,
+                            c1,
+                            c2,
+                            (c1 - c2).abs()
+                        );
+                    });
+            });
     }
 
     #[test]

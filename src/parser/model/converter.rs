@@ -13,7 +13,9 @@
 use petgraph::csr::Csr;
 
 use crate::factor_graph::factor::{Factor, FactorType::*};
-use crate::factor_graph::variable::{FixedType, LandmarkVariable2D, LandmarkVariable3D, Variable, VehicleVariable2D, VehicleVariable3D};
+use crate::factor_graph::variable::{
+    FixedType, LandmarkVariable2D, LandmarkVariable3D, Variable, VehicleVariable2D, VehicleVariable3D,
+};
 use crate::factor_graph::FactorGraph;
 use crate::parser::model::{Edge, FactorGraphModel, Vertex};
 
@@ -152,7 +154,9 @@ fn add_vertex(factor_graph: &mut FactorGraph, vertex: &Vertex, fixed: bool) {
             )))),
         other_type => panic!("Unsupported vertex type in the model: {}", other_type),
     };
-    factor_graph.custom_to_csr_id_map.insert(vertex.id, *factor_graph.node_indices.last().unwrap());
+    factor_graph
+        .custom_to_csr_id_map
+        .insert(vertex.id, *factor_graph.node_indices.last().unwrap());
 }
 
 fn add_var_to_matrix(dim: &mut usize, added_dim: usize, fixed: bool) -> FixedType {

@@ -15,10 +15,21 @@
 
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::{FixedType, VehicleVariable3D};
-use crate::optimizer::linear_system::iso3d_gradients::{calc_dq_dR, get_isometry, skew_matr_T_and_mult_parts, skew_matr_and_mult_parts, skew_trans};
-use nalgebra::{DMatrix, DVector, Dynamic, Isometry3, Matrix, Matrix3, Matrix6, MatrixMN, RowVector6, SliceStorage, Vector, U1, U12, U6};
+use crate::optimizer::linear_system::iso3d_gradients::{
+    calc_dq_dR, get_isometry, skew_matr_T_and_mult_parts, skew_matr_and_mult_parts, skew_trans,
+};
+use nalgebra::{
+    DMatrix, DVector, Dynamic, Isometry3, Matrix, Matrix3, Matrix6, MatrixMN, RowVector6, SliceStorage, Vector, U1,
+    U12, U6,
+};
 
-pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var_i: &VehicleVariable3D, var_j: &VehicleVariable3D) {
+pub fn update_H_b(
+    H: &mut DMatrix<f64>,
+    b: &mut DVector<f64>,
+    factor: &Factor,
+    var_i: &VehicleVariable3D,
+    var_j: &VehicleVariable3D,
+) {
     let iso_i = get_isometry(&*var_i.pose.borrow());
     let iso_j = get_isometry(&*var_j.pose.borrow());
     let iso_ij = get_isometry(&factor.constraint);
@@ -39,7 +50,11 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     update_b_subvector(b, &b_updates.index((6.., ..)), &var_j.fixed_type);
 }
 
-fn calc_jacobians(iso_i: &Isometry3<f64>, iso_j: &Isometry3<f64>, iso_ij: &Isometry3<f64>) -> (MatrixMN<f64, U6, U12>, MatrixMN<f64, U12, U6>) {
+fn calc_jacobians(
+    iso_i: &Isometry3<f64>,
+    iso_j: &Isometry3<f64>,
+    iso_ij: &Isometry3<f64>,
+) -> (MatrixMN<f64, U6, U12>, MatrixMN<f64, U12, U6>) {
     let A_ij = iso_ij.inverse();
     let B_ij = iso_i.inverse() * iso_j;
     let Err_ij = A_ij * B_ij;
@@ -81,7 +96,11 @@ fn update_H_submatrix(
     }
 }
 
-fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, Dynamic, SliceStorage<f64, Dynamic, U1, U1, U12>>, var: &FixedType) {
+fn update_b_subvector(
+    b: &mut DVector<f64>,
+    added_vector: &Vector<f64, Dynamic, SliceStorage<f64, Dynamic, U1, U1, U12>>,
+    var: &FixedType,
+) {
     if let FixedType::NonFixed(range) = var {
         let range = range.to_owned();
 

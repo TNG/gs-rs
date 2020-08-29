@@ -96,7 +96,10 @@ mod tests {
     use log::LevelFilter;
 
     fn init() {
-        let _ = env_logger::builder().is_test(true).filter_level(LevelFilter::Debug).try_init();
+        let _ = env_logger::builder()
+            .is_test(true)
+            .filter_level(LevelFilter::Debug)
+            .try_init();
     }
 
     fn relative_eq_slice(actual: &[f64], expected: &[f64], epsilon: f64) {

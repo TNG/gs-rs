@@ -40,7 +40,12 @@ pub fn calculate_H_b(factor_graph: &FactorGraph) -> (DMatrix<f64>, DVector<f64>)
     (H, b)
 }
 
-fn update_H_b(factor_graph: &FactorGraph, H: &mut DMatrix<f64>, b: &mut DVector<f64>, edge: EdgeReference<Factor, Directed, usize>) {
+fn update_H_b(
+    factor_graph: &FactorGraph,
+    H: &mut DMatrix<f64>,
+    b: &mut DVector<f64>,
+    edge: EdgeReference<Factor, Directed, usize>,
+) {
     use crate::factor_graph::variable::Variable::*;
     let factor = edge.weight();
     let var_i = &factor_graph.get_var(edge.source());

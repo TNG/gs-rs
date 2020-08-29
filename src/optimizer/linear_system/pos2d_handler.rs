@@ -15,7 +15,9 @@
 
 use crate::factor_graph::factor::Factor;
 use crate::factor_graph::variable::{FixedType, VehicleVariable2D};
-use nalgebra::{ArrayStorage, DMatrix, DVector, Matrix, Matrix3, Rotation2, Rotation3, RowVector3, Vector, Vector2, Vector3, U1, U3};
+use nalgebra::{
+    ArrayStorage, DMatrix, DVector, Matrix, Matrix3, Rotation2, Rotation3, RowVector3, Vector, Vector2, Vector3, U1, U3,
+};
 use std::{f64::consts::PI, ops::Range};
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var: &VehicleVariable2D) {
@@ -51,12 +53,20 @@ fn calc_jacobians(rot_m: f64) -> (Matrix3<f64>, Matrix3<f64>) {
     (jacobian, jacobian.transpose())
 }
 
-fn update_H_submatrix(H: &mut DMatrix<f64>, added_matrix: &Matrix<f64, U3, U3, ArrayStorage<f64, U3, U3>>, range: Range<usize>) {
+fn update_H_submatrix(
+    H: &mut DMatrix<f64>,
+    added_matrix: &Matrix<f64, U3, U3, ArrayStorage<f64, U3, U3>>,
+    range: Range<usize>,
+) {
     let updated_submatrix = &(H.index((range.clone(), range.clone())) + added_matrix);
     H.index_mut((range.clone(), range)).copy_from(updated_submatrix);
 }
 
-fn update_b_subvector(b: &mut DVector<f64>, added_vector: &Vector<f64, U3, ArrayStorage<f64, U3, U1>>, range: Range<usize>) {
+fn update_b_subvector(
+    b: &mut DVector<f64>,
+    added_vector: &Vector<f64, U3, ArrayStorage<f64, U3, U1>>,
+    range: Range<usize>,
+) {
     let updated_subvector = &(b.index((range.clone(), ..)) + added_vector);
     b.index_mut((range, ..)).copy_from(updated_subvector);
 }

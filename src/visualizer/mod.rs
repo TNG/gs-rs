@@ -39,7 +39,10 @@ pub fn visualize(factor_graph: &FactorGraph) {
     };
     let mut cam = ArcBall::new(Point3::new(0.0, 0.0, 50.0), init_point);
     while window.render_with_camera(&mut cam) {
-        visual_factor_graph.lines.iter().for_each(|line| window.draw_line(&line[0], &line[1], &line[2]));
+        visual_factor_graph
+            .lines
+            .iter()
+            .for_each(|line| window.draw_line(&line[0], &line[1], &line[2]));
     }
 }
 
@@ -80,7 +83,13 @@ fn add_factor(visual_factor_graph: &mut VisualFactorGraph, factor: &Factor, sour
     let mut meas_object = add_factor_core(visual_factor_graph, &meas_point);
     handle_factor_rotation(factor, &mut meas_object, source);
     color_meas_object(factor, &mut meas_object);
-    add_factor_lines(visual_factor_graph, factor, meas_point, get_var_point(source), get_var_point(target));
+    add_factor_lines(
+        visual_factor_graph,
+        factor,
+        meas_point,
+        get_var_point(source),
+        get_var_point(target),
+    );
 }
 
 fn add_var_core(visual_factor_graph: &mut VisualFactorGraph, var_point: &Point3<f32>) -> SceneNode {
@@ -93,7 +102,10 @@ fn handle_var_rotation(var: &Variable, var_object: &mut SceneNode) {
     let mut rot_object = var_object.add_capsule(0.02, 2.0);
 
     match var {
-        Variable::Vehicle2D(v) => rot_object.set_local_rotation(UnitQuaternion::from_axis_angle(&Vector3::z_axis(), get_rot_from_2d(&*v.pose.borrow()))),
+        Variable::Vehicle2D(v) => rot_object.set_local_rotation(UnitQuaternion::from_axis_angle(
+            &Vector3::z_axis(),
+            get_rot_from_2d(&*v.pose.borrow()),
+        )),
         Variable::Vehicle3D(v) => {
             rot_object.set_local_rotation(get_rot_from_3d(&*v.pose.borrow()));
         }
@@ -166,11 +178,17 @@ fn add_factor_lines(
     target_point: Point3<f32>,
 ) {
     let (r, g, b) = get_factor_color(factor);
-    visual_factor_graph.lines.push([meas_point, source_point, Point3::new(r, g, b)]);
+    visual_factor_graph
+        .lines
+        .push([meas_point, source_point, Point3::new(r, g, b)]);
     if factor.factor_type == Observation2D || factor.factor_type == Observation3D {
-        visual_factor_graph.lines.push([meas_point, target_point, Point3::new(r, g, b)]);
+        visual_factor_graph
+            .lines
+            .push([meas_point, target_point, Point3::new(r, g, b)]);
     } else if factor.factor_type == Odometry2D || factor.factor_type == Odometry3D {
-        visual_factor_graph.lines.push([source_point, target_point, Point3::new(1.0, 1.0, 1.0)]);
+        visual_factor_graph
+            .lines
+            .push([source_point, target_point, Point3::new(1.0, 1.0, 1.0)]);
     }
 }
 
@@ -187,7 +205,9 @@ fn get_var_point(var: &Variable) -> Point3<f32> {
         Variable::Vehicle2D(VehicleVariable2D { pose, .. }) => (pose.borrow()[0], pose.borrow()[1], 0.),
         Variable::Landmark2D(LandmarkVariable2D { position, .. }) => (position.borrow()[0], position.borrow()[1], 0.),
         Variable::Vehicle3D(VehicleVariable3D { pose, .. }) => (pose.borrow()[0], pose.borrow()[1], pose.borrow()[2]),
-        Variable::Landmark3D(LandmarkVariable3D { position, .. }) => (position.borrow()[0], position.borrow()[1], position.borrow()[2]),
+        Variable::Landmark3D(LandmarkVariable3D { position, .. }) => {
+            (position.borrow()[0], position.borrow()[1], position.borrow()[2])
+        }
     };
 
     Point3::new(x as f32, y as f32, z as f32)
@@ -209,7 +229,12 @@ fn get_rot_from_2d(content: &[f64]) -> f32 {
 }
 
 fn get_rot_from_3d(content: &[f64]) -> UnitQuaternion<f32> {
-    UnitQuaternion::from_quaternion(Quaternion::new(content[6] as f32, content[3] as f32, content[4] as f32, content[5] as f32))
+    UnitQuaternion::from_quaternion(Quaternion::new(
+        content[6] as f32,
+        content[3] as f32,
+        content[4] as f32,
+        content[5] as f32,
+    ))
 }
 
 impl Variable {
@@ -232,7 +257,10 @@ mod test {
     use log::LevelFilter;
 
     fn init() {
-        let _ = env_logger::builder().is_test(true).filter_level(LevelFilter::Debug).try_init();
+        let _ = env_logger::builder()
+            .is_test(true)
+            .filter_level(LevelFilter::Debug)
+            .try_init();
     }
 
     #[test]
