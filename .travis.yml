@@ -37,4 +37,4 @@ script:
 
 after_success:
   # measure code coverage and upload to coveralls.io
-  - cargo coveralls
+  - cargo coveralls -v
