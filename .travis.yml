@@ -19,7 +19,7 @@ addons:
 
 rust:
   - stable
-  - 1.31.0 # minimum required edition is 2018
+  - 1.40.0 # minimum required edition is 2018
 
 before_script:
   - export PATH=$HOME/.cargo/bin:$PATH
