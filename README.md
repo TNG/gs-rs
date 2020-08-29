@@ -1,11 +1,11 @@
 # gs-rs [ˈdʒiːzrs] - GraphSLAM in Rust
-[![Travis CI](https://travis-ci.org/TNG/gs-rs.png?branch=master)](https://travis-ci.org/TNG/gs-rs)
-[![Coverage Status](https://coveralls.io/repos/TNG/gs-rs/badge.png?branch=master)](https://coveralls.io/r/TNG/gs-rs)
-[![License-MIT](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-MIT)
-[![License-Apache](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-APACHE)
-[![Issues](https://img.shields.io/github/issues/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/issues)
-[![Forks](https://img.shields.io/github/forks/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/network)
-[![Stars](https://img.shields.io/github/stars/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/stargazers)
+[![Travis CI](https://travis-ci.org/deltapi/gs-rs-test.png?branch=master)](https://travis-ci.org/deltapi/gs-rs-test)
+[![Coverage Status](https://coveralls.io/repos/deltapi/gs-rs-test/badge.png?branch=master)](https://coveralls.io/r/deltapi/gs-rs-test)
+[![License-MIT](https://img.shields.io/github/license/deltapi/gs-rs-test.svg)](https://github.com/deltapi/gs-rs-test/blob/master/LICENSE-MIT)
+[![License-Apache](https://img.shields.io/github/license/deltapi/gs-rs-test.svg)](https://github.com/deltapi/gs-rs-test/blob/master/LICENSE-APACHE)
+[![Issues](https://img.shields.io/github/issues/deltapi/gs-rs-test.svg)](https://github.com/deltapi/gs-rs-test/issues)
+[![Forks](https://img.shields.io/github/forks/deltapi/gs-rs-test.svg)](https://github.com/deltapi/gs-rs-test/network)
+[![Stars](https://img.shields.io/github/stars/deltapi/gs-rs-test.svg)](https://github.com/deltapi/gs-rs-test/stargazers)
 [![Crates.io Version](https://img.shields.io/crates/v/gs-rs.svg)](https://crates.io/crates/gs-rs)
 
 
