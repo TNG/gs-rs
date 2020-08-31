@@ -1,6 +1,6 @@
 # gs-rs [ˈdʒiːzrs] - GraphSLAM in Rust
 [![Travis CI](https://travis-ci.com/TNG/gs-rs.png?branch=master)](https://travis-ci.com/TNG/gs-rs)
-[![Coverage Status](https://coveralls.io/repos/TNG/gs-rs/badge.png?branch=master)](https://coveralls.io/r/TNG/gs-rs)
+[![Coverage Status](https://coveralls.io/repos/github/TNG/gs-rs/badge.svg)](https://coveralls.io/github/TNG/gs-rs)
 [![License-MIT](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-MIT)
 [![License-Apache](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-APACHE)
 [![Issues](https://img.shields.io/github/issues/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/issues)
