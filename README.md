@@ -1,11 +1,11 @@
 # gs-rs [ˈdʒiːzrs] - GraphSLAM in Rust
-[![Travis CI](https://travis-ci.com/deltapi/gs-rs-test.png?branch=master)](https://travis-ci.com/deltapi/gs-rs-test)
-[![Coverage Status](https://coveralls.io/repos/deltapi/gs-rs-test/badge.png?branch=master)](https://coveralls.io/r/deltapi/gs-rs-test)
-[![License-MIT](https://img.shields.io/github/license/deltapi/gs-rs-test.svg)](https://github.com/deltapi/gs-rs-test/blob/master/LICENSE-MIT.md)
-[![License-Apache](https://img.shields.io/github/license/deltapi/gs-rs-test.svg)](https://github.com/deltapi/gs-rs-test/blob/master/LICENSE-APACHE.md)
-[![Issues](https://img.shields.io/github/issues/deltapi/gs-rs-test.svg)](https://github.com/deltapi/gs-rs-test/issues)
-[![Forks](https://img.shields.io/github/forks/deltapi/gs-rs-test.svg)](https://github.com/deltapi/gs-rs-test/network)
-[![Stars](https://img.shields.io/github/stars/deltapi/gs-rs-test.svg)](https://github.com/deltapi/gs-rs-test/stargazers)
+[![Travis CI](https://travis-ci.com/TNG/gs-rs.png?branch=master)](https://travis-ci.com/TNG/gs-rs)
+[![Coverage Status](https://coveralls.io/repos/TNG/gs-rs/badge.png?branch=master)](https://coveralls.io/r/TNG/gs-rs)
+[![License-MIT](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-MIT.md)
+[![License-Apache](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-APACHE.md)
+[![Issues](https://img.shields.io/github/issues/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/issues)
+[![Forks](https://img.shields.io/github/forks/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/network)
+[![Stars](https://img.shields.io/github/stars/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/stargazers)
 [![Crates.io Version](https://img.shields.io/crates/v/gs-rs.svg)](https://crates.io/crates/gs-rs)
 
 
@@ -60,8 +60,8 @@ fn main() {
 
 ## Attribution
 
-The file format `.g2o` as well as the initial implementation in `C++` were 
-initially part of the project [g2o](https://github.com/RainerKuemmerle/g2o).
+The file format `.g2o` as well as the reference implementation in `C++` are 
+are part of the project [g2o](https://github.com/RainerKuemmerle/g2o).
 
 The datasets used in `data_files/` and `examples/` have been described by Carlone et al. and adapted to include fixed vertices. Other modifications have been performed as well to demonstrate the different vertex and edge types supported in gs-rs. 
 The original datasets as well as more examples can be found online.
