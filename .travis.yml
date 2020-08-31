@@ -1,6 +1,6 @@
 language: rust
-sudo: true
-dist: trusty
+sudo: required
+
 cache: cargo
 
 addons:

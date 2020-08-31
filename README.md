@@ -1,8 +1,8 @@
 # gs-rs [ˈdʒiːzrs] - GraphSLAM in Rust
 [![Travis CI](https://travis-ci.com/TNG/gs-rs.png?branch=master)](https://travis-ci.com/TNG/gs-rs)
 [![Coverage Status](https://coveralls.io/repos/TNG/gs-rs/badge.png?branch=master)](https://coveralls.io/r/TNG/gs-rs)
-[![License-MIT](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-MIT.md)
-[![License-Apache](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-APACHE.md)
+[![License-MIT](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-MIT)
+[![License-Apache](https://img.shields.io/github/license/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/blob/master/LICENSE-APACHE)
 [![Issues](https://img.shields.io/github/issues/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/issues)
 [![Forks](https://img.shields.io/github/forks/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/network)
 [![Stars](https://img.shields.io/github/stars/TNG/gs-rs.svg)](https://github.com/TNG/gs-rs/stargazers)
@@ -20,8 +20,8 @@ a rusty touch.
 * [Data Files](data_files/README.md)
 * [Contributing](CONTRIBUTING.md)
 * [Code of Conduct](CODE_OF_CONDUCT.md)
-* [MIT License](LICENSE-MIT.md)
-* [Apache License](LICENSE-APACHE.md)
+* [MIT License](LICENSE-MIT)
+* [Apache License](LICENSE-APACHE)
 
 ## Documentation
 A brief introduction to the algorithms used is available as a Jupyter Notebook [here](doc/documentation.ipynb)
@@ -79,5 +79,5 @@ But we want to state very clearly that we discourage any use of our software wit
 
 © 2020 Daniel Pape, TNG Technology Consulting GmbH
 
-**gs-rs** is licensed under the Apache License, Version 2.0 (cf. [here](LICENSE-APACHE.md) or
-http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (cf. [here](LICENSE-MIT.md) or http://opensource.org/licenses/MIT), at your option.
+**gs-rs** is licensed under the Apache License, Version 2.0 (cf. [here](LICENSE-APACHE) or
+http://www.apache.org/licenses/LICENSE-2.0) or the MIT license (cf. [here](LICENSE-MIT) or http://opensource.org/licenses/MIT), at your option.
