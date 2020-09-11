@@ -37,4 +37,4 @@ script:
 
 after_success:
   # measure code coverage and upload to coveralls.io
-  - cargo tarpaulin -v
+  - cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
