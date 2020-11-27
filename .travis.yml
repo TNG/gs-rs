@@ -24,7 +24,6 @@ rust:
 before_script:
   - export PATH=$HOME/.cargo/bin:$PATH
   - cargo install cargo-update || echo "cargo-update already installed"
-  - cargo install cargo-tarpaulin || echo "cargo-tarpaulin already installed"
   - cargo install-update -a # update outdated cached binaries
 
 # the main build
@@ -34,7 +33,3 @@ script:
     cargo test &&
     cargo bench &&
     cargo doc
-
-after_success:
-  # measure code coverage and upload to coveralls.io
-  - cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
