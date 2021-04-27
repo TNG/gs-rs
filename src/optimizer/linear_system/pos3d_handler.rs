@@ -18,6 +18,7 @@ use crate::factor_graph::variable::{FixedType, VehicleVariable3D};
 use crate::optimizer::linear_system::iso3d_gradients::{calc_dq_dR, get_isometry, skew_matr_and_mult_parts};
 use nalgebra::{ArrayStorage, DMatrix, DVector, Isometry3, Matrix, Matrix3, Matrix6, RowVector6, Vector, U1, U6};
 use std::ops::Range;
+use nalgebra::storage::Storage;
 
 pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, var: &VehicleVariable3D) {
     let range = if let FixedType::NonFixed(range) = &var.fixed_type {
@@ -35,8 +36,8 @@ pub fn update_H_b(H: &mut DMatrix<f64>, b: &mut DVector<f64>, factor: &Factor, v
     update_H_submatrix(H, &H_update, &range);
 
     let err = iso_m.inverse() * iso_v;
-    let mut err_vec = err.translation.vector.data.to_vec();
-    err_vec.extend_from_slice(&err.rotation.quaternion().coords.data.to_vec()[..3]);
+    let mut err_vec = err.translation.vector.data.as_slice().to_vec();
+    err_vec.extend_from_slice(&err.rotation.quaternion().coords.data.as_slice().to_vec()[..3]);
     let b_update = (RowVector6::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_update, &range);
 }
@@ -57,7 +58,7 @@ fn calc_jacobians(iso_v: &Isometry3<f64>, iso_m: &Isometry3<f64>) -> (Matrix6<f6
 
 fn update_H_submatrix(
     H: &mut DMatrix<f64>,
-    added_matrix: &Matrix<f64, U6, U6, ArrayStorage<f64, U6, U6>>,
+    added_matrix: &Matrix<f64, U6, U6, ArrayStorage<f64, { 6 }, { 6 }>>,
     range: &Range<usize>,
 ) {
     let updated_submatrix = &(H.index((range.to_owned(), range.to_owned())) + added_matrix);
@@ -67,7 +68,7 @@ fn update_H_submatrix(
 
 fn update_b_subvector(
     b: &mut DVector<f64>,
-    added_vector: &Vector<f64, U6, ArrayStorage<f64, U6, U1>>,
+    added_vector: &Vector<f64, U6, ArrayStorage<f64, { 6 }, { 1 }>>,
     range: &Range<usize>,
 ) {
     let updated_subvector = &(b.index((range.to_owned(), ..)) + added_vector);
