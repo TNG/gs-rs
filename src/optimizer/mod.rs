@@ -21,6 +21,7 @@ use crate::optimizer::linear_system::iso3d_gradients::{get_isometry, get_isometr
 use crate::optimizer::solver::sparse_cholesky::SparseCholeskySolver;
 use crate::optimizer::solver::Solver;
 use std::f64::consts::PI;
+use nalgebra::storage::Storage;
 
 mod linear_system;
 mod solver;
@@ -78,8 +79,8 @@ fn update_var(var: &Variable, solution: &[f64]) {
             let old_iso = get_isometry(&*var.pose.borrow());
             let cor_iso = get_isometry_normalized(correction);
             let new_iso = old_iso * cor_iso;
-            let mut updated_content = new_iso.translation.vector.data.to_vec();
-            updated_content.extend(&new_iso.rotation.quaternion().coords.data.to_vec());
+            let mut updated_content = new_iso.translation.vector.data.as_slice().to_vec();
+            updated_content.extend(&new_iso.rotation.quaternion().coords.data.as_slice().to_vec());
             updated_content
         }
         Variable::Landmark3D(var) => var

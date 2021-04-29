@@ -20,6 +20,7 @@ use nalgebra::{
     Vector, Vector2, Vector3, U1, U6,
 };
 use std::f64::consts::PI;
+use nalgebra::storage::Storage;
 
 pub fn update_H_b(
     H: &mut DMatrix<f64>,
@@ -47,7 +48,7 @@ pub fn update_H_b(
     } else if err_rot < -PI {
         err_rot += 2.0 * PI;
     }
-    let mut err_vec = err_pos.data.to_vec();
+    let mut err_vec = err_pos.data.as_slice().to_vec();
     err_vec.push(err_rot);
     let b_updates = (RowVector3::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_updates.index((..3, ..)), &var_i.fixed_type);

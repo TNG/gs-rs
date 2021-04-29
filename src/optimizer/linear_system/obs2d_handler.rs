@@ -19,6 +19,7 @@ use nalgebra::{
     DMatrix, DVector, Dynamic, Matrix, Matrix2x5, Matrix5x2, Rotation2, RowVector2, SliceStorage, Vector, Vector2, U1,
     U5,
 };
+use nalgebra::storage::Storage;
 
 pub fn update_H_b(
     H: &mut DMatrix<f64>,
@@ -39,8 +40,8 @@ pub fn update_H_b(
     update_H_submatrix(H, &H_updates.index((3.., ..3)), &var_j.fixed_type, &var_i.fixed_type);
     update_H_submatrix(H, &H_updates.index((3.., 3..)), &var_j.fixed_type, &var_j.fixed_type);
 
-    let err_pos = Rotation2::new(-rot_i) * (pos_j - pos_i) - pos_ij;
-    let err_vec = err_pos.data.to_vec();
+    let err_pos: Vector2<f64> = Rotation2::new(-rot_i) * (pos_j - pos_i) - pos_ij;
+    let err_vec = err_pos.data.as_slice().to_vec();
     let b_updates = (RowVector2::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_updates.index((..3, ..)), &var_i.fixed_type);
     update_b_subvector(b, &b_updates.index((3.., ..)), &var_j.fixed_type);

@@ -20,6 +20,8 @@ use nalgebra::{
     DMatrix, DVector, Dynamic, Isometry3, Matrix, Matrix3, MatrixMN, RowVector3, SliceStorage, Translation3, Vector,
     Vector3, U1, U3, U9,
 };
+use nalgebra::storage::Storage;
+
 
 pub fn update_H_b(
     H: &mut DMatrix<f64>,
@@ -42,7 +44,7 @@ pub fn update_H_b(
     update_H_submatrix(H, &H_updates.index((6.., 6..)), &var_j.fixed_type, &var_j.fixed_type);
 
     let err_pos = local_j.vector - pos_ij;
-    let err_vec = err_pos.data.to_vec();
+    let err_vec = err_pos.data.as_slice().to_vec();
     let b_updates = (RowVector3::from_vec(err_vec) * &right_mult).transpose();
     update_b_subvector(b, &b_updates.index((..6, ..)), &var_i.fixed_type);
     update_b_subvector(b, &b_updates.index((6.., ..)), &var_j.fixed_type);
